@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>马式超的个人博客</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href={{url_for("static", filename="css/bootstrap.min.css")}}>
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href={{url_for("static", filename="css/font-awesome/css/font-awesome.min.css")}}>
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
+
+    <!--[if lt IE 9]>
+        <script src={{url_for("static", filename="js/vendor/google/html5-3.6-respond-1.1.0.min.js")}}></script>
+    <![endif]-->
+
+    <script src={{url_for("static", filename="js/jquery-1.12.4.min.js")}}></script>
+    <script src={{url_for("static", filename="js/bootstrap.min.js")}}></script>
+    <script src={{url_for("static", filename="js/modernizr.js")}}></script>
+    <script src={{url_for("static", filename="js/react.js")}}></script>
+    <script src={{url_for("static", filename="js/react-dom.js")}}></script>
+    <script src={{url_for("static", filename="js/browser.min.js")}}></script>
+    <script src={{url_for("static", filename="js/moment.min.js")}}></script>
+</head>
+<script type="text/babel">
+
+    function gen_url(id){
+        return '{{url_for("artile")}}?id=' + id;
+    }
+
+    function parseDate(date){
+        return moment(date, "YYYY-MM-DDTHH:mm:ss")
+    }
+
+    function gen_block(article, that){
+        if(article){
+            return (<Block {...article}>
+                <div className="clearfix">
+                    <a href="#" value={gen_url(article.id)}
+                       className="btn btn-clean-one" onClick={that.handleClick}>更多</a>
+                </div>
+            </Block>)
+        }
+    }
+
+    var common = {};
+
+    function Article(props){
+         let img = '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random()*10) + ".jpg";
+        return (<div className="col-md-8 blog-main">
+                    <article className="blog-post">
+                        <header>
+                            <div class="lead-image">
+                                <img src={img} alt="" className="img-responsive"/>
+                            </div>
+                            <h1>{props.title}</h1>
+                            <div className="meta">
+                                <i className={props.author ? "fa fa-user": ""}></i> {props.author}
+                                <i className={props.created_at ? "fa fa-calendar": ""}></i>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}
+                            </div>
+                        </header>
+                        {props.children}
+                    </article>
+                </div>)
+    }
+
+    function Block(props){
+        let img = '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random()*10) + ".jpg";
+        return (<div className="col-md-6 col-sm-6">
+                    <article className=" blog-teaser">
+                        <header>
+                            <img src={img} alt=""/>
+                            <h3>{props.title}</h3>
+                            <span className="meta">
+                                <span>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
+                                <font>{props.author}</font>
+                            </span>
+                        </header>
+                        <div className="body">
+                           {props.description}
+                        </div>
+                        {props.children}
+                    </article>
+                </div>)
+    }
+
+    class Row extends React.Component {
+        constructor(props) {
+            super(props);
+            common.row = this;
+            this.handleClick = this.handleClick.bind(this);
+            this.state = {};
+        }
+
+        handleClick(e) {
+            let target = $(e.target);
+            this.setState({
+                url: target.val(),
+                title: target.parent().parent().find("h3").html(),
+                created_at: target.parent().parent().find("header span span").html(),
+                author: target.parent().parent().find("header span font").html()});
+        }
+
+        render() {
+            if(this.state.url){
+                let data = null;
+                $.ajax({
+                    url: this.state.url,
+                    async: false,
+                    success: function(resp){
+                        data = eval("("+resp+")");
+                    }
+                });
+                let html = { __html: data.body};
+                return (<Article author={this.state.author || data.author}
+                                 created_at={this.state.created_at || data.created_at}
+                                 title={this.state.title || data.title}>
+                            <div dangerouslySetInnerHTML={html} className="body"/>
+                        </Article>)
+            }
+            let count = 0;
+            let rows = [];
+            while(true){
+                let article1 = this.props.articles[count];
+                let article2 = this.props.articles[count+1];
+                if(!(article2 || article1)){
+                    break;
+                }else{
+                    rows.push([article1, article2]);
+                }
+                count += 2;
+            }
+            let that = this;
+            return (<div  className="col-md-8 blog-main">{rows.map(function(blocks){
+                return (<div className="row" key={blocks[0].id}>{gen_block(blocks[0], that)} {gen_block(blocks[1], that)}</div>)
+            })}</div>)
+        }
+    }
+
+    class Aside extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleClick = this.handleClick.bind(this);
+            this.state = {};
+        }
+
+        handleClick(e) {
+            let target = $(e.target);
+            common.row.setState({
+                url: target.val(),
+                title: target.html(),
+                created_at: target.parent().children("input")[1].value,
+                author: target.parent().children("input")[0].value});
+        }
+
+        render() {
+            let that = this;
+            let feature_list = this.props.feature_articles.map(function(article){
+                return (<li key={gen_url(article.id)}>
+                            <a href="#" value={gen_url(article.id)} onClick={that.handleClick}>{article.title}</a>
+                            <input type="hidden" value={article.author}/>
+                            <input type="hidden" value={article.created_at}/>
+                        </li>);
+            });
+            let recent_list = this.props.recent_articles.map(function(article){
+                return (<li key={article.id}>
+                            <a href="#" value={gen_url(article.id)} onClick={that.handleClick}>{article.title}</a>
+                            <input type="hidden" value={article.author}/>
+                            <input type="hidden" value={article.created_at}/>
+                        </li>);
+            });
+            let tags = this.props.tags.map(
+                (tag) => (<li key={tag}><a href="#" onClick={common.container.handleClick} value={tag}>{tag}</a></li>)
+            );
+            return (<aside className="col-md-4 blog-aside">
+                        <div className="aside-widget">
+                            <header>
+                                <h3>精品发布</h3>
+                            </header>
+                            <div className="body">
+                                <ul className="clean-list">
+                                    {feature_list}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="aside-widget">
+                            <header>
+                                <h3>最近发布</h3>
+                            </header>
+                            <div className="body">
+                                <ul className="clean-list">
+                                    {recent_list}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="aside-widget">
+                            <header>
+                                <h3>标签</h3>
+                            </header>
+                            <div className="body clearfix">
+                                <ul className="tags">
+                                    {tags}
+                                </ul>
+                            </div>
+                        </div>
+                    </aside>)
+        }
+    }
+
+    function Page(props){
+        let data = null;
+        // 用来在多个并行组件之间传递参数
+        $.ajax({
+            url: '{{url_for("show")}}',
+            data: {"searchField": props.searchField},
+            async: false,
+            success: function(resp){
+                data = eval("("+resp+")");
+            }
+        });
+        let row = (<Row {...{"articles": data.articles.sort(function(a, b){
+                        return a["feature"] || parseDate(b["created_at"])._d.getTime() - parseDate(a["created_at"])._d.getTime()
+                    }).slice(0, 4)}}/>);
+        let aside = (<Aside {...{"feature_articles": data.articles.filter(function(article){
+                return article.feature
+            }).slice(0, 6),"recent_articles": data.articles.sort(function(a, b){
+                        return parseDate(b["created_at"])._d.getTime() - parseDate(a["created_at"])._d.getTime()
+                    }).slice(0, 6), "tags": data.tags}}/>);
+        return (<div className="container">
+        <div className="row">
+            {row}
+            {aside}
+        </div>
+    </div>)
+    }
+
+     class Container extends React.Component{
+        constructor(props) {
+            super(props);
+            common.container = this;
+            this.handleClick = this.handleClick.bind(this);
+            this.state = {};
+        }
+
+        handleClick(e){
+            this.setState({searchField: $(e.target).val() || $("#searchField").val()});
+        }
+
+        render(){
+            return (<div><div className="widewrapper subheader">
+            <div className="container">
+                <div className="clean-breadcrumb">
+                    <a href="#">博客</a>
+                </div>
+
+                <div className="clean-searchbox">
+                    <input className="searchfield" id="searchfield" type="text" placeholder="Search"/>
+                    <button className="searchbutton" onClick={this.handleClick}>
+                        <i className="fa fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <Page {...this.state}/>
+            </div>)
+        }
+    }
+    Container.defaultProps = {
+    };
+
+    class Header extends React.Component{
+        constructor(props) {
+            super(props);
+            this.handleClick = this.handleClick.bind(this);
+            this.state = {};
+        }
+
+        handleClick(e){
+            let target = $(e.target);
+            console.log(target);
+            if(target.val() == "1"){
+                location.href = '{{url_for("index")}}';
+            }else if(target.val() == "2"){
+                common.row.setState({
+                    url: "{{url_for('me')}}",
+                });
+            }else{
+                common.row.setState({
+                    url: "{{url_for('contact')}}",
+                });
+            }
+
+        }
+
+        render(){
+            return (<div>
+                        <a href="#" onClick={this.handleClick} id="logo">
+                            <img value="1" src='{{url_for("static", filename="img/logo.png")}}' alt="clean Blog"/>
+                        </a>
+                    <div id="mobile-nav-toggle" className="pull-right">
+                        <a href="#" data-toggle="collapse" data-target=".clean-nav .navbar-collapse">
+                            <i className="fa fa-bars"></i>
+                        </a>
+                    </div>
+
+                    <nav className="pull-right clean-nav">
+                        <div className="collapse navbar-collapse">
+                            <ul className="nav nav-pills navbar-nav">
+
+                                <li>
+                                    <a href="#" value="1" onClick={this.handleClick}>主页</a>
+                                </li>
+                                <li>
+                                    <a href="#" value="2" onClick={this.handleClick}>关于我</a>
+                                </li>
+                                <li>
+                                    <a href="#" value="3" onClick={this.handleClick}>联系我</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav></div>)
+        }
+    }
+
+    ReactDOM.render(
+        <Container/>, document.getElementById("body")
+    );
+
+    ReactDOM.render(
+        <Header/>, document.getElementById("header")
+    );
+</script>
+<body>
+    <header>
+        <div class="widewrapper masthead">
+            <div class="container" id="header">
+            </div>
+        </div>
+
+    </header>
+
+    <div class="widewrapper main" id="body"></div>
+
+    <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="fa fa-user"></i>About</h3>
+
+                       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab animi laboriosam nostrum consequatur fugiat at, labore praesentium modi, quasi dolorum debitis reiciendis facilis, dolor saepe sint nemo, earum molestias quas.</p>
+                       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorum, error aspernatur assumenda quae eveniet.</p>
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="fa fa-pencil"></i> Recent Post</h3>
+                        <ul class="clean-list">
+                            <li><a href="">Clean - Responsive HTML5 Template</a></li>
+                            <li><a href="">Responsive Pricing Table</a></li>
+                            <li><a href="">Yellow HTML5 Template</a></li>
+                            <li><a href="">Blackor Responsive Theme</a></li>
+                            <li><a href="">Portfolio Bootstrap Template</a></li>
+                            <li><a href="">Clean Slider Template</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="fa fa-envelope"></i>Contact Me</h3>
+
+                        <p>Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet.</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nihil fugiat, cupiditate veritatis excepturi tempore explicabo.</p>
+                         <div class="footer-widget-icon">
+                            <i class="fa fa-facebook"></i><i class="fa fa-twitter"></i><i class="fa fa-google"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="widewrapper copyright">
+                Copyright 2017
+        </div>
+    </footer>
+</body>
+</html>

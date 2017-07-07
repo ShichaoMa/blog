@@ -1,0 +1,33 @@
+// PUT /blog
+{
+  "mappings": {
+    "artiles": {
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "text"
+        },
+        "description": {
+          "type": "text"
+        },
+        "title": {
+          "type": "text"
+        },
+        "author": {
+          "type": "text"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "feature": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
