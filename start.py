@@ -108,8 +108,7 @@ def edit():
     id = request.args.get("id")
     try:
         doc = es.get(app.config.get("INDEX"), id=id, doc_type=app.config.get("DOC_TYPE"))
-    except Exception as e:
-        print(e)
+    except Exception:
         doc = {}
     if not doc:
         doc["_source"] = {}
@@ -148,8 +147,8 @@ def update():
     }
     try:
         es.update(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=id, body=body)
-    except Exception as e:
-        print(e)
+    except Exception:
+        pass
     file.save(os.path.join(project_path, "articles/%s.md" % id))
     return redirect(url_for("index"))
 
