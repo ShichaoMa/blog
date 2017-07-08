@@ -221,4 +221,4 @@ def show():
 
 
 if __name__ == "__main__":
-    app.run(debug=eval(host=os.environ.get("DEBUG", True)), host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=eval(os.environ.get("DEBUG", False)), host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", 5000)))
