@@ -19,6 +19,7 @@ app.template_folder = app.config.get("TEMPLATE_FOLDER")
 es = Elasticsearch(app.config.get("ES_HOST"), http_auth=(app.config.get("ES_USERNAME"), app.config.get("ES_PASSWORD")))
 tz = pytz.timezone('Asia/Shanghai')
 
+
 class CustomIO(StringIO):
 
     def save(self, filename):
@@ -27,10 +28,13 @@ class CustomIO(StringIO):
 
 
 def gen_article(id):
-    if id:
-        input_file = codecs.open(os.path.join(project_path, "articles", "%s.md" % id), mode="r",
-                                 encoding="utf-8")
-        return input_file.read()
+    try:
+        if id:
+            input_file = codecs.open(os.path.join(project_path, "articles", "%s.md" % id), mode="r",
+                                     encoding="utf-8")
+            return input_file.read()
+    except Exception:
+        pass
     return ""
 
 
@@ -86,7 +90,7 @@ def imports():
         "id": id,
         "tags": tags,
         "description": description,
-        "title": title or file.filename.strip(".md"),
+        "title": title or file.filename.replace(".md", ""),
         "author": author,
         "feature": feature,
         "created_at": datetime.datetime.now(tz),
@@ -169,19 +173,29 @@ def artile():
 
 @app.route("/me")
 def me():
+    body = markdown.markdown(gen_article("我的自我介绍"), extensions=['markdown.extensions.extra'])
+    if not body:
+        created_at = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    else:
+        created_at = datetime.datetime.fromtimestamp(os.stat(os.path.join(project_path, "我的自我介绍.md")).st_ctime).strftime("%Y-%m-%dT%H:%M:%S")
     return json.dumps({"author":"马式超",
-                       "body": markdown.markdown(gen_article("我的自我介绍"), extensions=['markdown.extensions.extra']),
+                       "body": body,
                        "title": "我的自我介绍",
-                       "created_at": "2017-07-08T12:12:12"})
+                       "created_at": created_at})
 
 
 @app.route("/contact")
 def contact():
-    return json.dumps({"author":"马式超",
-                       "body": markdown.markdown(gen_article("我的联系方式"), extensions=['markdown.extensions.extra']),
+    body = markdown.markdown(gen_article("我的联系方式"), extensions=['markdown.extensions.extra'])
+    if not body:
+        created_at = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    else:
+        created_at = datetime.datetime.fromtimestamp(
+            os.stat(os.path.join(project_path, "我的联系方式.md")).st_ctime).strftime("%Y-%m-%dT%H:%M:%S")
+    return json.dumps({"author": "马式超",
+                       "body": body,
                        "title": "我的联系方式",
-                       "created_at": "2017-07-08T12:12:12"})
-
+                       "created_at": created_at})
 
 @app.route("/show")
 def show():
