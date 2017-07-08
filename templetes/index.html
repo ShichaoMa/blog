@@ -99,8 +99,8 @@
                             <img src={img} alt=""/>
                             <h3>{props.title}</h3>
                             <span className="meta">
-                                <span>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
-                                <font>{props.author}</font>
+                                <i className={props.created_at ? "fa icon-calendar" : ""}></i>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}
+                                <i className={this.props.author ? "fa icon-user-md" : ""}></i>{props.author}
                             </span>
                         </header>
                         <div className="body">
