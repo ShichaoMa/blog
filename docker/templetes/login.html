@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <title>登陆</title>
+    </head>
+    <body>
+        <form method="post" action="{{url_for('check')}}" >
+            <h1>这里不是你该来的地方</h1>
+            <input type="hidden" name="ref" value="{{ref}}" />
+            <input type="hidden" name="title" value="{{title}}" />
+            <input type="hidden" name="description" value="{{description}}" />
+            <input type="hidden" name="tags" value="{{tags}}" />
+            <input type="hidden" name="id" value="{{id}}" />
+            <input type="hidden" name="author" value="{{author}}" />
+            <input type="hidden" name="feature" value="{{feature}}" />
+            <input name="username"/>
+            <input type="password" name="password" />
+            <input type="submit" valu="登录" />
+        </form>
+    </body>
+</html>

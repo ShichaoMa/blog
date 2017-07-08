@@ -1,0 +1,49 @@
+FROM ubuntu 
+
+MAINTAINER Shichao Ma
+
+RUN locale-gen en_US.UTF-8
+
+RUN update-locale LANG=en_US.UTF-8
+
+ENV LANG en_US.UTF-8
+
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+COPY timezone /etc
+
+COPY sources.list /etc/apt/
+
+COPY Python-3.6.0.tgz /
+
+RUN apt-get update
+
+RUN apt-get install -y --no-install-recommends libc6-dev gcc make
+
+RUN apt-get install -y --no-install-recommends make build-essential \
+libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm
+
+RUN apt-get install -y python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev libffi-dev libssl-dev
+
+# 安装python3.6
+RUN tar zxvf Python-3.6.0.tgz
+
+RUN cd Python-3.6.0 && ./configure --bindir=/bin/
+
+RUN cd Python-3.6.0 && make && make install
+
+COPY requirements.txt /tmp/
+
+RUN mkdir -p /app/articles
+
+RUN pip3.6 install -r /tmp/requirements.txt
+
+COPY static /app/
+
+COPY start.py /app/start.py
+
+COPY settings.py /app/settings.py
+
+COPY templetes /app/templetes
+
+WORKDIR /app
