@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <title>更新</title>
+    </head>
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href={{url_for("static", filename="css/bootstrap.min.css")}}>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
+
+    <script src={{url_for("static", filename="js/jquery-1.12.4.min.js")}}></script>
+    <script src={{url_for("static", filename="js/bootstrap.min.js")}}></script>
+    <script src={{url_for("static", filename="js/modernizr.js")}}></script>
+    <body>
+        <div style="padding: 0% 10%;text-align: center">
+            <aside style="width: 80%" class="create-comment">
+
+                <h2><i class="fa fa-pencil"></i> 修改文章</h2>
+                <form method="post" action="{{url_for('update')}}">
+                    <input name="id" type="hidden" value="{{id}}" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" name="tags" placeholder="tags" value="{{tags}}" class="form-control input-lg"/>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="description" placeholder="description" value="{{description}}" class="form-control input-lg"/>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" name="title" placeholder="title" value="{{title}}" class="form-control input-lg"/>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="author" placeholder="author" value="{{author}}" class="form-control input-lg"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                                       feature: 是 <input type="radio" value="True"  {{ 'checked' if feature else ''}} /> 否 <input type="radio" value="False" {{ 'checked' if not feature else ''}}/>
+                    </div>
+
+                    <textarea rows="30" name="article" placeholder="article" class="form-control input-lg">{{article}}</textarea>
+
+                    <div class="buttons clearfix">
+                        <button type="submit" class="btn btn-xlarge btn-clean-one">提交</button>
+                    </div>
+                </form>
+            </aside>
+        </div>
+    </body>
+</html>

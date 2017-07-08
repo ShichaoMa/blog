@@ -53,27 +53,46 @@
 
     var common = {};
 
-    function Article(props){
-         let img = '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random()*10) + ".jpg";
-        return (<div className="col-md-8 blog-main">
-                    <article className="blog-post">
-                        <header>
-                            <div class="lead-image">
-                                <img src={img} alt="" className="img-responsive"/>
-                            </div>
-                            <h1>{props.title}</h1>
-                            <div className="meta">
-                                <i className={props.author ? "fa fa-user": ""}></i> {props.author}
-                                <i className={props.created_at ? "fa fa-calendar": ""}></i>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}
-                            </div>
-                        </header>
-                        {props.children}
-                    </article>
-                </div>)
+    class Article extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleClick = this.handleClick.bind(this);
+            this.state = {};
+        }
+
+        handleClick(e) {
+            this.props.parent.setState({url: null})
+
+        }
+
+        render() {
+            let img = '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random() * 1) + ".jpg";
+            let edit_url = "{{url_for('edit')}}?id=" + this.props.id;
+            let delete_url = "{{url_for('delete')}}?id=" + this.props.id;
+            return (<div className="col-md-8 blog-main">
+                <article className="blog-post">
+                    <header>
+                        <div class="lead-image">
+                            <img src={img} alt="" className="img-responsive"/>
+                        </div>
+                        <h1>{this.props.title}</h1>
+                        <div className="meta">
+                            <i className={this.props.author ? "fa fa-user" : ""}></i> {this.props.author}
+                            <i className={this.props.created_at ? "fa fa-calendar" : ""}></i>
+                            {parseDate(this.props.created_at).format("YYYY-MM-DD HH:mm:ss")}
+                            <a href="#"><i className="fa  icon-reply" onClick={this.handleClick}></i></a>
+                            <a href={edit_url}><i className="fa icon-edit"></i></a>
+                            <a href={delete_url}><i className="fa icon-remove-sign"></i></a>
+                        </div>
+                    </header>
+                    {this.props.children}
+                </article>
+            </div>)
+        }
     }
 
     function Block(props){
-        let img = '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random()*10) + ".jpg";
+        let img = '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random()*1) + ".jpg";
         return (<div className="col-md-6 col-sm-6">
                     <article className=" blog-teaser">
                         <header>
@@ -106,7 +125,9 @@
                 url: target.val(),
                 title: target.parent().parent().find("h3").html(),
                 created_at: target.parent().parent().find("header span span").html(),
-                author: target.parent().parent().find("header span font").html()});
+                author: target.parent().parent().find("header span font").html(),
+                id: /id=(\w+)/.exec(target.val())[1]});
+
         }
 
         render() {
@@ -122,7 +143,9 @@
                 let html = { __html: data.body};
                 return (<Article author={this.state.author || data.author}
                                  created_at={this.state.created_at || data.created_at}
-                                 title={this.state.title || data.title}>
+                                 title={this.state.title || data.title}
+                                 id={this.state.id || data.id}
+                                 parent={this}>
                             <div dangerouslySetInnerHTML={html} className="body"/>
                         </Article>)
             }
@@ -158,7 +181,8 @@
                 url: target.val(),
                 title: target.html(),
                 created_at: target.parent().children("input")[1].value,
-                author: target.parent().children("input")[0].value});
+                author: target.parent().children("input")[0].value,
+                id: /id=(\w+)/.exec(target.val())[1]});
         }
 
         render() {
@@ -168,6 +192,7 @@
                             <a href="#" value={gen_url(article.id)} onClick={that.handleClick}>{article.title}</a>
                             <input type="hidden" value={article.author}/>
                             <input type="hidden" value={article.created_at}/>
+                            <input type="hidden" value={article.id}/>
                         </li>);
             });
             let recent_list = this.props.recent_articles.map(function(article){
@@ -175,6 +200,7 @@
                             <a href="#" value={gen_url(article.id)} onClick={that.handleClick}>{article.title}</a>
                             <input type="hidden" value={article.author}/>
                             <input type="hidden" value={article.created_at}/>
+                            <input type="hidden" value={article.id}/>
                         </li>);
             });
             let tags = this.props.tags.map(
@@ -264,9 +290,9 @@
                 </div>
 
                 <div className="clean-searchbox">
-                    <input className="searchfield" id="searchfield" type="text" placeholder="Search"/>
+                    <input className="searchfield" id="searchField" type="text" placeholder="Search"/>
                     <button className="searchbutton" onClick={this.handleClick}>
-                        <i className="fa fa-search"></i>
+                        <i className="fa icon-search"></i>
                     </button>
                 </div>
             </div>
@@ -287,16 +313,17 @@
 
         handleClick(e){
             let target = $(e.target);
-            console.log(target);
             if(target.val() == "1"){
                 location.href = '{{url_for("index")}}';
             }else if(target.val() == "2"){
                 common.row.setState({
                     url: "{{url_for('me')}}",
+                    id: "我的自我介绍"
                 });
             }else{
                 common.row.setState({
                     url: "{{url_for('contact')}}",
+                    id: "我的联系方式"
                 });
             }
 
@@ -356,29 +383,29 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-4 footer-widget">
-                        <h3> <i class="fa fa-user"></i>About</h3>
+                        <h3> <i class="fa fa-user"></i>关于</h3>
 
-                       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab animi laboriosam nostrum consequatur fugiat at, labore praesentium modi, quasi dolorum debitis reiciendis facilis, dolor saepe sint nemo, earum molestias quas.</p>
-                       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorum, error aspernatur assumenda quae eveniet.</p>
+                       <p>这是我的第一个个人博客，从开始开发到试用版发布，用了差不多两天的时间，若的bug或缺陷，请及时联系我.</p>
+                       <p>后续会增加评论功能，请多关注.</p>
                     </div>
 
                     <div class="col-md-4 footer-widget">
-                        <h3> <i class="fa fa-pencil"></i> Recent Post</h3>
+                        <h3> <i class="fa fa-pencil"></i>使用技术方案</h3>
                         <ul class="clean-list">
-                            <li><a href="">Clean - Responsive HTML5 Template</a></li>
-                            <li><a href="">Responsive Pricing Table</a></li>
-                            <li><a href="">Yellow HTML5 Template</a></li>
-                            <li><a href="">Blackor Responsive Theme</a></li>
-                            <li><a href="">Portfolio Bootstrap Template</a></li>
-                            <li><a href="">Clean Slider Template</a></li>
+                            <li><a href="#">python</a></li>
+                            <li><a href="#">flask</a></li>
+                            <li><a href="#">react</a></li>
+                            <li><a href="#">bootstrap</a></li>
+                            <li><a href="#">elasticsearch</a></li>
+                            <li><a href="#">markdown</a></li>
                         </ul>
                     </div>
 
                     <div class="col-md-4 footer-widget">
-                        <h3> <i class="fa fa-envelope"></i>Contact Me</h3>
+                        <h3> <i class="fa fa-envelope"></i>联系我</h3>
 
-                        <p>Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet.</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nihil fugiat, cupiditate veritatis excepturi tempore explicabo.</p>
+                        <p>如果您对技术感兴趣或者需要合作，请点击右上角联系我，以上拥有我全部的联系方式</p>
+                        <p>期待与您交洽</p>
                          <div class="footer-widget-icon">
                             <i class="fa fa-facebook"></i><i class="fa fa-twitter"></i><i class="fa fa-google"></i>
                         </div>
