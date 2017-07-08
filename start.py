@@ -166,8 +166,8 @@ def delete():
     return redirect(url_for("index"))
 
 
-@app.route("/artile")
-def artile():
+@app.route("/artcile")
+def artcile():
     return json.dumps({"body": markdown.markdown(gen_article(request.args.get("id")), extensions=['markdown.extensions.extra'])})
 
 
@@ -177,7 +177,7 @@ def me():
     if not body:
         created_at = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     else:
-        created_at = datetime.datetime.fromtimestamp(os.stat(os.path.join(project_path, "我的自我介绍.md")).st_ctime).strftime("%Y-%m-%dT%H:%M:%S")
+        created_at = datetime.datetime.fromtimestamp(os.stat(os.path.join(project_path, "articles", "我的自我介绍.md")).st_ctime).strftime("%Y-%m-%dT%H:%M:%S")
     return json.dumps({"author":"马式超",
                        "body": body,
                        "title": "我的自我介绍",
@@ -191,11 +191,12 @@ def contact():
         created_at = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     else:
         created_at = datetime.datetime.fromtimestamp(
-            os.stat(os.path.join(project_path, "我的联系方式.md")).st_ctime).strftime("%Y-%m-%dT%H:%M:%S")
+            os.stat(os.path.join(project_path, "articles", "我的联系方式.md")).st_ctime).strftime("%Y-%m-%dT%H:%M:%S")
     return json.dumps({"author": "马式超",
                        "body": body,
                        "title": "我的联系方式",
                        "created_at": created_at})
+
 
 @app.route("/show")
 def show():
