@@ -40,7 +40,7 @@ def gen_article(id):
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', author=app.config.get("AUTHOR"))
 
 
 @app.route("/import")
