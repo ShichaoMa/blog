@@ -77,8 +77,8 @@
                         </div>
                         <h1>{this.props.title}</h1>
                         <div className="meta">
-                            <i className={this.props.author ? "fa fa-user" : ""}></i> {this.props.author}
-                            <i className={this.props.created_at ? "fa fa-calendar" : ""}></i>
+                            <i className={this.props.author ? "fa icon-user-md" : ""}></i> {this.props.author}
+                            <i className={this.props.created_at ? "fa icon-calendar" : ""}></i>
                             {parseDate(this.props.created_at).format("YYYY-MM-DD HH:mm:ss")}
                             <a href="#"><i className="fa  icon-reply" onClick={this.handleClick}></i></a>
                             <a href={edit_url}><i className="fa icon-edit"></i></a>
@@ -141,10 +141,10 @@
                     }
                 });
                 let html = { __html: data.body};
-                return (<Article author={this.state.author || data.author}
-                                 created_at={this.state.created_at || data.created_at}
-                                 title={this.state.title || data.title}
-                                 id={this.state.id || data.id}
+                return (<Article author={data.author || this.state.author }
+                                 created_at={data.created_at || this.state.created_at}
+                                 title={data.title || this.state.title}
+                                 id={data.id || this.state.id}
                                  parent={this}>
                             <div dangerouslySetInnerHTML={html} className="body"/>
                         </Article>)
