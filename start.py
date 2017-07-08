@@ -81,7 +81,7 @@ def imports():
         return render_template("login.html", ref="import")
     file =request.files["article"]
     title = request.form.get("title")
-    author = request.form.get("author") or "马式超"
+    author = request.form.get("author") or app.config.get("AUTHOR")
     tags = request.form.get("tags").split(",")
     feature = True if request.form.get("feature") == "True" else False
     description = request.form.get("description")
@@ -131,7 +131,7 @@ def update():
     file = CustomIO(request.form.get("article"))
     id = request.form.get("id")
     title = request.form.get("title")
-    author = request.form.get("author") or "马式超"
+    author = request.form.get("author") or app.config.get("AUTHOR")
     tags = request.form.get("tags").split(",")
     feature = True if request.form.get("feature") == 1 else False
     description = request.form.get("description")
@@ -180,7 +180,7 @@ def me():
         created_at = datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S")
     else:
             created_at = datetime.datetime.fromtimestamp(os.stat(os.path.join(project_path, "articles", "我的自我介绍.md")).st_ctime, tz).strftime("%Y-%m-%dT%H:%M:%S")
-    return json.dumps({"author":"马式超",
+    return json.dumps({"author":app.config.get("AUTHOR"),
                        "body": body,
                        "title": "我的自我介绍",
                        "created_at": created_at})
@@ -194,7 +194,7 @@ def contact():
     else:
         created_at = datetime.datetime.fromtimestamp(
             os.stat(os.path.join(project_path, "articles", "我的联系方式.md")).st_ctime, tz).strftime("%Y-%m-%dT%H:%M:%S")
-    return json.dumps({"author": "马式超",
+    return json.dumps({"author": app.config.get("AUTHOR"),
                        "body": body,
                        "title": "我的联系方式",
                        "created_at": created_at})

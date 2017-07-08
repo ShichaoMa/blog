@@ -24,3 +24,5 @@ PASSWORD = os.environ.get("PASSWORD", "12345")
 SECRET_KEY = os.urandom(24)
 
 TIME_ZONE = os.environ.get("TIME_ZONE", 'Asia/Shanghai')
+
+AUTHOR = os.environ.get("AUTHOR", "马式超")
