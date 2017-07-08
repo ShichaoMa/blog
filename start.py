@@ -85,7 +85,7 @@ def imports():
     tags = request.form.get("tags").split(",")
     feature = True if request.form.get("feature") == "True" else False
     description = request.form.get("description")
-    id = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    id = datetime.datetime.now(tz).strftime("%Y%m%d%H%M%S")
     body = {
         "id": id,
         "tags": tags,
@@ -143,7 +143,7 @@ def update():
             "title": title,
             "author": author,
             "feature": feature,
-            "updated_at": datetime.datetime.now(pytz.timezone('Asia/Shanghai')),
+            "updated_at": datetime.datetime.now(tz),
         }
     }
     try:
@@ -162,7 +162,10 @@ def delete():
         es.delete(app.config.get("INDEX"), id=request.args.get("id"), doc_type=app.config.get("DOC_TYPE"))
     except Exception:
         pass
-    os.unlink(os.path.join("articles", "%s.md" % request.args.get("id")))
+    try:
+        os.unlink(os.path.join("articles", "%s.md" % request.args.get("id")))
+    except FileNotFoundError:
+        pass
     return redirect(url_for("index"))
 
 
@@ -175,7 +178,7 @@ def article():
 def me():
     body = markdown.markdown(gen_article("我的自我介绍"), extensions=['markdown.extensions.extra'])
     if not body:
-        created_at = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        created_at = datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S")
     else:
             created_at = datetime.datetime.fromtimestamp(os.stat(os.path.join(project_path, "articles", "我的自我介绍.md")).st_ctime, tz).strftime("%Y-%m-%dT%H:%M:%S")
     return json.dumps({"author":"马式超",
@@ -188,7 +191,7 @@ def me():
 def contact():
     body = markdown.markdown(gen_article("我的联系方式"), extensions=['markdown.extensions.extra'])
     if not body:
-        created_at = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        created_at = datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S")
     else:
         created_at = datetime.datetime.fromtimestamp(
             os.stat(os.path.join(project_path, "articles", "我的联系方式.md")).st_ctime, tz).strftime("%Y-%m-%dT%H:%M:%S")
