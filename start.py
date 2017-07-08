@@ -17,7 +17,7 @@ app.static_folder = app.config.get("STATIC_FOLDER")
 app.static_url_path = app.config.get("STATIC_URL_PATH")
 app.template_folder = app.config.get("TEMPLATE_FOLDER")
 es = Elasticsearch(app.config.get("ES_HOST"), http_auth=(app.config.get("ES_USERNAME"), app.config.get("ES_PASSWORD")))
-tz = pytz.timezone('Asia/Shanghai')
+tz = pytz.timezone(app.config.get("TIME_ZONE"))
 
 
 class CustomIO(StringIO):

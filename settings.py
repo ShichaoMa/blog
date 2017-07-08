@@ -22,3 +22,5 @@ USERNAME = os.environ.get("USERNAME", "test")
 PASSWORD = os.environ.get("PASSWORD", "12345")
 
 SECRET_KEY = os.urandom(24)
+
+TIME_ZONE = os.environ.get("TIME_ZONE", 'Asia/Shanghai')
