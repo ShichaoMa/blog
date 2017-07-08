@@ -160,9 +160,9 @@ def delete():
         return render_template("login.html", ref="delete", id=request.args.get("id", ""))
     try:
         es.delete(app.config.get("INDEX"), id=request.args.get("id"), doc_type=app.config.get("DOC_TYPE"))
-        os.unlink(os.path.join("articles", "%s.md" % request.args.get("id")))
     except Exception:
         pass
+    os.unlink(os.path.join("articles", "%s.md" % request.args.get("id")))
     return redirect(url_for("index"))
 
 
@@ -177,7 +177,7 @@ def me():
     if not body:
         created_at = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     else:
-        created_at = datetime.datetime.fromtimestamp(os.stat(os.path.join(project_path, "articles", "我的自我介绍.md")).st_ctime).strftime("%Y-%m-%dT%H:%M:%S")
+            created_at = datetime.datetime.fromtimestamp(os.stat(os.path.join(project_path, "articles", "我的自我介绍.md")).st_ctime, tz).strftime("%Y-%m-%dT%H:%M:%S")
     return json.dumps({"author":"马式超",
                        "body": body,
                        "title": "我的自我介绍",
@@ -191,7 +191,7 @@ def contact():
         created_at = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     else:
         created_at = datetime.datetime.fromtimestamp(
-            os.stat(os.path.join(project_path, "articles", "我的联系方式.md")).st_ctime).strftime("%Y-%m-%dT%H:%M:%S")
+            os.stat(os.path.join(project_path, "articles", "我的联系方式.md")).st_ctime, tz).strftime("%Y-%m-%dT%H:%M:%S")
     return json.dumps({"author": "马式超",
                        "body": body,
                        "title": "我的联系方式",
