@@ -166,8 +166,8 @@ def delete():
     return redirect(url_for("index"))
 
 
-@app.route("/artcile")
-def artcile():
+@app.route("/article")
+def article():
     return json.dumps({"body": markdown.markdown(gen_article(request.args.get("id")), extensions=['markdown.extensions.extra'])})
 
 
