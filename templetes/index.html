@@ -30,6 +30,10 @@
     <script src={{url_for("static", filename="js/browser.min.js")}}></script>
     <script src={{url_for("static", filename="js/moment.min.js")}}></script>
 </head>
+<style>
+    ol{list-style-type:demical;}
+    ol li{ list-style-position:outside;}
+</style>
 <script type="text/babel">
 
     function gen_url(id){
@@ -52,6 +56,43 @@
     }
 
     var common = {};
+
+
+    class List extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleClick = this.handleClick.bind(this);
+            this.state = {};
+        }
+
+        handleClick(e) {
+            this.props.parent.setState({url: null})
+
+        }
+        render(){
+            let list = this.props.articles.map((article) => (
+                    <li key={gen_url(article.id)}>
+                        <a href="#" value={gen_url(article.id)} onClick={common.aside.handleClick}>{article.title}</a>
+                        <input type="hidden" value={article.author}/>
+                        <input type="hidden" value={article.created_at}/>
+                        <input type="hidden" value={article.id}/>
+                    </li>
+            ));
+            return (<div className="col-md-8 blog-main">
+                <header>
+                    <h3>全部文章</h3>
+                </header>
+                <div className="body">
+                    <ol>
+                        {list}
+                    </ol>
+                </div>
+                <i className="fa icon-angle-left" onClick={this.handleClick}></i>
+                <i className="fa icon-angle-right" onClick={this.handleClick}></i>
+            </div>)
+        }
+    }
+
 
     class Article extends React.Component {
         constructor(props) {
@@ -149,6 +190,19 @@
                             <div dangerouslySetInnerHTML={html} className="body"/>
                         </Article>)
             }
+            if(this.state.showList){
+                let data = null;
+                $.ajax({
+                    url: "{{url_for('show')}}",
+                    data: {"from": 0, "size": 10},
+                    async: false,
+                    success: function(resp){
+                        data = eval("("+resp+")");
+                    }
+                });
+                console.log(data)
+                return (<List {...data} />)
+            }
             let count = 0;
             let rows = [];
             while(true){
@@ -164,7 +218,11 @@
             let that = this;
             return (<div  className="col-md-8 blog-main">{rows.map(function(blocks){
                 return (<div className="row" key={blocks[0].id}>{gen_block(blocks[0], that)} {gen_block(blocks[1], that)}</div>)
-            })}</div>)
+            })}
+                <div className="paging">
+                    <a href="#" onClick={(() => this.setState({"showList": true}))} className="older">过往文章</a>
+                </div>
+            </div>)
         }
     }
 
@@ -172,6 +230,7 @@
         constructor(props) {
             super(props);
             this.handleClick = this.handleClick.bind(this);
+            common["aside"] = this;
             this.state = {};
         }
 

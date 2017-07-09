@@ -26,3 +26,5 @@ SECRET_KEY = os.urandom(24)
 TIME_ZONE = os.environ.get("TIME_ZONE", 'Asia/Shanghai')
 
 AUTHOR = os.environ.get("AUTHOR", "马式超")
+
+DB = os.environ.get("DB", "sqlite")
