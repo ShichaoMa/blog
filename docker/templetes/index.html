@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>马式超的个人博客</title>
+    <title>{{author}}的个人博客</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
 
@@ -33,7 +33,7 @@
 <script type="text/babel">
 
     function gen_url(id){
-        return '{{url_for("artile")}}?id=' + id;
+        return '{{url_for("article")}}?id=' + id;
     }
 
     function parseDate(date){
@@ -77,8 +77,8 @@
                         </div>
                         <h1>{this.props.title}</h1>
                         <div className="meta">
-                            <i className={this.props.author ? "fa fa-user" : ""}></i> {this.props.author}
-                            <i className={this.props.created_at ? "fa fa-calendar" : ""}></i>
+                            <i className={this.props.author ? "fa icon-user-md" : ""}></i> {this.props.author}
+                            <i className={this.props.created_at ? "fa icon-calendar" : ""}></i>
                             {parseDate(this.props.created_at).format("YYYY-MM-DD HH:mm:ss")}
                             <a href="#"><i className="fa  icon-reply" onClick={this.handleClick}></i></a>
                             <a href={edit_url}><i className="fa icon-edit"></i></a>
@@ -99,8 +99,8 @@
                             <img src={img} alt=""/>
                             <h3>{props.title}</h3>
                             <span className="meta">
-                                <span>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
-                                <font>{props.author}</font>
+                                <i className={props.created_at ? "fa icon-calendar" : ""}></i><span>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
+                                <i className={props.author ? "fa icon-user-md" : ""}></i><font>{props.author}</font>
                             </span>
                         </header>
                         <div className="body">
@@ -141,10 +141,10 @@
                     }
                 });
                 let html = { __html: data.body};
-                return (<Article author={this.state.author || data.author}
-                                 created_at={this.state.created_at || data.created_at}
-                                 title={this.state.title || data.title}
-                                 id={this.state.id || data.id}
+                return (<Article author={data.author || this.state.author }
+                                 created_at={data.created_at || this.state.created_at}
+                                 title={data.title || this.state.title}
+                                 id={data.id || this.state.id}
                                  parent={this}>
                             <div dangerouslySetInnerHTML={html} className="body"/>
                         </Article>)
