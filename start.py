@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 import os
 import re
-import sys
 import json
 import pytz
 import sqlite3
@@ -9,9 +8,10 @@ import markdown
 import datetime
 import elasticsearch
 
-from io import StringIO
+from threading import local
 from flask import Flask, render_template, request, session, url_for, redirect
 
+local = local()
 project_path = os.path.dirname(__file__)
 app = Flask(__name__)
 app.config.from_pyfile(os.path.join(project_path, "settings.py"))
@@ -23,7 +23,7 @@ tz = pytz.timezone(app.config.get("TIME_ZONE"))
 
 def conn_wrapper(func):
     """
-    sqlite的conn不能多个线程使用，只能先开再关
+    sqlite的conn不能多个线程使用
     :param func:
     :return:
     """
@@ -31,13 +31,15 @@ def conn_wrapper(func):
         self = args[0]
         index = args[1]
         if self.config.get("DB", "ES") != "ES":
-            self.conn = sqlite3.connect(os.path.join(project_path, "db", index))
-            self.cur = self.conn.cursor()
+            self.conn = getattr(local, "conn", None)
+            if not self.conn:
+                self.conn = sqlite3.connect(os.path.join(project_path, "db", index))
+                self.cur = self.conn.cursor()
         result = func(*args, **kwargs)
         if self.config.get("DB", "ES") != "ES":
             self.conn.commit()
-            self.cur.close()
-            self.conn.close()
+            # self.cur.close()
+            # self.conn.close()
         return result
     return wrapper
 
@@ -80,7 +82,7 @@ class DB:
             try:
                 self.cur.execute(self.table_initialize)
             except sqlite3.OperationalError as e:
-                print(e)
+                pass
             finally:
                 self.cur.close()
                 self.conn.close()
@@ -237,6 +239,7 @@ def login():
 @app.route('/check', methods=["post"])
 def check():
     ref = request.form.get("ref")
+    print(request.form.get("username"),app.config.get("USERNAME"),request.form.get("password"),app.config.get("PASSWORD"))
     if request.form.get("username") == app.config.get("USERNAME") and request.form.get("password") == app.config.get("PASSWORD"):
         session["login"] = "%s:%s"%(request.form.get("username"), request.form.get("password"))
         return render_template("%s.html"%ref, success="",
