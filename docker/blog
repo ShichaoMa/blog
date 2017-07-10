@@ -46,6 +46,10 @@ COPY start.py /app/start.py
 
 COPY settings.py /app/settings.py
 
+COPY blog.json /app/blog.json
+
+COPY blog.sql /app/blog.sql
+
 COPY templetes /app/templetes
 
 WORKDIR /app

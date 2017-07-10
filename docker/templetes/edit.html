@@ -1,6 +1,7 @@
 <html>
     <head>
         <title>更新</title>
+         <link href={{url_for("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
     </head>
     <!-- Bootstrap styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/bootstrap.min.css")}}>
@@ -20,10 +21,10 @@
                     <input name="id" type="hidden" value="{{id}}" />
                     <div class="row">
                         <div class="col-md-6">
-                            <input type="text" name="tags" placeholder="tags" value="{{tags}}" class="form-control input-lg"/>
+                            <input type="text" name="tags" required=required placeholder="tags" value="{{tags}}" class="form-control input-lg"/>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" name="description" placeholder="description" value="{{description}}" class="form-control input-lg"/>
+                            <input type="text" name="description" required=required placeholder="description" value="{{description}}" class="form-control input-lg"/>
                         </div>
                     </div>
 
@@ -36,7 +37,8 @@
                         </div>
                     </div>
                     <div class="row">
-                                       是否精品: 是 <input type="radio" value="True"  {{ 'checked' if feature else ''}} /> 否 <input type="radio" value="False" {{ 'checked' if not feature else ''}}/>
+                        是否精品: 是 <input type="radio" name="feature" value="True"  {{ 'checked' if feature else ''}} />
+                        否 <input type="radio" name="feature" value="False" {{ 'checked' if not feature else ''}}/>
                     </div>
 
                     <textarea rows="30" name="article" placeholder="article" class="form-control input-lg">{{article}}</textarea>
