@@ -365,7 +365,6 @@ def me():
         article["created_at"] = created_at.strftime("%Y-%m-%dT%H:%M:%S")
     article["article"] = markdown.markdown(article["article"],
                                         extensions=['markdown.extensions.extra'])
-    del article["article"]
     return json.dumps(article)
 
 
@@ -392,8 +391,6 @@ def contact():
         article["created_at"] = created_at.strftime("%Y-%m-%dT%H:%M:%S")
     article["article"] = markdown.markdown(article["article"],
                                         extensions=['markdown.extensions.extra'])
-    del article["article"]
-
     return json.dumps(article)
 
 
