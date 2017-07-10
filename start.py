@@ -239,7 +239,6 @@ def login():
 @app.route('/check', methods=["post"])
 def check():
     ref = request.form.get("ref")
-    print(request.form.get("username"),app.config.get("USERNAME"),request.form.get("password"),app.config.get("PASSWORD"))
     if request.form.get("username") == app.config.get("USERNAME") and request.form.get("password") == app.config.get("PASSWORD"):
         session["login"] = "%s:%s"%(request.form.get("username"), request.form.get("password"))
         return render_template("%s.html"%ref, success="",
