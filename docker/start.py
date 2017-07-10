@@ -17,7 +17,8 @@ app.static_folder = app.config.get("STATIC_FOLDER")
 app.static_url_path = app.config.get("STATIC_URL_PATH")
 app.template_folder = app.config.get("TEMPLATE_FOLDER")
 es = Elasticsearch(app.config.get("ES_HOST"), http_auth=(app.config.get("ES_USERNAME"), app.config.get("ES_PASSWORD")))
-tz = pytz.timezone('Asia/Shanghai')
+tz = pytz.timezone(app.config.get("TIME_ZONE"))
+
 
 class CustomIO(StringIO):
 
@@ -27,16 +28,19 @@ class CustomIO(StringIO):
 
 
 def gen_article(id):
-    if id:
-        input_file = codecs.open(os.path.join(project_path, "articles", "%s.md" % id), mode="r",
-                                 encoding="utf-8")
-        return input_file.read()
+    try:
+        if id:
+            input_file = codecs.open(os.path.join(project_path, "articles", "%s.md" % id), mode="r",
+                                     encoding="utf-8")
+            return input_file.read()
+    except Exception:
+        pass
     return ""
 
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', author=app.config.get("AUTHOR"))
 
 
 @app.route("/import")
@@ -77,16 +81,16 @@ def imports():
         return render_template("login.html", ref="import")
     file =request.files["article"]
     title = request.form.get("title")
-    author = request.form.get("author") or "马式超"
+    author = request.form.get("author") or app.config.get("AUTHOR")
     tags = request.form.get("tags").split(",")
     feature = True if request.form.get("feature") == "True" else False
     description = request.form.get("description")
-    id = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    id = datetime.datetime.now(tz).strftime("%Y%m%d%H%M%S")
     body = {
         "id": id,
         "tags": tags,
         "description": description,
-        "title": title or file.filename.strip(".md"),
+        "title": title or file.filename.replace(".md", ""),
         "author": author,
         "feature": feature,
         "created_at": datetime.datetime.now(tz),
@@ -104,8 +108,7 @@ def edit():
     id = request.args.get("id")
     try:
         doc = es.get(app.config.get("INDEX"), id=id, doc_type=app.config.get("DOC_TYPE"))
-    except Exception as e:
-        print(e)
+    except Exception:
         doc = {}
     if not doc:
         doc["_source"] = {}
@@ -128,7 +131,7 @@ def update():
     file = CustomIO(request.form.get("article"))
     id = request.form.get("id")
     title = request.form.get("title")
-    author = request.form.get("author") or "马式超"
+    author = request.form.get("author") or app.config.get("AUTHOR")
     tags = request.form.get("tags").split(",")
     feature = True if request.form.get("feature") == 1 else False
     description = request.form.get("description")
@@ -139,13 +142,13 @@ def update():
             "title": title,
             "author": author,
             "feature": feature,
-            "updated_at": datetime.datetime.now(pytz.timezone('Asia/Shanghai')),
+            "updated_at": datetime.datetime.now(tz),
         }
     }
     try:
         es.update(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=id, body=body)
-    except Exception as e:
-        print(e)
+    except Exception:
+        pass
     file.save(os.path.join(project_path, "articles/%s.md" % id))
     return redirect(url_for("index"))
 
@@ -156,31 +159,45 @@ def delete():
         return render_template("login.html", ref="delete", id=request.args.get("id", ""))
     try:
         es.delete(app.config.get("INDEX"), id=request.args.get("id"), doc_type=app.config.get("DOC_TYPE"))
-        os.unlink(os.path.join("articles", "%s.md" % request.args.get("id")))
     except Exception:
+        pass
+    try:
+        os.unlink(os.path.join("articles", "%s.md" % request.args.get("id")))
+    except FileNotFoundError:
         pass
     return redirect(url_for("index"))
 
 
-@app.route("/artile")
-def artile():
+@app.route("/article")
+def article():
     return json.dumps({"body": markdown.markdown(gen_article(request.args.get("id")), extensions=['markdown.extensions.extra'])})
 
 
 @app.route("/me")
 def me():
-    return json.dumps({"author":"马式超",
-                       "body": markdown.markdown(gen_article("我的自我介绍"), extensions=['markdown.extensions.extra']),
+    body = markdown.markdown(gen_article("我的自我介绍"), extensions=['markdown.extensions.extra'])
+    if not body:
+        created_at = datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S")
+    else:
+            created_at = datetime.datetime.fromtimestamp(os.stat(os.path.join(project_path, "articles", "我的自我介绍.md")).st_ctime, tz).strftime("%Y-%m-%dT%H:%M:%S")
+    return json.dumps({"author":app.config.get("AUTHOR"),
+                       "body": body,
                        "title": "我的自我介绍",
-                       "created_at": "2017-07-08T12:12:12"})
+                       "created_at": created_at})
 
 
 @app.route("/contact")
 def contact():
-    return json.dumps({"author":"马式超",
-                       "body": markdown.markdown(gen_article("我的联系方式"), extensions=['markdown.extensions.extra']),
+    body = markdown.markdown(gen_article("我的联系方式"), extensions=['markdown.extensions.extra'])
+    if not body:
+        created_at = datetime.datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S")
+    else:
+        created_at = datetime.datetime.fromtimestamp(
+            os.stat(os.path.join(project_path, "articles", "我的联系方式.md")).st_ctime, tz).strftime("%Y-%m-%dT%H:%M:%S")
+    return json.dumps({"author": app.config.get("AUTHOR"),
+                       "body": body,
                        "title": "我的联系方式",
-                       "created_at": "2017-07-08T12:12:12"})
+                       "created_at": created_at})
 
 
 @app.route("/show")
@@ -206,4 +223,5 @@ def show():
 
 
 if __name__ == "__main__":
-    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=eval(os.environ.get("DEBUG", "False")), host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", 5000)))
+

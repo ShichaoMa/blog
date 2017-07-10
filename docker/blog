@@ -2,21 +2,23 @@ FROM ubuntu
 
 MAINTAINER Shichao Ma
 
+COPY sources.list /etc/apt/
+
+COPY Python-3.6.0.tgz /
+
+RUN apt-get clean && apt-get update
+
+RUN apt-get install -y locales
+
 RUN locale-gen en_US.UTF-8
 
 RUN update-locale LANG=en_US.UTF-8
 
 ENV LANG en_US.UTF-8
 
-RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+COPY Shanghai /etc/localtime
 
 COPY timezone /etc
-
-COPY sources.list /etc/apt/
-
-COPY Python-3.6.0.tgz /
-
-RUN apt-get update
 
 RUN apt-get install -y --no-install-recommends libc6-dev gcc make
 
@@ -38,7 +40,7 @@ RUN mkdir -p /app/articles
 
 RUN pip3.6 install -r /tmp/requirements.txt
 
-COPY static /app/
+COPY static /app/static
 
 COPY start.py /app/start.py
 
