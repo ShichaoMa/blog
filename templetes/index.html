@@ -6,6 +6,8 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
 
+    <link href={{url_for("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
+
     <!-- Bootstrap styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/bootstrap.min.css")}}>
 
@@ -29,10 +31,12 @@
     <script src={{url_for("static", filename="js/react-dom.js")}}></script>
     <script src={{url_for("static", filename="js/browser.min.js")}}></script>
     <script src={{url_for("static", filename="js/moment.min.js")}}></script>
+    <script src={{url_for("static", filename="js/jqpage.js")}}></script>
 </head>
 <style>
-    ol{list-style-type:demical;}
-    ol li{ list-style-position:outside;}
+    .span-right{
+        float: right;
+    }
 </style>
 <script type="text/babel">
 
@@ -69,26 +73,63 @@
             this.props.parent.setState({url: null})
 
         }
+
+        componentDidMount(){
+            let that = this;
+            $('#page').jqPaginator({
+                totalCounts: this.props.count,
+                pageSize: 10,
+                visiblePages: 10,
+                currentPage: 1,
+                onPageChange: function (num, type) {
+                    that.setState({
+                        from: (num -1) *10,
+                        size: 10,
+                        url: "{{url_for('show')}}"
+                    })
+                }
+            });
+        }
+
         render(){
-            let list = this.props.articles.map((article) => (
-                    <li key={gen_url(article.id)}>
-                        <a href="#" value={gen_url(article.id)} onClick={common.aside.handleClick}>{article.title}</a>
+            let articles = this.props.articles;
+            if(this.state.url){
+                       $.ajax({
+                           url: this.state.url,
+                           data: {
+                               from: this.state.from,
+                               size: this.state.size
+                           },
+                           async: false,
+                           success: function(resp){
+                                let data = eval("("+resp+")");
+                                articles = data.articles;
+                                $('#page').jqPaginator('option', {
+                                    totalPages: data.count
+                                });
+                            }
+                       });
+            }
+            let list = articles.map((article) => (
+                    <a href="#" value={gen_url(article.id)} onClick={common.aside.handleClick} className="list-group-item" key={gen_url(article.id)}>
+                        <i className={article.feature?"fa icon-star":"fa icon-star-empty"} ></i>&nbsp;&nbsp;
+                        <span>{article.title}</span>
                         <input type="hidden" value={article.author}/>
                         <input type="hidden" value={article.created_at}/>
                         <input type="hidden" value={article.id}/>
-                    </li>
+                        <span className="span-right">{parseDate(article.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
+                    </a>
             ));
             return (<div className="col-md-8 blog-main">
                 <header>
                     <h3>全部文章</h3>
                 </header>
                 <div className="body">
-                    <ol>
+                    <div className="list-group">
                         {list}
-                    </ol>
+                    </div>
                 </div>
-                <i className="fa icon-angle-left" onClick={this.handleClick}></i>
-                <i className="fa icon-angle-right" onClick={this.handleClick}></i>
+                <ul id="page" className="pagination"></ul>
             </div>)
         }
     }
@@ -107,7 +148,8 @@
         }
 
         render() {
-            let img = '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random() * 1) + ".jpg";
+            console.log(this.props);
+            let img =  this.props.first_img || '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random() * 1) + ".jpg";
             let edit_url = "{{url_for('edit')}}?id=" + this.props.id;
             let delete_url = "{{url_for('delete')}}?id=" + this.props.id;
             return (<div className="col-md-8 blog-main">
@@ -133,7 +175,7 @@
     }
 
     function Block(props){
-        let img = '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random()*1) + ".jpg";
+        let img = props.first_img || '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random()*1) + ".jpg";
         return (<div className="col-md-6 col-sm-6">
                     <article className=" blog-teaser">
                         <header>
@@ -181,12 +223,10 @@
                         data = eval("("+resp+")");
                     }
                 });
-                let html = { __html: data.body};
-                return (<Article author={data.author || this.state.author }
-                                 created_at={data.created_at || this.state.created_at}
-                                 title={data.title || this.state.title}
-                                 id={data.id || this.state.id}
-                                 parent={this}>
+                let html = { __html: data.article};
+                data.article = null;
+                data.parent = this;
+                return (<Article {...data}>
                             <div dangerouslySetInnerHTML={html} className="body"/>
                         </Article>)
             }
@@ -200,7 +240,6 @@
                         data = eval("("+resp+")");
                     }
                 });
-                console.log(data)
                 return (<List {...data} />)
             }
             let count = 0;
@@ -236,31 +275,34 @@
 
         handleClick(e) {
             let target = $(e.target);
+            console.log(target);
             common.row.setState({
-                url: target.val(),
+                url: target.parent().val(),
                 title: target.html(),
                 created_at: target.parent().children("input")[1].value,
                 author: target.parent().children("input")[0].value,
-                id: /id=(\w+)/.exec(target.val())[1]});
+                id: /id=(\w+)/.exec(target.parent().val())[1]});
         }
 
         render() {
             let that = this;
             let feature_list = this.props.feature_articles.map(function(article){
-                return (<li key={gen_url(article.id)}>
-                            <a href="#" value={gen_url(article.id)} onClick={that.handleClick}>{article.title}</a>
+                return (<a href="#" value={gen_url(article.id)} onClick={that.handleClick} className="list-group-item" key={gen_url(article.id)}>
+                            <i className="fa  icon-star" ></i>&nbsp;&nbsp;
+                            <span>{article.title}</span>
                             <input type="hidden" value={article.author}/>
                             <input type="hidden" value={article.created_at}/>
                             <input type="hidden" value={article.id}/>
-                        </li>);
+                        </a>);
             });
-            let recent_list = this.props.recent_articles.map(function(article){
-                return (<li key={article.id}>
-                            <a href="#" value={gen_url(article.id)} onClick={that.handleClick}>{article.title}</a>
+            let recent_list = this.props.articles.map(function(article){
+                return (<a href="#" value={gen_url(article.id)} onClick={that.handleClick} className="list-group-item" key={article.id}>
+                            <i className="fa  icon-star-empty" ></i>&nbsp;&nbsp;
+                            <span>{article.title}</span>
                             <input type="hidden" value={article.author}/>
                             <input type="hidden" value={article.created_at}/>
                             <input type="hidden" value={article.id}/>
-                        </li>);
+                        </a>);
             });
             let tags = this.props.tags.map(
                 (tag) => (<li key={tag}><a href="#" onClick={common.container.handleClick} value={tag}>{tag}</a></li>)
@@ -268,10 +310,10 @@
             return (<aside className="col-md-4 blog-aside">
                         <div className="aside-widget">
                             <header>
-                                <h3>精品发布</h3>
+                                <h3>精品文章</h3>
                             </header>
                             <div className="body">
-                                <ul className="clean-list">
+                                <ul className="list-group">
                                     {feature_list}
                                 </ul>
                             </div>
@@ -282,9 +324,9 @@
                                 <h3>最近发布</h3>
                             </header>
                             <div className="body">
-                                <ul className="clean-list">
+                                <div className="list-group">
                                     {recent_list}
-                                </ul>
+                                </div>
                             </div>
                         </div>
 
@@ -313,14 +355,9 @@
                 data = eval("("+resp+")");
             }
         });
-        let row = (<Row {...{"articles": data.articles.sort(function(a, b){
-                        return a["feature"] || parseDate(b["created_at"])._d.getTime() - parseDate(a["created_at"])._d.getTime()
-                    }).slice(0, 4)}}/>);
-        let aside = (<Aside {...{"feature_articles": data.articles.filter(function(article){
-                return article.feature
-            }).slice(0, 6),"recent_articles": data.articles.sort(function(a, b){
-                        return parseDate(b["created_at"])._d.getTime() - parseDate(a["created_at"])._d.getTime()
-                    }).slice(0, 6), "tags": data.tags}}/>);
+        let row = (<Row {...{"articles": data.articles.slice(0, 4)}}/>);
+        let aside = (<Aside {...{"feature_articles": data.feature_articles.slice(0, 6),
+            "articles": data.articles.slice(0, 6), "tags": data.tags}}/>);
         return (<div className="container">
         <div className="row">
             {row}
@@ -453,6 +490,7 @@
                         <ul class="clean-list">
                             <li><a href="#">python</a></li>
                             <li><a href="#">flask</a></li>
+                            <li><a href="#">sqlite3</a></li>
                             <li><a href="#">react</a></li>
                             <li><a href="#">bootstrap</a></li>
                             <li><a href="#">elasticsearch</a></li>
