@@ -15,6 +15,7 @@
 ### 推荐使用docker来运行，非常简单，只需要一行代码，docker安装方法在我的[blog](http://www.mashichao.com:5678)里面可以找到。
 ```
 sudo docker run -e "HOST=0.0.0.0" -e "DB=SQLITE" -e "AUTHOR=你的名字" -e "USERNAME=xxxxx" -e "PASSWORD=xxxxxx" -v /home/cn/db:/app/db -p 5000:5000 cnaafhvk/blog:latest python3.6 start.py
+# 使用sqlite作存储，最好将外部路径映射到docker中，如-v /home/cn/db:/app/db， 否则docker container删除之后所有数据记录全部会丢失。
 ```
 ### 或者常规方案
 ```

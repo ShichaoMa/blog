@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 import os
 import re
-import sys
 import json
 import pytz
 import sqlite3
@@ -9,9 +8,10 @@ import markdown
 import datetime
 import elasticsearch
 
-from io import StringIO
+from threading import local
 from flask import Flask, render_template, request, session, url_for, redirect
 
+local = local()
 project_path = os.path.dirname(__file__)
 app = Flask(__name__)
 app.config.from_pyfile(os.path.join(project_path, "settings.py"))
@@ -23,21 +23,23 @@ tz = pytz.timezone(app.config.get("TIME_ZONE"))
 
 def conn_wrapper(func):
     """
-    sqlite的conn不能多个线程使用，只能先开再关
+    sqlite的conn不能多个线程使用
     :param func:
     :return:
     """
     def wrapper(*args, **kwargs):
         self = args[0]
         index = args[1]
-        if self.config.get("DB", "ES") != "ES":
-            self.conn = sqlite3.connect(os.path.join(project_path, "db", index))
-            self.cur = self.conn.cursor()
+        if self.config.get("DB", "es").lower() != "es":
+            self.conn = getattr(local, "conn", None)
+            if not self.conn:
+                self.conn = sqlite3.connect(os.path.join(project_path, "db", index))
+                self.cur = self.conn.cursor()
         result = func(*args, **kwargs)
-        if self.config.get("DB", "ES") != "ES":
+        if self.config.get("DB", "es").lower() != "es":
             self.conn.commit()
-            self.cur.close()
-            self.conn.close()
+            # self.cur.close()
+            # self.conn.close()
         return result
     return wrapper
 
@@ -80,7 +82,7 @@ class DB:
             try:
                 self.cur.execute(self.table_initialize)
             except sqlite3.OperationalError as e:
-                print(e)
+                pass
             finally:
                 self.cur.close()
                 self.conn.close()
@@ -363,7 +365,6 @@ def me():
         article["created_at"] = created_at.strftime("%Y-%m-%dT%H:%M:%S")
     article["article"] = markdown.markdown(article["article"],
                                         extensions=['markdown.extensions.extra'])
-    del article["article"]
     return json.dumps(article)
 
 
@@ -390,8 +391,6 @@ def contact():
         article["created_at"] = created_at.strftime("%Y-%m-%dT%H:%M:%S")
     article["article"] = markdown.markdown(article["article"],
                                         extensions=['markdown.extensions.extra'])
-    del article["article"]
-
     return json.dumps(article)
 
 
@@ -412,7 +411,7 @@ def format_articles(articles):
 def show():
     count, articles, feature_articles = db.search(app.config.get("INDEX"), app.config.get("DOC_TYPE"),
                          request.args.get("searchField"), request.args.get("from", 0),
-                         request.args.get("size", 10))
+                         request.args.get("size", 20))
     tags, articles = format_articles(articles)
     _, feature_articles = format_articles(feature_articles)
     return json.dumps({"count": count, "articles": articles, "feature_articles": feature_articles,

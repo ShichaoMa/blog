@@ -167,10 +167,16 @@ class DB:
                         ]
                     }
             } if search_field else {
+                    "bool": {
+                        "must": [
+                            {
                                 "term": {
                                     "show": 1
                                 }
                             }
+                        ]
+                    }
+            }
             body = {
                 "query": condition,
                 "from": _from,
@@ -411,7 +417,7 @@ def format_articles(articles):
 def show():
     count, articles, feature_articles = db.search(app.config.get("INDEX"), app.config.get("DOC_TYPE"),
                          request.args.get("searchField"), request.args.get("from", 0),
-                         request.args.get("size", 10))
+                         request.args.get("size", 20))
     tags, articles = format_articles(articles)
     _, feature_articles = format_articles(feature_articles)
     return json.dumps({"count": count, "articles": articles, "feature_articles": feature_articles,
