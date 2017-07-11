@@ -15,7 +15,7 @@
     <link rel="stylesheet" href={{url_for("static", filename="css/font-awesome/css/font-awesome.min.css")}}>
 
     <!-- Google Webfonts -->
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+    <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>-->
 
     <!-- Styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
@@ -160,7 +160,7 @@
                         </div>
                         <h1>{this.props.title}</h1>
                         <div className="meta">
-                            <i className={this.props.author ? "fa icon-user-md" : ""}></i> {this.props.author}
+                            <i className={this.props.author ? "fa icon-user" : ""}></i> {this.props.author}
                             <i className={this.props.created_at ? "fa icon-calendar" : ""}></i>
                             {parseDate(this.props.created_at).format("YYYY-MM-DD HH:mm:ss")}
                             <a href="#"><i className="fa  icon-reply" onClick={this.handleClick}></i></a>
@@ -183,7 +183,7 @@
                             <h3>{props.title}</h3>
                             <span className="meta">
                                 <i className={props.created_at ? "fa icon-calendar" : ""}></i><span>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
-                                <i className={props.author ? "fa icon-user-md" : ""}></i><font>{props.author}</font>
+                                <i className={props.author ? "fa icon-user" : ""}></i><font>{props.author}</font>
                             </span>
                         </header>
                         <div className="body">
@@ -479,7 +479,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-4 footer-widget">
-                        <h3> <i class="fa fa-user"></i>关于</h3>
+                        <h3> <i class="fa icon-user"></i>关于</h3>
 
                        <p>这是我的第一个个人博客，若的bug或缺陷，请及时联系我。</p>
                        <p>博文支持markdown格式的上传和编辑。支持全文搜索。</p>
@@ -487,7 +487,7 @@
                     </div>
 
                     <div class="col-md-4 footer-widget">
-                        <h3> <i class="fa fa-pencil"></i>技术栈</h3>
+                        <h3> <i class="fa icon-legal"></i>技术栈</h3>
                         <ul class="clean-list">
                             <li><a href="#">python</a></li>
                             <li><a href="#">flask</a></li>
@@ -502,15 +502,16 @@
                     </div>
 
                     <div class="col-md-4 footer-widget">
-                        <h3> <i class="fa fa-envelope"></i>联系我</h3>
+                        <h3> <i class="fa icon-mobile-phone"></i>联系我</h3>
 
                         <p>如果您对技术感兴趣或者需要合作，请点击右上角联系我，以上拥有我全部的联系方式</p>
                         <p>期待与您交洽</p>
-                         <div class="footer-widget-icon">
-                            <i class="fa fa-facebook"></i><i class="fa fa-twitter"></i><i class="fa fa-google"></i>
-                        </div>
                     </div>
-
+                    <div class="footer-widget-icon">
+                            <a href="https://github.com/ShichaoMa"><i class="fa icon-github"></i></a>
+                            <a href="https://twitter.com/cnaafhvk"><i class="fa icon-twitter"></i></a>
+                            <i class="fa icon-facebook"></i>
+                    </div>
                 </div>
             </div>
         </div>
