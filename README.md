@@ -23,7 +23,7 @@ sudo docker run -e "HOST=0.0.0.0" -e "DB=SQLITE" -e "AUTHOR=你的名字" -e "US
 git clone https://github.com/ShichaoMa/blog.git
 cd blog
 pip install -r docker/requirements.txt
-# 自行设置配置变量
+# 自行配置变量
 python start.py
 ```
 ### 首页
@@ -32,7 +32,7 @@ python start.py
 ![](https://github.com/ShichaoMa/blog/blob/master/2.jpg)
 ### 全部文章
 ![](https://github.com/ShichaoMa/blog/blob/master/3.jpg)
-### 登陆
+### 登录
 ![](https://github.com/ShichaoMa/blog/blob/master/4.jpg)
 ### 上传文章
 ![](https://github.com/ShichaoMa/blog/blob/master/5.jpg)

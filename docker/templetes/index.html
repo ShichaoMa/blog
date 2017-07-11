@@ -275,7 +275,6 @@
 
         handleClick(e) {
             let target = $(e.target);
-            console.log(target);
             common.row.setState({
                 url: target.parent().val(),
                 title: target.html(),
@@ -297,7 +296,7 @@
             });
             let recent_list = this.props.articles.map(function(article){
                 return (<a href="#" value={gen_url(article.id)} onClick={that.handleClick} className="list-group-item" key={article.id}>
-                            <i className="fa  icon-star-empty" ></i>&nbsp;&nbsp;
+                            <i className={article.feature ? "fa icon-star" : "fa icon-star-empty"} ></i>&nbsp;&nbsp;
                             <span>{article.title}</span>
                             <input type="hidden" value={article.author}/>
                             <input type="hidden" value={article.created_at}/>
@@ -382,7 +381,7 @@
             return (<div><div className="widewrapper subheader">
             <div className="container">
                 <div className="clean-breadcrumb">
-                    <a href="#">博客</a>
+                    <span>博客</span>
                 </div>
 
                 <div className="clean-searchbox">

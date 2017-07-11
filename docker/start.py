@@ -167,10 +167,16 @@ class DB:
                         ]
                     }
             } if search_field else {
+                    "bool": {
+                        "must": [
+                            {
                                 "term": {
                                     "show": 1
                                 }
                             }
+                        ]
+                    }
+            }
             body = {
                 "query": condition,
                 "from": _from,
