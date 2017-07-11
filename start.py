@@ -30,13 +30,13 @@ def conn_wrapper(func):
     def wrapper(*args, **kwargs):
         self = args[0]
         index = args[1]
-        if self.config.get("DB", "ES") != "ES":
+        if self.config.get("DB", "es").lower() != "es":
             self.conn = getattr(local, "conn", None)
             if not self.conn:
                 self.conn = sqlite3.connect(os.path.join(project_path, "db", index))
                 self.cur = self.conn.cursor()
         result = func(*args, **kwargs)
-        if self.config.get("DB", "ES") != "ES":
+        if self.config.get("DB", "es").lower() != "es":
             self.conn.commit()
             # self.cur.close()
             # self.conn.close()
