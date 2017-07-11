@@ -25,6 +25,30 @@ cd blog
 pip install -r docker/requirements.txt
 # 自行配置变量
 python start.py
+
+# 若使用uwsgi
+nohup uwsgi --socket 127.0.0.1:3031 --wsgi-file start.py --master --processes 4 --threads 2 --stats 127.0.0.1:9191 --callable app 1>&2 &
+
+# 若配置nginx
+server {
+    listen      80;
+    server_name localhost;
+    charset     utf-8;
+    client_max_body_size 75M;
+
+    #静态文件，nginx自己处理
+    location ~ ^/(images|javascript|js|css|flash|media|static)/ {
+        root /home/ubuntu/myprojects/blog/static;
+        #过期30天，静态文件不怎么更新，过期可以设大一点，如果频繁更新，则可以设置得小一点。
+        expires 30d;
+    }
+    location / {
+    include uwsgi_params;
+    uwsgi_pass 127.0.0.1:3031;
+}
+}
+
+
 ```
 ### 首页
 ![](https://github.com/ShichaoMa/blog/blob/master/1.jpg)
