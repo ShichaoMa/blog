@@ -27,7 +27,7 @@ pip install -r docker/requirements.txt
 python start.py
 
 # 若使用uwsgi
-nohup uwsgi --socket 127.0.0.1:3031 --wsgi-file start.py --master --processes 4 --threads 2 --stats 127.0.0.1:9191 --callable app 1>&2 &
+nohup uwsgi --socket 127.0.0.1:3031 --wsgi-file start.py --master --processes 1 --threads 4 --stats 127.0.0.1:9191 --callable app 1>&2 &
 
 # 若配置nginx
 server {
@@ -37,8 +37,8 @@ server {
     client_max_body_size 75M;
 
     #静态文件，nginx自己处理
-    location ~ ^/(images|javascript|js|css|flash|media|static)/ {
-        root /home/ubuntu/myprojects/blog/static;
+    location /static {
+        alias /home/ubuntu/myprojects/blog/static;
         #过期30天，静态文件不怎么更新，过期可以设大一点，如果频繁更新，则可以设置得小一点。
         expires 30d;
     }
