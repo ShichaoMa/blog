@@ -52,8 +52,8 @@
         if(article){
             return (<Block {...article}>
                 <div className="clearfix">
-                    <a href="#" value={gen_url(article.id)}
-                       className="btn btn-clean-one" onClick={that.handleClick}>更多</a>
+                    <span value={gen_url(article.id)}
+                       className="btn btn-clean-one" onClick={that.handleClick}>更多</span>
                 </div>
             </Block>)
         }
@@ -143,12 +143,12 @@
         }
 
         handleClick(e) {
+            e.preventDefault();
             this.props.parent.setState({url: null})
 
         }
 
         render() {
-            console.log(this.props);
             let img =  this.props.first_img || '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random() * 1) + ".jpg";
             let edit_url = "{{url_for('edit')}}?id=" + this.props.id;
             let delete_url = "{{url_for('delete')}}?id=" + this.props.id;
@@ -259,7 +259,7 @@
                 return (<div className="row" key={blocks[0].id}>{gen_block(blocks[0], that)} {gen_block(blocks[1], that)}</div>)
             })}
                 <div className="paging">
-                    <a href="#" onClick={(() => this.setState({"showList": true}))} className="older">全部文章</a>
+                    <span className="btn btn-clean-one" onClick={(() => this.setState({"showList": true}))}>全部文章</span>
                 </div>
             </div>)
         }
@@ -274,6 +274,7 @@
         }
 
         handleClick(e) {
+            e.preventDefault();
             let target = $(e.target);
             common.row.setState({
                 url: target.parent().val(),
@@ -304,7 +305,7 @@
                         </a>);
             });
             let tags = this.props.tags.map(
-                (tag) => (<li key={tag}><a href="#" onClick={common.container.handleClick} value={tag}>{tag}</a></li>)
+                (tag) => (<li key={tag}><a onClick={common.container.handleClick} value={tag}>{tag}</a></li>)
             );
             return (<aside className="col-md-4 blog-aside">
                         <div className="aside-widget">
@@ -374,6 +375,7 @@
         }
 
         handleClick(e){
+            e.preventDefault();
             this.setState({searchField: $(e.target).val() || $("#searchField").val()});
         }
 
@@ -407,6 +409,7 @@
         }
 
         handleClick(e){
+            e.preventDefault();
             let target = $(e.target);
             if(target.val() == "1"){
                 location.href = '{{url_for("index")}}';
@@ -488,15 +491,15 @@
                     <div class="col-md-4 footer-widget">
                         <h3> <i class="fa icon-legal"></i>技术栈</h3>
                         <ul class="clean-list">
-                            <li><a href="#">python</a></li>
-                            <li><a href="#">flask</a></li>
-                            <li><a href="#">sqlite3</a></li>
-                            <li><a href="#">react</a></li>
-                            <li><a href="#">bootstrap</a></li>
-                            <li><a href="#">elasticsearch</a></li>
-                            <li><a href="#">markdown</a></li>
-                            <li><a href="#">docker</a></li>
-                            <li><a href="#">raspberry</a></li>
+                            <li><span>python</span></li>
+                            <li><span>flask</span></li>
+                            <li><span>sqlite3</span></li>
+                            <li><span>react</span></li>
+                            <li><span>bootstrap</span></li>
+                            <li><span>elasticsearch</span></li>
+                            <li><span>markdown</span></li>
+                            <li><span>docker</span></li>
+                            <li><span>raspberry</span></li>
                         </ul>
                     </div>
 
