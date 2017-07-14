@@ -7,7 +7,7 @@ from threading import local
 
 
 local = local()
-project_path = os.path.dirname(os.path.dirname(__file__))
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def conn_wrapper(func):
