@@ -3,6 +3,7 @@
 import sys
 import time
 import socket
+import requests
 import paramiko
 
 current_ip = None
@@ -25,11 +26,11 @@ def change(ip):
 
 
 def getip():
-    sock = socket.create_connection(('ns1.dnspod.net', 6666))
-    ip = sock.recv(16)
-    sock.close()
-    return ip.decode("utf-8")
-
+    # sock = socket.create_connection(('ns1.dnspod.net', 6666))
+    # ip = sock.recv(16)
+    # sock.close()
+    # return ip.decode("utf-8")
+    return requests.get("http://ip.42.pl/raw").text
 
 if __name__ == '__main__':
     while True:
