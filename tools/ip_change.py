@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/pi/.pyenv/shims/python
 # -*- coding:utf-8 -*-
 import sys
 import time
