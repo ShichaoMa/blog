@@ -50,6 +50,7 @@ server {
 
 
 ```
+
 ### 首页
 ![](https://github.com/ShichaoMa/blog/blob/master/1.jpg)
 ### 文章正文

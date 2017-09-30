@@ -11,13 +11,13 @@ a:link {
   color: #5862ff
 }		/* 未访问的链接 */
 a:visited {
-  color: #e63e04
+  color: #5862ff
 }	/* 已访问的链接 */
 a:hover {
   color: #5862ff
 }	/* 鼠标移动到链接上 */
 a:active {
-  color: #ff585d
+  color: #5862ff
 }	/* 选定的链接 */
 
 h1 {
