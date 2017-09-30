@@ -206,7 +206,10 @@ def format_articles(articles):
     for article in articles:
         article = article["_source"]
         body = article.pop("article")
-        image_part = body[: body.index("\n")]
+        try:
+            image_part = body[: body.index("\n")]
+        except ValueError:
+            image_part = body
         mth = re.search(r"\!\[.*?\]\((.*?)\)", image_part)
         article["first_img"] = mth.group(1) if mth else ""
         for tag in article["tags"]:
