@@ -205,7 +205,9 @@ def format_articles(articles):
     format_articles = []
     for article in articles:
         article = article["_source"]
-        mth = re.search(r"\!\[.*?\]\((.*?)\)", article.pop("article"))
+        body = article.pop("article")
+        image_part = body[: body.index("\n")]
+        mth = re.search(r"\!\[.*?\]\((.*?)\)", image_part)
         article["first_img"] = mth.group(1) if mth else ""
         for tag in article["tags"]:
             tags[tag.upper()] = tags.setdefault(tag.upper(), 0) + 1
