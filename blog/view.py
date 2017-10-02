@@ -207,7 +207,7 @@ def format_articles(articles):
         article = article["_source"]
         body = article.pop("article")
         try:
-            image_part = body[: body.index("\n")]
+            image_part = body[:body.index("\n")]
         except ValueError:
             image_part = body
         mth = re.search(r"\!\[.*?\]\((.*?)\)", image_part)
