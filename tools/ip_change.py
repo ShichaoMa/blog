@@ -1,4 +1,4 @@
-#!/Users/mashichao/.pyenv/shims/python
+#!/home/pi/.pyenv/shims/python
 # -*- coding:utf-8 -*-
 import sys
 import time
