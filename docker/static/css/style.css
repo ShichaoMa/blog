@@ -7,15 +7,18 @@ body {
   background-color: #fff;
 }
 
-a {
-  color: #5b6268;
-}
-
-a:hover,
-a:focus {
-  text-decoration: none;
-  color: #5b6268;
-}
+a:link {
+  color: #5862ff
+}		/* 未访问的链接 */
+a:visited {
+  color: #5862ff
+}	/* 已访问的链接 */
+a:hover {
+  color: #5862ff
+}	/* 鼠标移动到链接上 */
+a:active {
+  color: #5862ff
+}	/* 选定的链接 */
 
 h1 {
   font-size: 45px;

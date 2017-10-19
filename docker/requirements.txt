@@ -2,3 +2,4 @@ elasticsearch
 flask
 markdown
 pytz
+html2text

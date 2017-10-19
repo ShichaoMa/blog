@@ -52,8 +52,8 @@
         if(article){
             return (<Block {...article}>
                 <div className="clearfix">
-                    <a href="#" value={gen_url(article.id)}
-                       className="btn btn-clean-one" onClick={that.handleClick}>更多</a>
+                    <span value={gen_url(article.id)}
+                       className="btn btn-clean-one" onClick={that.handleClick}>更多</span>
                 </div>
             </Block>)
         }
@@ -115,9 +115,9 @@
                         <i className={article.feature?"fa icon-star":"fa icon-star-empty"} ></i>&nbsp;&nbsp;
                         <span>{article.title}</span>
                         <input type="hidden" value={article.author}/>
-                        <input type="hidden" value={article.created_at}/>
+                        <input type="hidden" value={article.updated_at}/>
                         <input type="hidden" value={article.id}/>
-                        <span className="span-right">{parseDate(article.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
+                        <span className="span-right">{parseDate(article.updated_at).format("YYYY-MM-DD HH:mm:ss")}</span>
                     </a>
             ));
             return (<div className="col-md-8 blog-main">
@@ -139,16 +139,81 @@
         constructor(props) {
             super(props);
             this.handleClick = this.handleClick.bind(this);
+            this.handleSave = this.handleSave.bind(this);
             this.state = {};
         }
 
         handleClick(e) {
+            e.preventDefault();
             this.props.parent.setState({url: null})
 
         }
 
+        handleModify(e) {
+            e.preventDefault();
+            document.getElementsByClassName("body")[0].contentEditable = true;
+            alert("现在你可以直接在网页修改文章内容了，修改完毕后请点击保存按钮。")
+        }
+
+        handleSave(e) {
+            document.getElementsByClassName("body")[0].contentEditable = false;
+            let have_not_send = true;
+            while(have_not_send){
+                 $.ajax({
+                       url: "{{url_for('modify')}}",
+                       method: "post",
+                       data: {
+                           id: this.props.id,
+                           author: this.props.author,
+                           tags: this.props.tags.join(","),
+                           title: this.props.title,
+                           feature: this.props.feature ? "True": "False",
+                           description: this.props.description,
+                           article: $(".body").html()
+                       },
+                       async: false,
+                       success: function(resp){
+                            let data = eval("("+resp+")");
+                            if(!data.result){
+                                let have_not_login = true;
+                                while(have_not_login){
+                                    let username = prompt("请输入用户名：");
+                                    let password = prompt("请输入密码：");
+                                    $.ajax({
+                                        url: "{{url_for('load')}}",
+                                        data: {
+                                            username: username,
+                                            password: password
+                                        },
+                                        async: false,
+                                        success: function (resp) {
+                                            let data = eval("("+resp+")");
+                                            if(data.result){
+                                                have_not_login = false;
+                                            }else{
+                                                alert("用户名密码错误！");
+                                            }
+                                        },
+                                        error: function(){
+                                           alert("系统发生未知错误，登陆失败！");
+                                           have_not_login = false;
+                                       }
+                                    })
+                                }
+                            }else{
+                                have_not_send = false;
+                            }
+                       },
+                       error: function(){
+                           alert("系统发生未知错误，保存失败！");
+                           have_not_send = false;
+                       }
+                   })
+            }
+
+        }
+
         render() {
-            console.log(this.props);
             let img =  this.props.first_img || '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random() * 1) + ".jpg";
             let edit_url = "{{url_for('edit')}}?id=" + this.props.id;
             let delete_url = "{{url_for('delete')}}?id=" + this.props.id;
@@ -161,11 +226,13 @@
                         <h1>{this.props.title}</h1>
                         <div className="meta">
                             <i className={this.props.author ? "fa icon-user" : ""}></i> {this.props.author}
-                            <i className={this.props.created_at ? "fa icon-calendar" : ""}></i>
-                            {parseDate(this.props.created_at).format("YYYY-MM-DD HH:mm:ss")}
-                            <a href="#"><i className="fa  icon-reply" onClick={this.handleClick}></i></a>
-                            <a href={edit_url}><i className="fa icon-edit"></i></a>
-                            <a href={delete_url}><i className="fa icon-remove-sign"></i></a>
+                            <i className={this.props.updated_at ? "fa icon-calendar" : ""}></i>
+                            {parseDate(this.props.updated_at).format("YYYY-MM-DD HH:mm:ss")}
+                            <a href="#"><i title="返回" className="fa  icon-reply" onClick={this.handleClick}></i></a>
+                            <a href={edit_url}><i title="全文编辑" className="fa icon-edit"></i></a>
+                            <a href={delete_url}><i title="删除" className="fa icon-remove-sign"></i></a>
+                            <a onClick={this.handleModify}><i title="少量修改" className="fa icon-magic"></i></a>
+                            <a onClick={this.handleSave}><i title="保存" className="fa icon-save"></i></a>
                         </div>
                     </header>
                     {this.props.children}
@@ -182,7 +249,7 @@
                             <img src={img} alt=""/>
                             <h3>{props.title}</h3>
                             <span className="meta">
-                                <i className={props.created_at ? "fa icon-calendar" : ""}></i><span>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
+                                <i className={props.updated_at ? "fa icon-calendar" : ""}></i><span>{parseDate(props.updated_at).format("YYYY-MM-DD HH:mm:ss")}</span>
                                 <i className={props.author ? "fa icon-user" : ""}></i><font>{props.author}</font>
                             </span>
                         </header>
@@ -207,7 +274,7 @@
             this.setState({
                 url: target.val(),
                 title: target.parent().parent().find("h3").html(),
-                created_at: target.parent().parent().find("header span span").html(),
+                updated_at: target.parent().parent().find("header span span").html(),
                 author: target.parent().parent().find("header span font").html(),
                 id: /id=(\w+)/.exec(target.val())[1]});
 
@@ -259,7 +326,7 @@
                 return (<div className="row" key={blocks[0].id}>{gen_block(blocks[0], that)} {gen_block(blocks[1], that)}</div>)
             })}
                 <div className="paging">
-                    <a href="#" onClick={(() => this.setState({"showList": true}))} className="older">全部文章</a>
+                    <span className="btn btn-clean-one" onClick={(() => this.setState({"showList": true}))}>全部文章</span>
                 </div>
             </div>)
         }
@@ -274,11 +341,12 @@
         }
 
         handleClick(e) {
+            e.preventDefault();
             let target = $(e.target);
             common.row.setState({
                 url: target.parent().val(),
                 title: target.html(),
-                created_at: target.parent().children("input")[1].value,
+                updated_at: target.parent().children("input")[1].value,
                 author: target.parent().children("input")[0].value,
                 id: /id=(\w+)/.exec(target.parent().val())[1]});
         }
@@ -290,7 +358,7 @@
                             <i className="fa  icon-star" ></i>&nbsp;&nbsp;
                             <span>{article.title}</span>
                             <input type="hidden" value={article.author}/>
-                            <input type="hidden" value={article.created_at}/>
+                            <input type="hidden" value={article.updated_at}/>
                             <input type="hidden" value={article.id}/>
                         </a>);
             });
@@ -299,12 +367,12 @@
                             <i className={article.feature ? "fa icon-star" : "fa icon-star-empty"} ></i>&nbsp;&nbsp;
                             <span>{article.title}</span>
                             <input type="hidden" value={article.author}/>
-                            <input type="hidden" value={article.created_at}/>
+                            <input type="hidden" value={article.updated_at}/>
                             <input type="hidden" value={article.id}/>
                         </a>);
             });
             let tags = this.props.tags.map(
-                (tag) => (<li key={tag}><a href="#" onClick={common.container.handleClick} value={tag}>{tag}</a></li>)
+                (tag) => (<li key={tag}><a onClick={common.container.handleClick} value={tag}>{tag}</a></li>)
             );
             return (<aside className="col-md-4 blog-aside">
                         <div className="aside-widget">
@@ -374,6 +442,7 @@
         }
 
         handleClick(e){
+            e.preventDefault();
             this.setState({searchField: $(e.target).val() || $("#searchField").val()});
         }
 
@@ -407,6 +476,7 @@
         }
 
         handleClick(e){
+            e.preventDefault();
             let target = $(e.target);
             if(target.val() == "1"){
                 location.href = '{{url_for("index")}}';
@@ -480,7 +550,8 @@
                     <div class="col-md-4 footer-widget">
                         <h3> <i class="fa icon-user"></i>关于</h3>
 
-                       <p>这是我的第一个个人博客，若有bug或缺陷，请及时联系我。</p>
+                       <p>这是我的第一个react练手博客，看了一天的react官方文档又花了三天业余时间写出来的，若有bug，请及时联系我。</p>
+                       <p>全网站对外展示的部分只有一个index页面，所有跳转仅仅是react组件之间的相互切换。</p>
                        <p>博文支持markdown格式的上传和编辑。支持全文搜索。</p>
                        <p>后续会增加评论功能，请多关注。</p>
                     </div>
@@ -488,15 +559,15 @@
                     <div class="col-md-4 footer-widget">
                         <h3> <i class="fa icon-legal"></i>技术栈</h3>
                         <ul class="clean-list">
-                            <li><a href="#">python</a></li>
-                            <li><a href="#">flask</a></li>
-                            <li><a href="#">sqlite3</a></li>
-                            <li><a href="#">react</a></li>
-                            <li><a href="#">bootstrap</a></li>
-                            <li><a href="#">elasticsearch</a></li>
-                            <li><a href="#">markdown</a></li>
-                            <li><a href="#">docker</a></li>
-                            <li><a href="#">raspberry</a></li>
+                            <li><span>python</span></li>
+                            <li><span>flask</span></li>
+                            <li><span>sqlite3</span></li>
+                            <li><span>react</span></li>
+                            <li><span>bootstrap</span></li>
+                            <li><span>elasticsearch</span></li>
+                            <li><span>markdown</span></li>
+                            <li><span>docker</span></li>
+                            <li><span>raspberry</span></li>
                         </ul>
                     </div>
 
