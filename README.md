@@ -67,3 +67,5 @@ server {
 ![](https://github.com/ShichaoMa/blog/blob/master/7.jpg)
 ### 修改文章
 ![](https://github.com/ShichaoMa/blog/blob/master/8.jpg)
+### 新增少量实时修改功能
+![](https://github.com/ShichaoMa/blog/blob/master/9.png)

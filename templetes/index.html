@@ -115,9 +115,9 @@
                         <i className={article.feature?"fa icon-star":"fa icon-star-empty"} ></i>&nbsp;&nbsp;
                         <span>{article.title}</span>
                         <input type="hidden" value={article.author}/>
-                        <input type="hidden" value={article.created_at}/>
+                        <input type="hidden" value={article.updated_at}/>
                         <input type="hidden" value={article.id}/>
-                        <span className="span-right">{parseDate(article.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
+                        <span className="span-right">{parseDate(article.updated_at).format("YYYY-MM-DD HH:mm:ss")}</span>
                     </a>
             ));
             return (<div className="col-md-8 blog-main">
@@ -139,12 +139,77 @@
         constructor(props) {
             super(props);
             this.handleClick = this.handleClick.bind(this);
+            this.handleSave = this.handleSave.bind(this);
             this.state = {};
         }
 
         handleClick(e) {
             e.preventDefault();
             this.props.parent.setState({url: null})
+
+        }
+
+        handleModify(e) {
+            e.preventDefault();
+            document.getElementsByClassName("body")[0].contentEditable = true;
+            alert("现在你可以直接在网页修改文章内容了，修改完毕后请点击保存按钮。")
+        }
+
+        handleSave(e) {
+            document.getElementsByClassName("body")[0].contentEditable = false;
+            let have_not_send = true;
+            while(have_not_send){
+                 $.ajax({
+                       url: "{{url_for('modify')}}",
+                       method: "post",
+                       data: {
+                           id: this.props.id,
+                           author: this.props.author,
+                           tags: this.props.tags.join(","),
+                           title: this.props.title,
+                           feature: this.props.feature ? "True": "False",
+                           description: this.props.description,
+                           article: $(".body").html()
+                       },
+                       async: false,
+                       success: function(resp){
+                            let data = eval("("+resp+")");
+                            if(!data.result){
+                                let have_not_login = true;
+                                while(have_not_login){
+                                    let username = prompt("请输入用户名：");
+                                    let password = prompt("请输入密码：");
+                                    $.ajax({
+                                        url: "{{url_for('load')}}",
+                                        data: {
+                                            username: username,
+                                            password: password
+                                        },
+                                        async: false,
+                                        success: function (resp) {
+                                            let data = eval("("+resp+")");
+                                            if(data.result){
+                                                have_not_login = false;
+                                            }else{
+                                                alert("用户名密码错误！");
+                                            }
+                                        },
+                                        error: function(){
+                                           alert("系统发生未知错误，登陆失败！");
+                                           have_not_login = false;
+                                       }
+                                    })
+                                }
+                            }else{
+                                have_not_send = false;
+                            }
+                       },
+                       error: function(){
+                           alert("系统发生未知错误，保存失败！");
+                           have_not_send = false;
+                       }
+                   })
+            }
 
         }
 
@@ -161,11 +226,13 @@
                         <h1>{this.props.title}</h1>
                         <div className="meta">
                             <i className={this.props.author ? "fa icon-user" : ""}></i> {this.props.author}
-                            <i className={this.props.created_at ? "fa icon-calendar" : ""}></i>
-                            {parseDate(this.props.created_at).format("YYYY-MM-DD HH:mm:ss")}
-                            <a href="#"><i className="fa  icon-reply" onClick={this.handleClick}></i></a>
-                            <a href={edit_url}><i className="fa icon-edit"></i></a>
-                            <a href={delete_url}><i className="fa icon-remove-sign"></i></a>
+                            <i className={this.props.updated_at ? "fa icon-calendar" : ""}></i>
+                            {parseDate(this.props.updated_at).format("YYYY-MM-DD HH:mm:ss")}
+                            <a href="#"><i title="返回" className="fa  icon-reply" onClick={this.handleClick}></i></a>
+                            <a href={edit_url}><i title="全文编辑" className="fa icon-edit"></i></a>
+                            <a href={delete_url}><i title="删除" className="fa icon-remove-sign"></i></a>
+                            <a onClick={this.handleModify}><i title="少量修改" className="fa icon-magic"></i></a>
+                            <a onClick={this.handleSave}><i title="保存" className="fa icon-save"></i></a>
                         </div>
                     </header>
                     {this.props.children}
@@ -182,7 +249,7 @@
                             <img src={img} alt=""/>
                             <h3>{props.title}</h3>
                             <span className="meta">
-                                <i className={props.created_at ? "fa icon-calendar" : ""}></i><span>{parseDate(props.created_at).format("YYYY-MM-DD HH:mm:ss")}</span>
+                                <i className={props.updated_at ? "fa icon-calendar" : ""}></i><span>{parseDate(props.updated_at).format("YYYY-MM-DD HH:mm:ss")}</span>
                                 <i className={props.author ? "fa icon-user" : ""}></i><font>{props.author}</font>
                             </span>
                         </header>
@@ -207,7 +274,7 @@
             this.setState({
                 url: target.val(),
                 title: target.parent().parent().find("h3").html(),
-                created_at: target.parent().parent().find("header span span").html(),
+                updated_at: target.parent().parent().find("header span span").html(),
                 author: target.parent().parent().find("header span font").html(),
                 id: /id=(\w+)/.exec(target.val())[1]});
 
@@ -279,7 +346,7 @@
             common.row.setState({
                 url: target.parent().val(),
                 title: target.html(),
-                created_at: target.parent().children("input")[1].value,
+                updated_at: target.parent().children("input")[1].value,
                 author: target.parent().children("input")[0].value,
                 id: /id=(\w+)/.exec(target.parent().val())[1]});
         }
@@ -291,7 +358,7 @@
                             <i className="fa  icon-star" ></i>&nbsp;&nbsp;
                             <span>{article.title}</span>
                             <input type="hidden" value={article.author}/>
-                            <input type="hidden" value={article.created_at}/>
+                            <input type="hidden" value={article.updated_at}/>
                             <input type="hidden" value={article.id}/>
                         </a>);
             });
@@ -300,7 +367,7 @@
                             <i className={article.feature ? "fa icon-star" : "fa icon-star-empty"} ></i>&nbsp;&nbsp;
                             <span>{article.title}</span>
                             <input type="hidden" value={article.author}/>
-                            <input type="hidden" value={article.created_at}/>
+                            <input type="hidden" value={article.updated_at}/>
                             <input type="hidden" value={article.id}/>
                         </a>);
             });

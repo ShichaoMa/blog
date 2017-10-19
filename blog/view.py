@@ -5,6 +5,7 @@ import json
 import pytz
 import markdown
 import datetime
+import html2text
 
 from flask import Flask, render_template, request, session, url_for, redirect
 
@@ -66,6 +67,15 @@ def check():
                                ref=ref)
 
 
+@app.route('/load')
+def load():
+    if request.args.get("username") == app.config.get("USERNAME") and request.args.get("password") == app.config.get("PASSWORD"):
+        session["login"] = "%s:%s"%(request.form.get("username"), request.form.get("password"))
+        return json.dumps({"result": 1})
+    else:
+        return json.dumps({"result": 0})
+
+
 @app.route("/imports", methods=["post"])
 def imports():
     if not session.get("login"):
@@ -92,6 +102,35 @@ def imports():
     }
     db.index(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=id, body=body)
     return render_template("imports.html", success="success")
+
+
+@app.route("/modify", methods=["post"])
+def modify():
+    if not session.get("login"):
+        return json.dumps({"result": 0})
+    h2t = html2text.HTML2Text()
+    h2t.ignore_links = False
+    h2t.ignore_images = False
+    article = h2t.handle(request.form.get("article"))
+    id = request.form.get("id")
+    title = request.form.get("title")
+    author = request.form.get("author") or app.config.get("AUTHOR")
+    tags = request.form.get("tags").split(",")
+    feature = eval(request.form.get("feature", "False"))
+    description = request.form.get("description")
+    body = {
+        "doc": {
+            "tags": tags,
+            "description": description,
+            "title": title,
+            "article": article,
+            "author": author,
+            "feature": feature,
+            "updated_at": datetime.datetime.now(tz),
+        }
+    }
+    db.update(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=id, body=body)
+    return json.dumps({"result": 1})
 
 
 @app.route("/edit")
