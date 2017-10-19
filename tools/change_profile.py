@@ -8,7 +8,7 @@ conf = open("/etc/nginx/conf.d/blog.conf", "r")
 
 data = conf.read()
 
-data = re.sub("(uwsgi_pass )(.*?)(:3031;)", "\g<1>%s\g<3>"%sys.argv[1], data)
+data = re.sub(r"(?<=//)(.*?)(?=\:3031;)", sys.argv[1], data)
 
 conf.close()
 
