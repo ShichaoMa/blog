@@ -112,6 +112,7 @@ def modify():
     h2t.ignore_links = False
     h2t.ignore_images = False
     article = h2t.handle(request.form.get("article"))
+    img_url = request.form.get("img_url")
     id = request.form.get("id")
     title = request.form.get("title")
     author = request.form.get("author") or app.config.get("AUTHOR")
@@ -123,7 +124,7 @@ def modify():
             "tags": tags,
             "description": description,
             "title": title,
-            "article": article,
+            "article": "[comment]: <> (![](%s))\n%s" % (img_url, article),
             "author": author,
             "feature": feature,
             "updated_at": datetime.datetime.now(tz),
