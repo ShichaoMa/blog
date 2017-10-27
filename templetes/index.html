@@ -140,6 +140,7 @@
             super(props);
             this.handleClick = this.handleClick.bind(this);
             this.handleSave = this.handleSave.bind(this);
+            this.handleExport = this.handleExport.bind(this);
             this.state = {};
         }
 
@@ -153,6 +154,23 @@
             e.preventDefault();
             document.getElementsByClassName("body")[0].contentEditable = true;
             alert("现在你可以直接在网页修改文章内容了，修改完毕后请点击保存按钮。")
+        }
+
+        handleExport(e) {
+            e.preventDefault();
+            let form=$("<form>");//定义一个form表单
+            form.attr("style","display:none");
+            form.attr("target","");
+            form.attr("method","get");
+            form.attr("action","{{url_for('export')}}");
+            var input1=$("<input>");
+            input1.attr("type","hidden");
+            input1.attr("name", "ids");
+            input1.attr("value",this.props.id);
+            $("body").append(form);//将表单放置在web中
+            form.append(input1);
+
+            form.submit();//表单提交
         }
 
         handleSave(e) {
@@ -234,6 +252,7 @@
                             <a href={delete_url}><i title="删除" className="fa icon-remove-sign"></i></a>
                             <a onClick={this.handleModify}><i title="少量修改" className="fa icon-magic"></i></a>
                             <a onClick={this.handleSave}><i title="保存" className="fa icon-save"></i></a>
+                            <a onClick={this.handleExport}><i title="下载" className="fa icon-download"></i></a>
                         </div>
                     </header>
                     {this.props.children}
@@ -553,7 +572,7 @@
 
                        <p>这是我的第一个react练手博客，看了一天的react官方文档又花了三天业余时间写出来的，若有bug，请及时联系我。</p>
                        <p>全网站对外展示的部分只有一个index页面，所有跳转仅仅是react组件之间的相互切换。</p>
-                       <p>博文支持markdown格式的上传和编辑。支持全文搜索。</p>
+                       <p>博文支持markdown格式的上传和编辑，支持全文搜索。</p>
                        <p>后续会增加评论功能，请多关注。</p>
                     </div>
 
@@ -575,8 +594,8 @@
                     <div class="col-md-4 footer-widget">
                         <h3> <i class="fa icon-mobile-phone"></i>联系我</h3>
 
-                        <p>如果您对技术感兴趣或者需要合作，请点击页面右上角联系我，以上拥有我全部的联系方式</p>
-                        <p>期待与您合作</p>
+                        <p>如果您对技术感兴趣或者需要合作，请点击页面右上角联系我，以上拥有我全部的联系方式。</p>
+                        <p>期待与您合作。</p>
                     </div>
                     <div class="footer-widget-icon">
                             <a href="https://github.com/ShichaoMa"><i class="fa icon-github"></i></a>

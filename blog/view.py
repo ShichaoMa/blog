@@ -3,11 +3,13 @@ import os
 import re
 import json
 import pytz
+import zipfile
 import markdown
 import datetime
 import html2text
 
-from flask import Flask, render_template, request, session, url_for, redirect
+from io import BytesIO
+from flask import Flask, render_template, request, session, url_for, redirect, make_response
 
 from .utils import project_path, decode
 from .db import DB
@@ -102,6 +104,25 @@ def imports():
     }
     db.index(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=id, body=body)
     return render_template("imports.html", success="success")
+
+
+@app.route("/export")
+def export():
+    ids = request.args.get("ids").split(",")
+    zip_file = BytesIO()
+    zf = zipfile.ZipFile(zip_file, "w")
+    for id in ids:
+        article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id)
+        zf.writestr("%s.md"%article["_source"]["title"], article["_source"]["article"].encode("gbk"))
+    zf.close()
+    zip_file.seek(0)
+    body = zip_file.read()
+    zip_file.close()
+    response = make_response(body)
+    response.headers['Content-Type'] = 'application/zip'
+    response.headers['Content-Disposition'] = 'attachment; filename="%s.zip"' % datetime.datetime.now().strftime(
+        "%Y%m%d%H%M%S")
+    return response
 
 
 @app.route("/modify", methods=["post"])

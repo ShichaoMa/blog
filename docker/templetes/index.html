@@ -159,7 +159,7 @@
             document.getElementsByClassName("body")[0].contentEditable = false;
             let have_not_send = true;
             while(have_not_send){
-                 $.ajax({
+                $.ajax({
                        url: "{{url_for('modify')}}",
                        method: "post",
                        data: {
@@ -169,6 +169,7 @@
                            title: this.props.title,
                            feature: this.props.feature ? "True": "False",
                            description: this.props.description,
+                           img_url: document.getElementsByClassName("img-responsive")[0].src,
                            article: $(".body").html()
                        },
                        async: false,
