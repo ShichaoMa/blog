@@ -115,15 +115,16 @@ def export():
     else:
         ids = []
         count, articles, feature_articles = db.search(app.config.get("INDEX"), app.config.get("DOC_TYPE"),
+                                                      request.args.get("searchField"),
                                                       request.args.get("from", 0),
                                                       request.args.get("size", 20))
     zip_file = BytesIO()
     zf = zipfile.ZipFile(zip_file, "w")
     for id in ids:
         article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id)
-        zf.writestr("%s.md"%article["_source"]["title"], article["_source"]["article"].encode("gbk"))
+        zf.writestr("%s.md"%article["_source"]["title"], article["_source"]["article"].encode("utf-8"))
     for article in articles:
-        zf.writestr("%s.md" % article["_source"]["title"], article["_source"]["article"].encode("gbk"))
+        zf.writestr("%s.md" % article["_source"]["title"], article["_source"]["article"].encode("utf-8"))
     zf.close()
     zip_file.seek(0)
     body = zip_file.read()
