@@ -10,8 +10,8 @@ Environment=PASSWORD=abcde09876
 Environment=USERNAME=cnaafhvk
 Type=simple
 # 执行命令
-ExecStart=/home/pi/.pyenv/shims/uwsgi --http 0.0.0.0:3031 --wsgi-file /home/pi/blog/start.py --master --processes 4 --threads 2 --stats 127.0.0.1:9191 --callable app
-ExecStop=/home/pi/blog/tools/stop.py -c uwsgi
+ExecStart=/home/pi/.pyenv/shims/uwsgi --http 0.0.0.0:3031 --wsgi-file /home/pi/blog/start.py --master --processes 2 --threads 2 --stats 127.0.0.1:9191 --callable app
+ExecStop=/home/pi/blog/tools/stop.py -c uwsgi -s 9
 StandardOutput=uwsgi
 StandardError=uwsgi
 [Install]
