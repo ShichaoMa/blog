@@ -24,8 +24,6 @@ def main(cmd, signal):
                 pids.append(int(ele[1]))
                 ppids.append(int(ele[2]))
     if len(pids) > 3:
-        import pdb
-        pdb.set_trace()
         for index, pid in enumerate(pids):
             if pid in ppids:
                 kill(pid, signal)

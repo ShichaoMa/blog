@@ -137,7 +137,7 @@ class DB:
             return data["hits"]["total"], data["hits"]["hits"], \
                    self.conn.search(index=index, doc_type=doc_type, body=body)["hits"]["hits"]
         else:
-            sub = "AND article LIKE '%%%s%%'"%search_field if search_field else ""
+            sub = "AND (article LIKE '%%%s%%' OR tags LIKE '%%%s%%')"%(search_field, search_field) if search_field else ""
             self.cur.execute("SELECT * FROM %s WHERE show=1 %s ORDER BY updated_at desc limit %s offset %s;"%(
                 doc_type, sub, size, _from))
             rs = self.cur.fetchall()
