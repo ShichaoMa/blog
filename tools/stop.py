@@ -11,6 +11,7 @@ def kill(pid, signal):
     except ProcessLookupError:
         pass
 
+
 def main(cmd, signal):
     current_pid = os.getpid()
     pids = list()
