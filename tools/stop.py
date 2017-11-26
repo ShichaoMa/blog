@@ -5,7 +5,6 @@ import re
 from argparse import ArgumentParser
 
 
-
 def kill(pid, signal):
     try:
         os.kill(pid, signal)
