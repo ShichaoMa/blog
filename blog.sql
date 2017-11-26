@@ -1,3 +1,4 @@
+
 CREATE TABLE articles(
    id CHAR(14) PRIMARY KEY     NOT NULL,
    description           TEXT    NOT NULL,
