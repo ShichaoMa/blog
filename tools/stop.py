@@ -1,8 +1,9 @@
-#!/home/pi/.pyenv/shims/python
+#!/root/.pyenv/shims/python
 import os
 import re
 
 from argparse import ArgumentParser
+
 
 
 def kill(pid, signal):
