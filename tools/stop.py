@@ -1,4 +1,4 @@
-#!/home/pi/.pyenv/shims/python
+#!/root/.pyenv/shims/python
 import os
 import re
 
