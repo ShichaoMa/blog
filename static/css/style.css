@@ -1010,7 +1010,7 @@ aside.create-comment hr {
 
 aside.comments h2,
 aside.create-comment h2 {
-  text-align: center;
+  /* text-align: center; */
   font-weight: normal;
   margin-bottom: 40px;
 }
