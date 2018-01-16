@@ -14,9 +14,6 @@
     <!-- Font-Awesome -->
     <link rel="stylesheet" href={{url_for("static", filename="css/font-awesome/css/font-awesome.min.css")}}>
 
-    <!-- Google Webfonts -->
-    <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>-->
-
     <!-- Styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
 
@@ -36,6 +33,9 @@
 <style>
     .span-right{
         float: right;
+    }
+    .pagination {
+        display: inline;
     }
 </style>
 <script type="text/babel">
@@ -74,12 +74,24 @@
         constructor(props) {
             super(props);
             this.handleClick = this.handleClick.bind(this);
+            window.location.hash = "list";
             this.state = {};
         }
 
         handleClick(e) {
-            this.props.parent.setState({url: null})
+            e.preventDefault();
+            let target = $(e.target);
+            common.row.setState({
+                url: target.parent().val(),
+                title: target.html(),
+                updated_at: target.parent().children("input")[1].value,
+                author: target.parent().children("input")[0].value,
+                id: /id=(\w+)/.exec(target.parent().val())[1]});
+        }
 
+        handleReturn(e){
+            window.location.hash = "";
+            common.row.setState({url: null, showList: null});
         }
 
         componentDidMount(){
@@ -119,7 +131,7 @@
                        });
             }
             let list = articles.map((article) => (
-                    <a href="#" value={gen_url(article.id)} onClick={common.aside.handleClick} className="list-group-item" key={gen_url(article.id)}>
+                    <a href="#" value={gen_url(article.id)} onClick={this.handleClick} className="list-group-item" key={gen_url(article.id)}>
                         <i className={article.feature?"fa icon-star":"fa icon-star-empty"} ></i>&nbsp;&nbsp;
                         <span>{article.title}</span>
                         <input type="hidden" value={article.author}/>
@@ -138,6 +150,9 @@
                     </div>
                 </div>
                 <ul id="page" className="pagination"></ul>
+                <div className="clearfix">
+                    <span className="btn btn-clean-one span-right" onClick={this.handleReturn}>返回</span>
+                </div>
             </div>)
         }
     }
@@ -245,7 +260,6 @@
                        }
                    })
             }
-
         }
 
         render() {
@@ -302,7 +316,13 @@
             super(props);
             common.row = this;
             this.handleClick = this.handleClick.bind(this);
-            this.state = {};
+            if(window.location.hash && window.location.hash.indexOf("list") != -1){
+                  this.state = {showList: true};
+            }else if(window.location.hash){
+                this.state = {url: window.location.hash.substr(1)};
+            }else{
+                this.state = {};
+            }
         }
 
         handleClick(e) {
@@ -317,6 +337,7 @@
         }
 
         render() {
+            window.location.hash = "";
             if(this.state.url){
                 let data = null;
                 $.ajax({
@@ -329,6 +350,7 @@
                 let html = { __html: data.article};
                 data.article = null;
                 data.parent = this;
+                window.location.hash = this.state.url;
                 return (<Article {...data}>
                             <div dangerouslySetInnerHTML={html} className="body"/>
                         </Article>)
@@ -372,7 +394,7 @@
         constructor(props) {
             super(props);
             this.handleClick = this.handleClick.bind(this);
-            common["aside"] = this;
+            common.aside = this;
             this.state = {};
         }
 
@@ -462,11 +484,11 @@
         let aside = (<Aside {...{"feature_articles": data.feature_articles.slice(0, 6),
             "articles": data.articles.slice(0, 6), "tags": data.tags}}/>);
         return (<div className="container">
-        <div className="row">
-            {row}
-            {aside}
-        </div>
-    </div>)
+                    <div className="row">
+                        {row}
+                        {aside}
+                    </div>
+                </div>)
     }
 
      class Container extends React.Component{
