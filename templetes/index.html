@@ -59,8 +59,16 @@
         }
     }
 
-    var common = {};
+    const common = {};
 
+    $(document).ready(function(){
+        document.onkeydown = function(e){
+            let ev = document.all ? window.event : e;
+            if(ev.keyCode == 13) {
+                $(".searchbutton").click();
+            }
+        }
+    });
 
     class List extends React.Component {
         constructor(props) {
@@ -163,7 +171,7 @@
             form.attr("target","");
             form.attr("method","get");
             form.attr("action","{{url_for('export')}}");
-            var input1=$("<input>");
+            let input1=$("<input>");
             input1.attr("type","hidden");
             input1.attr("name", "ids");
             input1.attr("value",this.props.id);
@@ -197,7 +205,15 @@
                                 let have_not_login = true;
                                 while(have_not_login){
                                     let username = prompt("请输入用户名：");
+                                    if(!username){
+                                        have_not_send = false;
+                                        break;
+                                    }
                                     let password = prompt("请输入密码：");
+                                    if(!password){
+                                        have_not_send = false;
+                                        break;
+                                    }
                                     $.ajax({
                                         url: "{{url_for('load')}}",
                                         data: {
@@ -392,7 +408,7 @@
                         </a>);
             });
             let tags = this.props.tags.map(
-                (tag) => (<li key={tag}><a onClick={common.container.handleClick} value={tag}>{tag}</a></li>)
+                (tag) => (<li key={tag[0]}><a title={tag[1] + "篇相关文章"} onClick={common.container.handleClick} value={tag[0]}>{tag[0]}</a></li>)
             );
             return (<aside className="col-md-4 blog-aside">
                         <div className="aside-widget">
@@ -436,13 +452,13 @@
         // 用来在多个并行组件之间传递参数
         $.ajax({
             url: '{{url_for("show")}}',
-            data: {"searchField": props.searchField},
+            data: {"searchField": props.searchField, "fulltext": props.fulltext || false},
             async: false,
             success: function(resp){
                 data = eval("("+resp+")");
             }
         });
-        let row = (<Row {...{"articles": data.articles.slice(0, 4)}}/>);
+        let row = (<Row {...{"articles": data.articles.slice(0, Math.floor(data.tags.length/15)*2)}}/>);
         let aside = (<Aside {...{"feature_articles": data.feature_articles.slice(0, 6),
             "articles": data.articles.slice(0, 6), "tags": data.tags}}/>);
         return (<div className="container">
@@ -463,7 +479,14 @@
 
         handleClick(e){
             e.preventDefault();
-            this.setState({searchField: $(e.target).val() || $("#searchField").val()});
+            let searchField = $(e.target).val() || $("#searchField").val();
+            if(searchField){
+                if($(e.target).val()){
+                this.setState({searchField: $(e.target).val(), fulltext: false});
+                }else{
+                    this.setState({searchField: $("#searchField").val(), fulltext: true});
+                }
+            }
         }
 
         render(){
@@ -474,7 +497,7 @@
                 </div>
 
                 <div className="clean-searchbox">
-                    <input className="searchfield" id="searchField" type="text" placeholder="Search"/>
+                    <input className="searchfield" id="searchField" type="text" placeholder="全文检索"/>
                     <button className="searchbutton" onClick={this.handleClick}>
                         <i className="fa icon-search"></i>
                     </button>

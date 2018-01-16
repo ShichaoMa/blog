@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 import os
-import re
 import json
 import pytz
 import zipfile
@@ -11,8 +10,8 @@ import html2text
 from io import BytesIO
 from flask import Flask, render_template, request, session, url_for, redirect, make_response
 
-from .utils import project_path, decode
-from .db import DB
+from .utils import project_path, decode, format_articles
+from .db import DataBase
 
 
 app = Flask(__name__)
@@ -23,7 +22,7 @@ app.template_folder = os.path.join(project_path, app.config.get("TEMPLATE_FOLDER
 tz = pytz.timezone(app.config.get("TIME_ZONE"))
 
 
-db = DB(app.config)
+db = DataBase(app.config)
 
 
 @app.route("/")
@@ -272,30 +271,20 @@ def contact():
     return json.dumps(article)
 
 
-def format_articles(articles):
-    tags = {}
-    format_articles = []
-    for article in articles:
-        article = article["_source"]
-        body = article.pop("article")
-        try:
-            image_part = body[:body.index("\n")]
-        except ValueError:
-            image_part = body
-        mth = re.search(r"\!\[.*?\]\((.*?)\)", image_part)
-        article["first_img"] = mth.group(1) if mth else ""
-        for tag in article["tags"]:
-            tags[tag.upper()] = tags.setdefault(tag.upper(), 0) + 1
-        format_articles.append(article)
-    return tags, format_articles
-
-
 @app.route("/show")
 def show():
     count, articles, feature_articles = db.search(app.config.get("INDEX"), app.config.get("DOC_TYPE"),
-                         request.args.get("searchField"), request.args.get("from", 0),
-                         request.args.get("size", 20))
-    tags, articles = format_articles(articles)
+                                                  request.args.get("searchField"), request.args.get("from", 0),
+                                                  request.args.get("size", 20), request.args.get("fulltext") == "true")
+    # es获取全部tag的方法未实现，只能返回总数
+    if app.config.get("DB", "es").lower() != "es":
+        tags = count
+        count = len(count)
+    else:
+        tags = None
+    tags, articles = format_articles(articles, tags=tags)
+    tags.pop("我的个人介绍", None)
+    tags.pop("我的联系方式", None)
     _, feature_articles = format_articles(feature_articles)
     return json.dumps({"count": count, "articles": articles, "feature_articles": feature_articles,
-                       "tags": [i[0] for i in sorted(tags.items(), key=lambda x: x[1], reverse=True)]})
+                       "tags": [i for i in sorted(tags.items(), key=lambda x: x[1], reverse=True)]})

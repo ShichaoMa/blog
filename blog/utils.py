@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import re
 import os
 import sqlite3
 import datetime
@@ -19,16 +20,12 @@ def conn_wrapper(func):
     def wrapper(*args, **kwargs):
         self = args[0]
         index = args[1]
-        if self.config.get("DB", "es").lower() != "es":
-            self.conn = getattr(local, "conn", None)
-            if not self.conn:
-                self.conn = sqlite3.connect(os.path.join(project_path, "db", index))
-                self.cur = self.conn.cursor()
+        self.conn = getattr(local, "conn", None)
+        if not self.conn:
+            self.conn = sqlite3.connect(os.path.join(project_path, "db", index))
+            self.cur = self.conn.cursor()
         result = func(*args, **kwargs)
-        if self.config.get("DB", "es").lower() != "es":
-            self.conn.commit()
-            # self.cur.close()
-            # self.conn.close()
+        self.conn.commit()
         return result
     return wrapper
 
@@ -52,3 +49,27 @@ def format_data(data, tz):
         "created_at": datetime.datetime.fromtimestamp(data[7], tz).strftime("%Y-%m-%dT%H:%M:%S"),
         "updated_at": datetime.datetime.fromtimestamp(data[8], tz).strftime("%Y-%m-%dT%H:%M:%S")
     }}
+
+
+def format_articles(articles, tags=None):
+    group_tags = {}
+    formated = []
+    for article in articles:
+        article = article["_source"]
+        body = article.pop("article")
+        try:
+            image_part = body[:body.index("\n")]
+        except ValueError:
+            image_part = body
+        mth = re.search(r"\!\[.*?\]\((.*?)\)", image_part)
+        article["first_img"] = mth.group(1) if mth else ""
+        if not tags:
+            for tag in article["tags"]:
+                group_tags[tag.upper()] = group_tags.setdefault(tag.upper(), 0) + 1
+        formated.append(article)
+
+    if tags:
+        for ts in tags:
+            for tag in ts[0].split(","):
+                group_tags[tag.upper()] = group_tags.setdefault(tag.upper(), 0) + 1
+    return group_tags, formated
