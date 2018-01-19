@@ -2,8 +2,6 @@ FROM ubuntu
 
 MAINTAINER Shichao Ma
 
-COPY sources.list /etc/apt/
-
 COPY Python-3.6.0.tgz /
 
 RUN apt-get clean && apt-get update

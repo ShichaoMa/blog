@@ -14,9 +14,6 @@
     <!-- Font-Awesome -->
     <link rel="stylesheet" href={{url_for("static", filename="css/font-awesome/css/font-awesome.min.css")}}>
 
-    <!-- Google Webfonts -->
-    <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>-->
-
     <!-- Styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
 
@@ -36,6 +33,9 @@
 <style>
     .span-right{
         float: right;
+    }
+    .pagination {
+        display: inline;
     }
 </style>
 <script type="text/babel">
@@ -59,19 +59,39 @@
         }
     }
 
-    var common = {};
+    const common = {};
 
+    $(document).ready(function(){
+        document.onkeydown = function(e){
+            let ev = document.all ? window.event : e;
+            if(ev.keyCode == 13) {
+                $(".searchbutton").click();
+            }
+        }
+    });
 
     class List extends React.Component {
         constructor(props) {
             super(props);
             this.handleClick = this.handleClick.bind(this);
+            window.location.hash = "list";
             this.state = {};
         }
 
         handleClick(e) {
-            this.props.parent.setState({url: null})
+            e.preventDefault();
+            let target = $(e.target);
+            common.row.setState({
+                url: target.parent().val(),
+                title: target.html(),
+                updated_at: target.parent().children("input")[1].value,
+                author: target.parent().children("input")[0].value,
+                id: /id=(\w+)/.exec(target.parent().val())[1]});
+        }
 
+        handleReturn(e){
+            window.location.hash = "";
+            common.row.setState({url: null, showList: null});
         }
 
         componentDidMount(){
@@ -111,7 +131,7 @@
                        });
             }
             let list = articles.map((article) => (
-                    <a href="#" value={gen_url(article.id)} onClick={common.aside.handleClick} className="list-group-item" key={gen_url(article.id)}>
+                    <a href="#" value={gen_url(article.id)} onClick={this.handleClick} className="list-group-item" key={gen_url(article.id)}>
                         <i className={article.feature?"fa icon-star":"fa icon-star-empty"} ></i>&nbsp;&nbsp;
                         <span>{article.title}</span>
                         <input type="hidden" value={article.author}/>
@@ -130,6 +150,9 @@
                     </div>
                 </div>
                 <ul id="page" className="pagination"></ul>
+                <div className="clearfix">
+                    <span className="btn btn-clean-one span-right" onClick={this.handleReturn}>返回</span>
+                </div>
             </div>)
         }
     }
@@ -140,6 +163,7 @@
             super(props);
             this.handleClick = this.handleClick.bind(this);
             this.handleSave = this.handleSave.bind(this);
+            this.handleExport = this.handleExport.bind(this);
             this.state = {};
         }
 
@@ -153,6 +177,23 @@
             e.preventDefault();
             document.getElementsByClassName("body")[0].contentEditable = true;
             alert("现在你可以直接在网页修改文章内容了，修改完毕后请点击保存按钮。")
+        }
+
+        handleExport(e) {
+            e.preventDefault();
+            let form=$("<form>");//定义一个form表单
+            form.attr("style","display:none");
+            form.attr("target","");
+            form.attr("method","get");
+            form.attr("action","{{url_for('export')}}");
+            let input1=$("<input>");
+            input1.attr("type","hidden");
+            input1.attr("name", "ids");
+            input1.attr("value",this.props.id);
+            $("body").append(form);//将表单放置在web中
+            form.append(input1);
+
+            form.submit();//表单提交
         }
 
         handleSave(e) {
@@ -179,7 +220,15 @@
                                 let have_not_login = true;
                                 while(have_not_login){
                                     let username = prompt("请输入用户名：");
+                                    if(!username){
+                                        have_not_send = false;
+                                        break;
+                                    }
                                     let password = prompt("请输入密码：");
+                                    if(!password){
+                                        have_not_send = false;
+                                        break;
+                                    }
                                     $.ajax({
                                         url: "{{url_for('load')}}",
                                         data: {
@@ -211,7 +260,6 @@
                        }
                    })
             }
-
         }
 
         render() {
@@ -232,8 +280,9 @@
                             <a href="#"><i title="返回" className="fa  icon-reply" onClick={this.handleClick}></i></a>
                             <a href={edit_url}><i title="全文编辑" className="fa icon-edit"></i></a>
                             <a href={delete_url}><i title="删除" className="fa icon-remove-sign"></i></a>
-                            <a onClick={this.handleModify}><i title="少量修改" className="fa icon-magic"></i></a>
+                            <a onClick={this.handleModify}><i title="直接修改" className="fa icon-magic"></i></a>
                             <a onClick={this.handleSave}><i title="保存" className="fa icon-save"></i></a>
+                            <a onClick={this.handleExport}><i title="下载" className="fa icon-download"></i></a>
                         </div>
                     </header>
                     {this.props.children}
@@ -267,7 +316,13 @@
             super(props);
             common.row = this;
             this.handleClick = this.handleClick.bind(this);
-            this.state = {};
+            if(window.location.hash && window.location.hash.indexOf("list") != -1){
+                  this.state = {showList: true};
+            }else if(window.location.hash){
+                this.state = {url: window.location.hash.substr(1)};
+            }else{
+                this.state = {};
+            }
         }
 
         handleClick(e) {
@@ -282,6 +337,7 @@
         }
 
         render() {
+            window.location.hash = "";
             if(this.state.url){
                 let data = null;
                 $.ajax({
@@ -294,6 +350,7 @@
                 let html = { __html: data.article};
                 data.article = null;
                 data.parent = this;
+                window.location.hash = this.state.url;
                 return (<Article {...data}>
                             <div dangerouslySetInnerHTML={html} className="body"/>
                         </Article>)
@@ -337,7 +394,7 @@
         constructor(props) {
             super(props);
             this.handleClick = this.handleClick.bind(this);
-            common["aside"] = this;
+            common.aside = this;
             this.state = {};
         }
 
@@ -373,7 +430,7 @@
                         </a>);
             });
             let tags = this.props.tags.map(
-                (tag) => (<li key={tag}><a onClick={common.container.handleClick} value={tag}>{tag}</a></li>)
+                (tag) => (<li key={tag[0]}><a title={tag[1] + "篇相关文章"} onClick={common.container.handleClick} value={tag[0]}>{tag[0]}</a></li>)
             );
             return (<aside className="col-md-4 blog-aside">
                         <div className="aside-widget">
@@ -417,21 +474,21 @@
         // 用来在多个并行组件之间传递参数
         $.ajax({
             url: '{{url_for("show")}}',
-            data: {"searchField": props.searchField},
+            data: {"searchField": props.searchField, "fulltext": props.fulltext || false},
             async: false,
             success: function(resp){
                 data = eval("("+resp+")");
             }
         });
-        let row = (<Row {...{"articles": data.articles.slice(0, 4)}}/>);
+        let row = (<Row {...{"articles": data.articles.slice(0, Math.floor(data.tags.length/15)*2)}}/>);
         let aside = (<Aside {...{"feature_articles": data.feature_articles.slice(0, 6),
             "articles": data.articles.slice(0, 6), "tags": data.tags}}/>);
         return (<div className="container">
-        <div className="row">
-            {row}
-            {aside}
-        </div>
-    </div>)
+                    <div className="row">
+                        {row}
+                        {aside}
+                    </div>
+                </div>)
     }
 
      class Container extends React.Component{
@@ -444,7 +501,14 @@
 
         handleClick(e){
             e.preventDefault();
-            this.setState({searchField: $(e.target).val() || $("#searchField").val()});
+            let searchField = $(e.target).val() || $("#searchField").val();
+            if(searchField){
+                if($(e.target).val()){
+                this.setState({searchField: $(e.target).val(), fulltext: false});
+                }else{
+                    this.setState({searchField: $("#searchField").val(), fulltext: true});
+                }
+            }
         }
 
         render(){
@@ -455,7 +519,7 @@
                 </div>
 
                 <div className="clean-searchbox">
-                    <input className="searchfield" id="searchField" type="text" placeholder="Search"/>
+                    <input className="searchfield" id="searchField" type="text" placeholder="全文检索"/>
                     <button className="searchbutton" onClick={this.handleClick}>
                         <i className="fa icon-search"></i>
                     </button>
@@ -553,7 +617,7 @@
 
                        <p>这是我的第一个react练手博客，看了一天的react官方文档又花了三天业余时间写出来的，若有bug，请及时联系我。</p>
                        <p>全网站对外展示的部分只有一个index页面，所有跳转仅仅是react组件之间的相互切换。</p>
-                       <p>博文支持markdown格式的上传和编辑。支持全文搜索。</p>
+                       <p>博文支持markdown格式的上传和编辑，支持全文搜索。</p>
                        <p>后续会增加评论功能，请多关注。</p>
                     </div>
 
@@ -575,8 +639,8 @@
                     <div class="col-md-4 footer-widget">
                         <h3> <i class="fa icon-mobile-phone"></i>联系我</h3>
 
-                        <p>如果您对技术感兴趣或者需要合作，请点击页面右上角联系我，以上拥有我全部的联系方式</p>
-                        <p>期待与您合作</p>
+                        <p>如果您对技术感兴趣或者需要合作，请点击页面右上角联系我，以上拥有我全部的联系方式。</p>
+                        <p>期待与您合作。</p>
                     </div>
                     <div class="footer-widget-icon">
                             <a href="https://github.com/ShichaoMa"><i class="fa icon-github"></i></a>

@@ -59,7 +59,7 @@
         }
     }
 
-    const common = {};
+    const common = {"from": 0, "size": 20};
 
     $(document).ready(function(){
         document.onkeydown = function(e){
@@ -80,13 +80,14 @@
 
         handleClick(e) {
             e.preventDefault();
-            let target = $(e.target);
+            e.stopPropagation();
+            let target = $(e.currentTarget);
             common.row.setState({
-                url: target.parent().val(),
-                title: target.html(),
-                updated_at: target.parent().children("input")[1].value,
-                author: target.parent().children("input")[0].value,
-                id: /id=(\w+)/.exec(target.parent().val())[1]});
+                url: target.val(),
+                title: target.children("span").html(),
+                updated_at: target.children("input")[1].value,
+                author: target.children("input")[0].value,
+                id: /id=(\w+)/.exec(target.val())[1]});
         }
 
         handleReturn(e){
@@ -100,13 +101,15 @@
                 totalCounts: this.props.count,
                 pageSize: 20,
                 visiblePages: 10,
-                currentPage: 1,
+                currentPage: common.from/common.size + 1,
                 onPageChange: function (num, type) {
-                    that.setState({
-                        from: (num -1) *20,
-                        size: 20,
-                        url: "{{url_for('show')}}"
-                    })
+                    if(type == "change"){
+                        that.setState({
+                            from: (num -1) *20,
+                            size: common.size,
+                            url: "{{url_for('show')}}"
+                        })
+                    }
                 }
             });
         }
@@ -114,6 +117,7 @@
         render(){
             let articles = this.props.articles;
             if(this.state.url){
+                       common.from = this.state.from;
                        $.ajax({
                            url: this.state.url,
                            data: {
@@ -170,7 +174,6 @@
         handleClick(e) {
             e.preventDefault();
             this.props.parent.setState({url: null})
-
         }
 
         handleModify(e) {
@@ -192,7 +195,6 @@
             input1.attr("value",this.props.id);
             $("body").append(form);//将表单放置在web中
             form.append(input1);
-
             form.submit();//表单提交
         }
 
@@ -326,7 +328,7 @@
         }
 
         handleClick(e) {
-            let target = $(e.target);
+            let target = $(e.currentTarget);
             this.setState({
                 url: target.val(),
                 title: target.parent().parent().find("h3").html(),
@@ -359,7 +361,7 @@
                 let data = null;
                 $.ajax({
                     url: "{{url_for('show')}}",
-                    data: {"from": 0, "size": 20},
+                    data: {"from": common.from, "size": common.size},
                     async: false,
                     success: function(resp){
                         data = eval("("+resp+")");
@@ -400,13 +402,13 @@
 
         handleClick(e) {
             e.preventDefault();
-            let target = $(e.target);
+            let target = $(e.currentTarget);
             common.row.setState({
-                url: target.parent().val(),
-                title: target.html(),
-                updated_at: target.parent().children("input")[1].value,
-                author: target.parent().children("input")[0].value,
-                id: /id=(\w+)/.exec(target.parent().val())[1]});
+                url: target.val(),
+                title: target.children("span").html(),
+                updated_at: target.children("input")[1].value,
+                author: target.children("input")[0].value,
+                id: /id=(\w+)/.exec(target.val())[1]});
         }
 
         render() {
@@ -501,13 +503,11 @@
 
         handleClick(e){
             e.preventDefault();
-            let searchField = $(e.target).val() || $("#searchField").val();
-            if(searchField){
-                if($(e.target).val()){
-                this.setState({searchField: $(e.target).val(), fulltext: false});
-                }else{
-                    this.setState({searchField: $("#searchField").val(), fulltext: true});
-                }
+            e.stopPropagation();
+            if($(e.currentTarget).val()){
+                this.setState({searchField: $(e.currentTarget).val(), fulltext: false});
+            }else{
+                this.setState({searchField: $("#searchField").val(), fulltext: true});
             }
         }
 
@@ -542,7 +542,7 @@
 
         handleClick(e){
             e.preventDefault();
-            let target = $(e.target);
+            let target = $(e.currentTarget);
             if(target.val() == "1"){
                 location.href = '{{url_for("index")}}';
             }else if(target.val() == "2"){

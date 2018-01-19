@@ -3,15 +3,17 @@
         <title>更新</title>
          <link href={{url_for("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
     </head>
-    <!-- Bootstrap styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/bootstrap.min.css")}}>
-
-    <!-- Styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
 
+    <link rel="stylesheet" href={{url_for("static", filename="editor/index.css")}}>
+
+    <script src="//cdn.bootcss.com/vue/2.1.4/vue.min.js"></script>
     <script src={{url_for("static", filename="js/jquery-1.12.4.min.js")}}></script>
     <script src={{url_for("static", filename="js/bootstrap.min.js")}}></script>
     <script src={{url_for("static", filename="js/modernizr.js")}}></script>
+    <script src={{url_for("static", filename="editor/index.js")}}></script>
+
     <body>
         <div style="padding: 0% 10%;text-align: center">
             <aside style="width: 80%" class="create-comment">
@@ -40,8 +42,11 @@
                         是否精品: 是 <input type="radio" name="feature" value="True"  {{ 'checked' if feature else ''}} />
                         否 <input type="radio" name="feature" value="False" {{ 'checked' if not feature else ''}}/>
                     </div>
-
-                    <textarea rows="30" name="article" placeholder="article" class="form-control input-lg">{{article}}</textarea>
+                    <div id="app" style="text-align: left;">
+                      <markdown-editor v-model="content"></markdown-editor>
+                    </div>
+                    <input value="{{article}}" type="hidden" name="article" id="article" />
+                    <!-- <textarea rows="30" name="article" placeholder="article" class="form-control input-lg">{{article}}</textarea> -->
 
                     <div class="buttons clearfix">
                         <button type="submit" class="btn btn-xlarge btn-clean-one">提交</button>
@@ -50,4 +55,16 @@
             </aside>
         </div>
     </body>
+<script type="text/javascript">
+    var vue = new Vue({
+      el: '#app',
+      data: { content: $("#article").val() }
+    })
+    $(document).ready(function(){
+        $(document.forms[0]).submit(function(){
+           $("#article").val(vue.$data.content);
+           return true;
+        });
+    });
+  </script>
 </html>
