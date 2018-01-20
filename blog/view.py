@@ -10,7 +10,7 @@ import html2text
 from io import BytesIO
 from flask import Flask, render_template, request, session, url_for, redirect, make_response
 
-from .utils import project_path, decode, format_articles
+from .utils import project_path, decode, format_articles, code_generator
 from .db import DataBase
 
 
@@ -23,6 +23,7 @@ tz = pytz.timezone(app.config.get("TIME_ZONE"))
 
 
 db = DataBase(app.config)
+code_generator = code_generator(app.config.get("CODE_EXPIRE_INTERVAL", 60*60*24*7))
 
 
 @app.route("/")
@@ -221,6 +222,8 @@ def article():
 
 @app.route("/me")
 def me():
+    if request.args.get("code") != next(code_generator):
+        return json.dumps({"error":True})
     id = "me"
     article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id)
     if article:

@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 import re
 import os
+import time
+import random
 import sqlite3
 import datetime
 
@@ -73,3 +75,14 @@ def format_articles(articles, tags=None):
             for tag in ts[0].split(","):
                 group_tags[tag.upper()] = group_tags.setdefault(tag.upper(), 0) + 1
     return group_tags, formated
+
+
+def code_generator(interval, key="ABCDEFGHIGKLMNOPQISTUVWXYZ0123456789"):
+    last_time = 0
+    while True:
+        if time.time() - last_time > interval:
+            code, last_time = "".join(random.choice(key) for i in range(6)), time.time()
+            with open(os.path.join(project_path, "code"), "w") as f:
+                f.write(code)
+                f.write("Expire time: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")))
+        yield code
