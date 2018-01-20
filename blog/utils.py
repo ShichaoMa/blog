@@ -84,5 +84,5 @@ def code_generator(interval, key="ABCDEFGHIGKLMNOPQISTUVWXYZ0123456789"):
             code, last_time = "".join(random.choice(key) for i in range(6)), time.time()
             with open(os.path.join(project_path, "code"), "w") as f:
                 f.write(code)
-                f.write("Expire time: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")))
+                f.write("\nExpire time: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")))
         yield code

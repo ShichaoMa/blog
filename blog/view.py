@@ -24,6 +24,7 @@ tz = pytz.timezone(app.config.get("TIME_ZONE"))
 
 db = DataBase(app.config)
 code_generator = code_generator(app.config.get("CODE_EXPIRE_INTERVAL", 60*60*24*7))
+next(code_generator)
 
 
 @app.route("/")
