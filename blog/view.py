@@ -50,7 +50,8 @@ def login():
 def check():
     ref = request.form.get("ref")
     if request.form.get("username") == app.config.get("USERNAME") and request.form.get("password") == app.config.get("PASSWORD"):
-        session["login"] = "%s:%s"%(request.form.get("username"), request.form.get("password"))
+
+        session["login"] = "%s:%s" % (request.form.get("username"), request.form.get("password"))
         return render_template("%s.html"%ref, success="",
                                title=request.form.get("title", ""),
                                tags=request.form.get("tags", ""),
@@ -109,6 +110,8 @@ def imports():
 
 @app.route("/export")
 def export():
+    if request.args.get("code") != next(code_generator):
+        return json.dumps({"error":True})
     ids = request.args.get("ids")
     if ids:
         ids = ids.split(",")

@@ -16,6 +16,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
+    <link rel="stylesheet" href={{url_for("static", filename="css/github.css")}}>
 
     <!--[if lt IE 9]>
         <script src={{url_for("static", filename="js/vendor/google/html5-3.6-respond-1.1.0.min.js")}}></script>
@@ -37,7 +38,14 @@
     .pagination {
         display: inline;
     }
+    .markdown-body {
+		box-sizing: border-box;
+		min-width: 200px;
+		max-width: 980px;
+		margin: 0 auto;
+	}
 </style>
+
 <script type="text/babel">
 
     function gen_url(id){
@@ -357,7 +365,7 @@
                     data.parent = this;
                     window.location.hash = this.state.url;
                     return (<Article {...data}>
-                        <div dangerouslySetInnerHTML={html} className="body"/>
+                        <div dangerouslySetInnerHTML={html} className="markdown-body"/>
                     </Article>)
                 }
             }
@@ -486,7 +494,7 @@
                 data = eval("("+resp+")");
             }
         });
-        let row = (<Row {...{"articles": data.articles.slice(0, Math.floor(data.tags.length/15)*2)}}/>);
+        let row = (<Row {...{"articles": data.articles.slice(0, Math.max(4, Math.floor(data.tags.length/15)*2))}}/>);
         let aside = (<Aside {...{"feature_articles": data.feature_articles.slice(0, 6),
             "articles": data.articles.slice(0, 6), "tags": data.tags}}/>);
         return (<div className="container">

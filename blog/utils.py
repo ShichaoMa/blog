@@ -78,11 +78,15 @@ def format_articles(articles, tags=None):
 
 
 def code_generator(interval, key="ABCDEFGHIGKLMNOPQISTUVWXYZ0123456789"):
-    last_time = 0
+    try:
+        code, last_time = open(os.path.join(project_path, "code")).read().split("\n")
+        last_time = int(last_time)
+    except OSError:
+        last_time = 0
     while True:
         if time.time() - last_time > interval:
             code, last_time = "".join(random.choice(key) for i in range(6)), time.time()
             with open(os.path.join(project_path, "code"), "w") as f:
                 f.write(code)
-                f.write("\nExpire time: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")))
+                f.write("\n%d"%time.time())
         yield code
