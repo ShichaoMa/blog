@@ -131,7 +131,7 @@ def export():
                 if request.args.get("code") != next(code_generator):
                     return json.dumps({"error": True})
                 from weasyprint import HTML
-                html =  markdown.markdown(article["article"], extensions=['markdown.extensions.extra'])
+                html =  markdown.markdown(article["_source"]["article"], extensions=['markdown.extensions.extra'])
                 buffer = HTML(string=html).write_pdf(stylesheets=[os.path.join(project_path, "static/css/github.css")])
                 ext = "pdf"
             zf.writestr("%s.%s" % (article["_source"]["title"], ext),
