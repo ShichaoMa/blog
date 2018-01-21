@@ -10,7 +10,7 @@ import html2text
 from io import BytesIO
 from flask import Flask, render_template, request, session, url_for, redirect, make_response
 
-from .utils import project_path, decode, format_articles, code_generator
+from .utils import project_path, decode, format_articles, code_generator, get_image
 from .db import DataBase
 
 
@@ -110,8 +110,6 @@ def imports():
 
 @app.route("/export")
 def export():
-    if request.args.get("code") != next(code_generator):
-        return json.dumps({"error":True})
     ids = request.args.get("ids")
     if ids:
         ids = ids.split(",")
@@ -124,15 +122,27 @@ def export():
                                                       request.args.get("size", 20))
     zip_file = BytesIO()
     zf = zipfile.ZipFile(zip_file, "w")
-    for id in ids:
-        article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id)
-        zf.writestr("%s.md"%article["_source"]["title"], article["_source"]["article"].encode("utf-8"))
-    for article in articles:
-        zf.writestr("%s.md" % article["_source"]["title"], article["_source"]["article"].encode("utf-8"))
-    zf.close()
-    zip_file.seek(0)
-    body = zip_file.read()
-    zip_file.close()
+    try:
+        buffer = None
+        for id in ids:
+            article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id)
+            ext = "md"
+            if id == "me":
+                if request.args.get("code") != next(code_generator):
+                    return json.dumps({"error": True})
+                from weasyprint import HTML
+                html =  markdown.markdown(article["article"], extensions=['markdown.extensions.extra'])
+                buffer = HTML(string=html).write_pdf(stylesheets=[os.path.join(project_path, "static/css/github.css")])
+                ext = "pdf"
+            zf.writestr("%s.%s" % (article["_source"]["title"], ext),
+                        buffer or article["_source"]["article"].encode("utf-8"))
+        for article in articles:
+            zf.writestr("%s.md" % article["_source"]["title"], article["_source"]["article"].encode("utf-8"))
+    finally:
+        zf.close()
+        zip_file.seek(0)
+        body = zip_file.read()
+        zip_file.close()
     response = make_response(body)
     response.headers['Content-Type'] = 'application/zip'
     response.headers['Content-Disposition'] = 'attachment; filename="%s.zip"' % datetime.datetime.now().strftime(
@@ -234,19 +244,21 @@ def me():
         article = article["_source"]
     else:
         created_at = datetime.datetime.now(tz)
-        article = {"id": id,
-               "author": app.config.get("AUTHOR"),
-               "tags": [id],
-               "description": id,
-               "feature": 0,
-               "article": id,
-               "title": id,
-               "show": 0,
-               "updated_at": created_at,
-               "created_at": created_at}
+        article = {
+            "id": id,
+            "author": app.config.get("AUTHOR"),
+            "tags": [id],
+            "description": id,
+            "feature": 0,
+            "article": id,
+            "title": id,
+            "show": 0,
+            "updated_at": created_at,
+            "created_at": created_at}
         db.index(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id, article)
         article["updated_at"] = created_at.strftime("%Y-%m-%dT%H:%M:%S")
         article["created_at"] = created_at.strftime("%Y-%m-%dT%H:%M:%S")
+    article["first_img"] = get_image(article["article"])
     article["article"] = markdown.markdown(article["article"],
                                         extensions=['markdown.extensions.extra'])
     return json.dumps(article)
@@ -260,19 +272,21 @@ def contact():
         article = article["_source"]
     else:
         created_at = datetime.datetime.now(tz)
-        article = {"id": id,
-                   "author": app.config.get("AUTHOR"),
-                   "tags": [id],
-                   "description": id,
-                   "feature": 0,
-                   "article": id,
-                   "title": id,
-                   "show": 0,
-                   "updated_at": created_at,
-                   "created_at": created_at}
+        article = {
+            "id": id,
+            "author": app.config.get("AUTHOR"),
+            "tags": [id],
+            "description": id,
+            "feature": 0,
+            "article": id,
+            "title": id,
+            "show": 0,
+            "updated_at": created_at,
+            "created_at": created_at}
         db.index(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id, article)
         article["updated_at"] = created_at.strftime("%Y-%m-%dT%H:%M:%S")
         article["created_at"] = created_at.strftime("%Y-%m-%dT%H:%M:%S")
+    article["first_img"] = get_image(article["article"])
     article["article"] = markdown.markdown(article["article"],
                                         extensions=['markdown.extensions.extra'])
     return json.dumps(article)

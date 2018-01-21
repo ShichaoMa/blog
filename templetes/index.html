@@ -192,17 +192,26 @@
 
         handleExport(e) {
             e.preventDefault();
-            let form=$("<form>");//定义一个form表单
-            form.attr("style","display:none");
-            form.attr("target","");
-            form.attr("method","get");
-            form.attr("action","{{url_for('export')}}");
-            let input1=$("<input>");
-            input1.attr("type","hidden");
+            let form = $("<form>");//定义一个form表单
+            form.attr("style", "display:none");
+            form.attr("target", "");
+            form.attr("method", "get");
+            form.attr("action", "{{url_for('export')}}");
+            let input1 = $("<input>");
+            input1.attr("type", "hidden");
             input1.attr("name", "ids");
-            input1.attr("value",this.props.id);
-            $("body").append(form);//将表单放置在web中
+            input1.attr("value", this.props.id);
             form.append(input1);
+            if(window.location.hash.indexOf("code")!= -1){
+                let code = /code=(\w+)/.exec(window.location.hash)[1];
+                console.log(1111111111, code);
+                let input2 = $("<input>");
+                input2.attr("type", "hidden");
+                input2.attr("name", "code");
+                input2.attr("value", code);
+                form.append(input2);
+            }
+            $("body").append(form);//将表单放置在web中
             form.submit();//表单提交
         }
 
@@ -562,13 +571,13 @@
                 if(code){
                     common.row.setState({
                         url: `{{url_for('me')}}?code=${code}`,
-                        id: "我的自我介绍"
+                        //id: "我的自我介绍"
                     });
                 }
             }else{
                 common.row.setState({
                     url: "{{url_for('contact')}}",
-                    id: "我的联系方式"
+                    //id: "我的联系方式"
                 });
             }
 
