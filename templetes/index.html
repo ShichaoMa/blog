@@ -221,7 +221,7 @@
                            feature: this.props.feature ? "True": "False",
                            description: this.props.description,
                            img_url: document.getElementsByClassName("img-responsive")[0].src,
-                           article: $(".body").html()
+                           article: $(".markdown-body").html()
                        },
                        async: false,
                        success: function(resp){
