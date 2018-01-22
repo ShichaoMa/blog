@@ -382,7 +382,7 @@
                 count += 2;
             }
             let that = this;
-            return (<div  className="col-md-8 blog-main">{rows.map(function(blocks){
+            return (<div  className="col-md-8 blog-main" name>{rows.map(function(blocks){
                 return (<div className="row" key={blocks[0].id}>{gen_block(blocks[0], that)} {gen_block(blocks[1], that)}</div>)
             })}
                 <div className="paging">
