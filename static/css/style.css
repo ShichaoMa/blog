@@ -7,12 +7,12 @@ body {
   background-color: #fff;
 }
 
-a:link {
-  color: #5862ff
-}		/* 未访问的链接 */
-a:visited {
-  color: #5862ff
-}	/* 已访问的链接 */
+/*a:link {*/
+  /*color: #5862ff*/
+/*}		!* 未访问的链接 *!*/
+/*a:visited {*/
+  /*color: #5862ff*/
+/*}	!* 已访问的链接 *!*/
 a:hover {
   color: #5862ff
 }	/* 鼠标移动到链接上 */

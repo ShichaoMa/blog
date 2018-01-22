@@ -124,7 +124,7 @@ class Sqlite3Diver(Driver):
         self.cur.execute("SELECT * FROM %s WHERE show=1 %s ORDER BY updated_at desc limit %s offset %s;" % (
             doc_type, sub, size, _from))
         rs = self.cur.fetchall()
-        self.cur.execute("SELECT tags FROM %s" % doc_type)
+        self.cur.execute("SELECT tags FROM %s WHERE show=1" % doc_type)
         tags = self.cur.fetchall()
         self.cur.execute(
             "SELECT * FROM %s WHERE show=1 AND feature=1 %s ORDER BY updated_at desc limit %s offset %s;" % (

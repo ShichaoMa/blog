@@ -60,8 +60,8 @@
         if(article){
             return (<Block {...article}>
                 <div className="clearfix">
-                    <span value={gen_url(article.id)}
-                       className="btn btn-clean-one" onClick={that.handleClick}>更多</span>
+                    <a value={gen_url(article.id)} href={"#" + gen_url(article.id)}
+                       className="btn btn-clean-one" onClick={that.handleClick}>更多</a>
                 </div>
             </Block>)
         }
@@ -204,7 +204,6 @@
             form.append(input1);
             if(window.location.hash.indexOf("code")!= -1){
                 let code = /code=(\w+)/.exec(window.location.hash)[1];
-                console.log(1111111111, code);
                 let input2 = $("<input>");
                 input2.attr("type", "hidden");
                 input2.attr("name", "code");
@@ -216,7 +215,7 @@
         }
 
         handleSave(e) {
-            document.getElementsByClassName("body")[0].contentEditable = false;
+            document.getElementsByClassName("markdown-body")[0].contentEditable = false;
             let have_not_send = true;
             while(have_not_send){
                 $.ajax({
@@ -296,7 +295,7 @@
                             <i className={this.props.author ? "fa icon-user" : ""}></i> {this.props.author}
                             <i className={this.props.updated_at ? "fa icon-calendar" : ""}></i>
                             {parseDate(this.props.updated_at).format("YYYY-MM-DD HH:mm:ss")}
-                            <a href="#"><i title="返回" className="fa  icon-reply" onClick={this.handleClick}></i></a>
+                            <a><i title="返回" className="fa  icon-reply" onClick={this.handleClick}></i></a>
                             <a href={edit_url}><i title="全文编辑" className="fa icon-edit"></i></a>
                             <a href={delete_url}><i title="删除" className="fa icon-remove-sign"></i></a>
                             <a onClick={this.handleModify}><i title="直接修改" className="fa icon-magic"></i></a>
@@ -322,7 +321,7 @@
                                 <i className={props.author ? "fa icon-user" : ""}></i><font>{props.author}</font>
                             </span>
                         </header>
-                        <div className="body">
+                        <div className="markdown-body">
                            {props.description}
                         </div>
                         {props.children}
@@ -335,6 +334,7 @@
             super(props);
             common.row = this;
             this.handleClick = this.handleClick.bind(this);
+            this.handleList = this.handleList.bind(this);
             if(window.location.hash && window.location.hash.indexOf("list") != -1){
                   this.state = {showList: true};
             }else if(window.location.hash){
@@ -353,6 +353,11 @@
                 author: target.parent().parent().find("header span font").html(),
                 id: /id=(\w+)/.exec(target.val())[1]});
 
+        }
+
+        handleList(e){
+            e.preventDefault();
+            this.setState({"showList": true});
         }
 
         render() {
@@ -403,11 +408,11 @@
                 count += 2;
             }
             let that = this;
-            return (<div  className="col-md-8 blog-main" name>{rows.map(function(blocks){
+            return (<div  className="col-md-8 blog-main" >{rows.map(function(blocks){
                 return (<div className="row" key={blocks[0].id}>{gen_block(blocks[0], that)} {gen_block(blocks[1], that)}</div>)
             })}
                 <div className="paging">
-                    <span className="btn btn-clean-one" onClick={(() => this.setState({"showList": true}))}>全部文章</span>
+                    <span className="btn btn-clean-one" onClick={this.handleList}>全部文章</span>
                 </div>
             </div>)
         }
@@ -571,13 +576,11 @@
                 if(code){
                     common.row.setState({
                         url: `{{url_for('me')}}?code=${code}`,
-                        //id: "我的自我介绍"
                     });
                 }
             }else{
                 common.row.setState({
                     url: "{{url_for('contact')}}",
-                    //id: "我的联系方式"
                 });
             }
 

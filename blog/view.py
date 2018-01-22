@@ -304,8 +304,6 @@ def show():
     else:
         tags = None
     tags, articles = format_articles(articles, tags=tags)
-    tags.pop("我的个人介绍", None)
-    tags.pop("我的联系方式", None)
     _, feature_articles = format_articles(feature_articles)
     return json.dumps({"count": count, "articles": articles, "feature_articles": feature_articles,
                        "tags": [i for i in sorted(tags.items(), key=lambda x: x[1], reverse=True)]})
