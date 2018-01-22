@@ -16,6 +16,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
+    <link rel="stylesheet" href={{url_for("static", filename="css/github.css")}}>
 
     <!--[if lt IE 9]>
         <script src={{url_for("static", filename="js/vendor/google/html5-3.6-respond-1.1.0.min.js")}}></script>
@@ -37,7 +38,14 @@
     .pagination {
         display: inline;
     }
+    .markdown-body {
+		box-sizing: border-box;
+		min-width: 200px;
+		max-width: 980px;
+		margin: 0 auto;
+	}
 </style>
+
 <script type="text/babel">
 
     function gen_url(id){
@@ -52,8 +60,8 @@
         if(article){
             return (<Block {...article}>
                 <div className="clearfix">
-                    <span value={gen_url(article.id)}
-                       className="btn btn-clean-one" onClick={that.handleClick}>更多</span>
+                    <a value={gen_url(article.id)} href={"#" + gen_url(article.id)}
+                       className="btn btn-clean-one" onClick={that.handleClick}>更多</a>
                 </div>
             </Block>)
         }
@@ -178,28 +186,36 @@
 
         handleModify(e) {
             e.preventDefault();
-            document.getElementsByClassName("body")[0].contentEditable = true;
+            document.getElementsByClassName("markdown-body")[0].contentEditable = true;
             alert("现在你可以直接在网页修改文章内容了，修改完毕后请点击保存按钮。")
         }
 
         handleExport(e) {
             e.preventDefault();
-            let form=$("<form>");//定义一个form表单
-            form.attr("style","display:none");
-            form.attr("target","");
-            form.attr("method","get");
-            form.attr("action","{{url_for('export')}}");
-            let input1=$("<input>");
-            input1.attr("type","hidden");
+            let form = $("<form>");//定义一个form表单
+            form.attr("style", "display:none");
+            form.attr("target", "");
+            form.attr("method", "get");
+            form.attr("action", "{{url_for('export')}}");
+            let input1 = $("<input>");
+            input1.attr("type", "hidden");
             input1.attr("name", "ids");
-            input1.attr("value",this.props.id);
-            $("body").append(form);//将表单放置在web中
+            input1.attr("value", this.props.id);
             form.append(input1);
+            if(window.location.hash.indexOf("code")!= -1){
+                let code = /code=(\w+)/.exec(window.location.hash)[1];
+                let input2 = $("<input>");
+                input2.attr("type", "hidden");
+                input2.attr("name", "code");
+                input2.attr("value", code);
+                form.append(input2);
+            }
+            $("body").append(form);//将表单放置在web中
             form.submit();//表单提交
         }
 
         handleSave(e) {
-            document.getElementsByClassName("body")[0].contentEditable = false;
+            document.getElementsByClassName("markdown-body")[0].contentEditable = false;
             let have_not_send = true;
             while(have_not_send){
                 $.ajax({
@@ -213,7 +229,7 @@
                            feature: this.props.feature ? "True": "False",
                            description: this.props.description,
                            img_url: document.getElementsByClassName("img-responsive")[0].src,
-                           article: $(".body").html()
+                           article: $(".markdown-body").html()
                        },
                        async: false,
                        success: function(resp){
@@ -279,7 +295,7 @@
                             <i className={this.props.author ? "fa icon-user" : ""}></i> {this.props.author}
                             <i className={this.props.updated_at ? "fa icon-calendar" : ""}></i>
                             {parseDate(this.props.updated_at).format("YYYY-MM-DD HH:mm:ss")}
-                            <a href="#"><i title="返回" className="fa  icon-reply" onClick={this.handleClick}></i></a>
+                            <a><i title="返回" className="fa  icon-reply" onClick={this.handleClick}></i></a>
                             <a href={edit_url}><i title="全文编辑" className="fa icon-edit"></i></a>
                             <a href={delete_url}><i title="删除" className="fa icon-remove-sign"></i></a>
                             <a onClick={this.handleModify}><i title="直接修改" className="fa icon-magic"></i></a>
@@ -305,7 +321,7 @@
                                 <i className={props.author ? "fa icon-user" : ""}></i><font>{props.author}</font>
                             </span>
                         </header>
-                        <div className="body">
+                        <div className="markdown-body">
                            {props.description}
                         </div>
                         {props.children}
@@ -318,6 +334,7 @@
             super(props);
             common.row = this;
             this.handleClick = this.handleClick.bind(this);
+            this.handleList = this.handleList.bind(this);
             if(window.location.hash && window.location.hash.indexOf("list") != -1){
                   this.state = {showList: true};
             }else if(window.location.hash){
@@ -338,6 +355,11 @@
 
         }
 
+        handleList(e){
+            e.preventDefault();
+            this.setState({"showList": true});
+        }
+
         render() {
             window.location.hash = "";
             if(this.state.url){
@@ -349,13 +371,17 @@
                         data = eval("("+resp+")");
                     }
                 });
-                let html = { __html: data.article};
-                data.article = null;
-                data.parent = this;
-                window.location.hash = this.state.url;
-                return (<Article {...data}>
-                            <div dangerouslySetInnerHTML={html} className="body"/>
-                        </Article>)
+                if(data.error){
+                    alert("code错误，请联系作者！");
+                }else{
+                    let html = { __html: data.article};
+                    data.article = null;
+                    data.parent = this;
+                    window.location.hash = this.state.url;
+                    return (<Article {...data}>
+                        <div dangerouslySetInnerHTML={html} className="markdown-body"/>
+                    </Article>)
+                }
             }
             if(this.state.showList){
                 let data = null;
@@ -382,11 +408,11 @@
                 count += 2;
             }
             let that = this;
-            return (<div  className="col-md-8 blog-main">{rows.map(function(blocks){
+            return (<div  className="col-md-8 blog-main" >{rows.map(function(blocks){
                 return (<div className="row" key={blocks[0].id}>{gen_block(blocks[0], that)} {gen_block(blocks[1], that)}</div>)
             })}
                 <div className="paging">
-                    <span className="btn btn-clean-one" onClick={(() => this.setState({"showList": true}))}>全部文章</span>
+                    <span className="btn btn-clean-one" onClick={this.handleList}>全部文章</span>
                 </div>
             </div>)
         }
@@ -482,7 +508,7 @@
                 data = eval("("+resp+")");
             }
         });
-        let row = (<Row {...{"articles": data.articles.slice(0, Math.floor(data.tags.length/15)*2)}}/>);
+        let row = (<Row {...{"articles": data.articles.slice(0, Math.max(4, Math.floor(data.tags.length/15)*2))}}/>);
         let aside = (<Aside {...{"feature_articles": data.feature_articles.slice(0, 6),
             "articles": data.articles.slice(0, 6), "tags": data.tags}}/>);
         return (<div className="container">
@@ -546,14 +572,15 @@
             if(target.val() == "1"){
                 location.href = '{{url_for("index")}}';
             }else if(target.val() == "2"){
-                common.row.setState({
-                    url: "{{url_for('me')}}",
-                    id: "我的自我介绍"
-                });
+                let code = prompt("请输入密钥！");
+                if(code){
+                    common.row.setState({
+                        url: `{{url_for('me')}}?code=${code}`,
+                    });
+                }
             }else{
                 common.row.setState({
                     url: "{{url_for('contact')}}",
-                    id: "我的联系方式"
                 });
             }
 
