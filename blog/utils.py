@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 import re
 import os
+import time
+import random
 import sqlite3
 import datetime
 
@@ -56,13 +58,7 @@ def format_articles(articles, tags=None):
     formated = []
     for article in articles:
         article = article["_source"]
-        body = article.pop("article")
-        try:
-            image_part = body[:body.index("\n")]
-        except ValueError:
-            image_part = body
-        mth = re.search(r"\!\[.*?\]\((.*?)\)", image_part)
-        article["first_img"] = mth.group(1) if mth else ""
+        article["first_img"] = get_image(article.pop("article"))
         if not tags:
             for tag in article["tags"]:
                 group_tags[tag.upper()] = group_tags.setdefault(tag.upper(), 0) + 1
@@ -73,3 +69,27 @@ def format_articles(articles, tags=None):
             for tag in ts[0].split(","):
                 group_tags[tag.upper()] = group_tags.setdefault(tag.upper(), 0) + 1
     return group_tags, formated
+
+
+def get_image(body):
+    try:
+        image_part = body[:body.index("\n")]
+    except ValueError:
+        image_part = body
+    mth = re.search(r"\!\[.*?\]\((.*?)\)", image_part)
+    return mth.group(1) if mth else ""
+
+
+def code_generator(interval, key="ABCDEFGHIGKLMNOPQISTUVWXYZ0123456789"):
+    try:
+        code, last_time = open(os.path.join(project_path, "code")).read().split("\n")
+        last_time = int(last_time)
+    except OSError:
+        last_time = 0
+    while True:
+        if time.time() - last_time > interval:
+            code, last_time = "".join(random.choice(key) for i in range(6)), time.time()
+            with open(os.path.join(project_path, "code"), "w") as f:
+                f.write(code)
+                f.write("\n%d"%time.time())
+        yield code
