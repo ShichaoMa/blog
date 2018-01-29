@@ -17,7 +17,7 @@ class Driver(ABC):
         pass
 
     @abstractmethod
-    def get(self, index, doc_type, id):
+    def get(self, index, doc_type, **kwargs):
         pass
 
     @abstractmethod
@@ -37,6 +37,7 @@ class Driver(ABC):
         pass
 
 
+
 class DataBase(Driver):
 
     def __init__(self, config):
@@ -49,8 +50,8 @@ class DataBase(Driver):
     def index(self, index, doc_type, id, body):
         return self.driver.index(index, doc_type, id, body)
 
-    def get(self, index, doc_type, id):
-        return self.driver.get(index, doc_type, id)
+    def get(self, index, doc_type, **kwargs):
+        return self.driver.get(index, doc_type, **kwargs)
 
     def update(self, index, doc_type, id, body):
         return self.driver.update(index, doc_type, id, body)
@@ -92,8 +93,13 @@ class Sqlite3Diver(Driver):
                 body["show"]))
 
     @conn_wrapper
-    def get(self, index, doc_type, id):
-        self.cur.execute("SELECT * FROM {} WHERE id=?;".format(doc_type), (id,))
+    def get(self, index, doc_type, **kwargs):
+        sub = ""
+        args = list()
+        for k, v in kwargs.items():
+            sub += "and {}=?".format(k)
+            args.append(v)
+        self.cur.execute("SELECT * FROM {} WHERE 1=1 {}".format(doc_type, sub), tuple(args))
         data = self.cur.fetchone()
         if data:
             return format_data(data, tz=pytz.timezone(self.config.get("TIME_ZONE")))

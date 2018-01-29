@@ -125,10 +125,10 @@ def export():
     try:
         buffer = None
         for id in ids:
-            article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id)
+            article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=id)
             ext = "md"
             if id == "me":
-                if request.args.get("code") != next(code_generator):
+                if request.args.get("code") != next(code_generator) or not article:
                     return json.dumps({"error": True})
                 from weasyprint import HTML
                 html =  markdown.markdown(article["_source"]["article"], extensions=['markdown.extensions.extra'])
@@ -183,7 +183,7 @@ def modify():
 @app.route("/edit")
 def edit():
     id = request.args.get("id")
-    doc = db.get(app.config.get("INDEX"), id=id, doc_type=app.config.get("DOC_TYPE"))
+    doc = db.get(app.config.get("INDEX"), doc_type=app.config.get("DOC_TYPE"), id=id)
     doc["_source"]["tags"] = ",".join(doc["_source"]["tags"])
     if not session.get("login"):
         return render_template("login.html", ref="edit", **doc["_source"])
@@ -226,7 +226,7 @@ def delete():
 
 @app.route("/article")
 def article():
-    article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), request.args.get("id"))
+    article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=request.args.get("id"))
     format_article_body = markdown.markdown(article["_source"]["article"], extensions=['markdown.extensions.extra'])
     _, articles = format_articles([article])
     article = articles[0]
@@ -237,9 +237,9 @@ def article():
 @app.route("/me")
 def me():
     if request.args.get("code") != next(code_generator):
-        return json.dumps({"error":True})
+        return json.dumps({"error": True})
     id = "me"
-    article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id)
+    article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=id)
     if article:
         article = article["_source"]
     else:
@@ -267,7 +267,7 @@ def me():
 @app.route("/contact")
 def contact():
     id = "contact"
-    article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id)
+    article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=id)
     if article:
         article = article["_source"]
     else:

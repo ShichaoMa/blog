@@ -10,11 +10,14 @@ COPY Shanghai /etc/localtime
 COPY timezone /etc/timezone
 RUN apt-get install -y --no-install-recommends libc6-dev gcc make ca-certificates
 RUN apt-get install -y --no-install-recommends build-essential \
-libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev
+libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev
 # 安装python3.6
 RUN tar zxvf Python-3.6.0.tgz
 RUN cd Python-3.6.0 && ./configure --bindir=/bin/
 RUN cd Python-3.6.0 && make && make install
+RUN apt-get install -y --no-install-recommends libcairo2-dev pango1.0-tests
+RUN apt-get install -y --no-install-recommends xfonts-intl-chinese xfonts-wqy ttf-wqy-zenhei
+RUN apt-get install -y --no-install-recommends ttf-wqy-microhei xfonts-intl-chinese-big
 COPY requirements.txt /tmp/
 RUN mkdir -p /app/articles
 RUN pip3.6 install -r /tmp/requirements.txt
@@ -24,4 +27,5 @@ COPY settings.py /app/settings.py
 COPY blog.json /app/blog.json
 COPY blog.sql /app/blog.sql
 COPY templetes /app/templetes
+COPY blog /app/blog
 WORKDIR /app
