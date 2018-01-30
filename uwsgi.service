@@ -6,8 +6,8 @@ After=network.target
 # 依赖哪个程序
 Wants=network.target
 [Service]
-Environment=PASSWORD=abcde09876
-Environment=USERNAME=cnaafhvk
+Environment=PASSWORD=12345
+Environment=USERNAME=test
 Type=simple
 # 执行命令
 ExecStart=/home/pi/.pyenv/shims/uwsgi --http 0.0.0.0:3031 --wsgi-file /home/pi/blog/start.py --master --processes 2 --threads 2 --stats 127.0.0.1:9191 --callable app
