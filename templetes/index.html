@@ -317,8 +317,10 @@
                             <img src={img} alt=""/>
                             <h3>{props.title}</h3>
                             <span className="meta">
-                                <i className={props.updated_at ? "fa icon-calendar" : ""}></i><span>{parseDate(props.updated_at).format("YYYY-MM-DD HH:mm:ss")}</span>
-                                <i className={props.author ? "fa icon-user" : ""}></i><font>{props.author}</font>
+                                <i className={props.updated_at ? "fa icon-calendar" : ""}></i>
+                                <span>{parseDate(props.updated_at).format("YYYY-MM-DD HH:mm:ss")}</span>
+                                <i className={props.author ? "fa icon-user" : ""}></i>
+                                <font>{props.author}</font>
                             </span>
                         </header>
                         <div className="markdown-body">
@@ -352,7 +354,6 @@
                 updated_at: target.parent().parent().find("header span span").html(),
                 author: target.parent().parent().find("header span font").html(),
                 id: /id=(\w+)/.exec(target.val())[1]});
-
         }
 
         handleList(e){
@@ -535,6 +536,7 @@
             }else{
                 this.setState({searchField: $("#searchField").val(), fulltext: true});
             }
+            common.row.setState({url: null, showList: null});
         }
 
         render(){
