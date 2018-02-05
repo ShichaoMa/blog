@@ -28,3 +28,5 @@ TIME_ZONE = os.environ.get("TIME_ZONE", 'Asia/Shanghai')
 AUTHOR = os.environ.get("AUTHOR", "夏洛之枫")
 
 DB = os.environ.get("DB", "sqlite")
+
+PHANTOMJS_PATH = os.environ.get("PHANTOMJS_PATH", "/usr/local/bin/phantomjs")

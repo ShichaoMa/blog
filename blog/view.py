@@ -2,6 +2,7 @@
 import os
 import json
 import pytz
+import hashlib
 import zipfile
 import markdown
 import datetime
@@ -10,8 +11,11 @@ import html2text
 from io import BytesIO
 from flask import Flask, render_template, request, session, url_for, redirect, make_response
 
-from .utils import project_path, decode, format_articles, code_generator, get_image
 from .db import DataBase
+from .html_cut import Cuter
+from .utils import project_path, decode, format_articles, code_generator, get_image
+
+
 
 
 app = Flask(__name__)
@@ -20,7 +24,7 @@ app.static_folder = os.path.join(project_path, app.config.get("STATIC_FOLDER"))
 app.static_url_path = app.config.get("STATIC_URL_PATH")
 app.template_folder = os.path.join(project_path, app.config.get("TEMPLATE_FOLDER"))
 tz = pytz.timezone(app.config.get("TIME_ZONE"))
-
+cuter = Cuter(app.config.get("PHANTOMJS_PATH"), os.path.join(project_path, "cut_html.js"))
 
 db = DataBase(app.config)
 code_generator = code_generator(app.config.get("CODE_EXPIRE_INTERVAL", 60*60*24*7))
@@ -307,3 +311,21 @@ def show():
     _, feature_articles = format_articles(feature_articles)
     return json.dumps({"count": count, "articles": articles, "feature_articles": feature_articles,
                        "tags": [i for i in sorted(tags.items(), key=lambda x: x[1], reverse=True)]})
+
+
+@app.route("/cut")
+def cut():
+    url = request.args.get("url")
+    top = request.args.get("top", 0)
+    left = request.args.get("left", 0)
+    width = request.args.get("width", 0)
+    height = request.args.get("height", 0)
+    sh = hashlib.sha1(url.encode())
+    sh.update(bytes(str(top), encoding="utf-8"))
+    sh.update(bytes(str(left), encoding="utf-8"))
+    sh.update(bytes(str(width), encoding="utf-8"))
+    sh.update(bytes(str(height), encoding="utf-8"))
+    name = sh.hexdigest()[:10] + ".png"
+    save_name = os.path.join(project_path, "static/img", name)
+    cuter.cut(url, save_name, top, left, width, height)
+    return redirect("/static/img/" + name)
