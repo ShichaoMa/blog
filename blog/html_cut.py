@@ -1,7 +1,72 @@
 import os
 import time
+import inspect
 
-from collections import UserDict
+from functools import wraps
+
+
+def free_namedtuple(func):
+    """
+    根据一个类及其参数创建一个类namedtuple class，但不同之处在于创建实例成功后可以自由赋值，初时化时指定的值决定其Hash和eq结果
+    :param func:
+    :return:
+    """
+    cls_tmpl = """
+class {}(object):
+    def __init__(self, {}):
+        {}
+    def __hash__(self):
+        return {}
+
+    def __eq__(self, other):
+        return {}
+"""
+
+    args = inspect.getfullargspec(func).args
+    try:
+        args.remove("self")
+    except ValueError:
+        pass
+    class_name = func.__name__.capitalize()
+    init_arg = ", ".join(args)
+    init_body = "".join(
+        "self.{%s} = {%s}\n        " % (index, index) for index in range(len(args))).format(*args)
+    hash_body = " + ".join("hash(self.{})".format(arg) for arg in args)
+    eq_body = " and ".join("self.{0} == other.{0}".format(arg) for arg in args)
+    iter_body = ", self.".join(args)
+    namespace = dict(__name__='entries_%s' % class_name)
+    exec(cls_tmpl.format(class_name, init_arg, init_body, hash_body, eq_body, iter_body), namespace)
+    return namespace[class_name]
+
+
+def cache_method(timeout=3600):
+    """
+    缓存一个方法的调用结果，持续一定时间，该方法调用正常时，希望返回真值(形式真)，或返回值为假，缓存效果会失效。
+    :param timeout: 缓存时间 :s
+    :return:
+    """
+    def cache(func):
+        entry_class = free_namedtuple(func)
+        data = dict()
+
+        @wraps(func)
+        def inner(*args, **kwargs):
+            for k in data.keys():
+                if time.time() - timeout > data[k].ts:
+                    del data[k]
+
+            entry = entry_class(*args[1:], **kwargs)
+            entry.ts = time.time()
+            stored = data.get(entry, entry)
+            if entry not in data or time.time() - timeout > stored.ts:
+                entry.result = func(*args, **kwargs)
+                if entry.result:
+                    data[entry] = entry
+                return entry.result
+            else:
+                return stored.result
+        return inner
+    return cache
 
 
 class Cuter(object):
@@ -9,12 +74,9 @@ class Cuter(object):
     def __init__(self, phantomjs_path, js_path):
         self.phantomjs_path = phantomjs_path
         self.js_path = js_path
-        self.loader = LazyLoader(self._cut)
 
+    @cache_method()
     def cut(self, url, save_name, top=0, left=0, width=1024, height=768):
-        return self.loader[Picture(url, save_name, top, left, width, height)]
-
-    def _cut(self, url, save_name, top, left, width, height):
         try:
             os.system(("%s "*8) % (self.phantomjs_path, self.js_path, url, save_name, top, left, width, height))
             return True
@@ -22,46 +84,46 @@ class Cuter(object):
             print(e)
             return False
 
-
-class Picture(object):
-
-    def __init__(self, url, save_name, top, left, width, height, refresh=1000):
-        self.url = url
-        self.save_name = save_name
-        self.top = top
-        self.left = left
-        self.width = width
-        self.height = height
-        self.ts = time.time()
-        self.refresh = refresh
-
-    def __hash__(self):
-        return hash(self.url) + hash(self.save_name) + \
-               hash(self.top) + hash(self.left) + hash(self.width) + hash(self.height)
-
-    def __eq__(self, other):
-        return self.url == other.url and \
-               self.save_name == other.save_name and \
-               self.top == other.top and \
-               self.left == other.left and \
-               self.width == self.url and \
-               self.height == self.height
-
-    def __iter__(self):
-        return iter([self.url, self.save_name, self.top, self.left, self.width, self.height])
-
-
-class LazyLoader(UserDict):
-
-    def __init__(self, callback):
-        super(LazyLoader, self).__init__()
-        self.callback = callback
-
-    def __getitem__(self, key):
-        pic = self.data.get(key, key)
-        if key not in self.data or time.time() - pic.refesh > pic.ts:
-            if self.callback(*key):
-                self.data[key] = key
-                return key
-        else:
-            return pic
+#
+# class Picture(object):
+#
+#     def __init__(self, url, save_name, top, left, width, height, refresh=1000):
+#         self.url = url
+#         self.save_name = save_name
+#         self.top = top
+#         self.left = left
+#         self.width = width
+#         self.height = height
+#         self.ts = time.time()
+#         self.refresh = refresh
+#
+#     def __hash__(self):
+#         return hash(self.url) + hash(self.save_name) + \
+#                hash(self.top) + hash(self.left) + hash(self.width) + hash(self.height)
+#
+#     def __eq__(self, other):
+#         return self.url == other.url and \
+#                self.save_name == other.save_name and \
+#                self.top == other.top and \
+#                self.left == other.left and \
+#                self.width == self.url and \
+#                self.height == self.height
+#
+#     def __iter__(self):
+#         return iter([self.url, self.save_name, self.top, self.left, self.width, self.height])
+#
+#
+# class LazyLoader(UserDict):
+#
+#     def __init__(self, callback):
+#         super(LazyLoader, self).__init__()
+#         self.callback = callback
+#
+#     def __getitem__(self, key):
+#         pic = self.data.get(key, key)
+#         if key not in self.data or time.time() - pic.refesh > pic.ts:
+#             if self.callback(*key):
+#                 self.data[key] = key
+#                 return key
+#         else:
+#             return pic
