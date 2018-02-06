@@ -326,6 +326,6 @@ def cut():
     sh.update(bytes(str(width), encoding="utf-8"))
     sh.update(bytes(str(height), encoding="utf-8"))
     name = sh.hexdigest()[:10] + ".png"
-    save_name = os.path.join(project_path, "static/img", name)
+    save_name = os.path.join(project_path, "static/temp/", name)
     cuter.cut(url, save_name, top, left, width, height)
-    return redirect("/static/img/" + name)
+    return redirect("/static/temp/" + name)
