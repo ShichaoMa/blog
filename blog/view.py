@@ -155,8 +155,15 @@ def export():
             zf.writestr("%s.%s" % (article["_source"]["title"], ext),
                         buffer or article["_source"]["article"].encode("utf-8"))
         for article in articles:
+            body = "\n".join([
+                article["_source"]["article"],
+                "[comment]: <tags> (%s)" % ",".join(article["_source"]["tags"]),
+                "[comment]: <description> (%s)" % article["_source"]["description"],
+                "[comment]: <title> (%s)" % article["_source"]["title"],
+                "[comment]: <author> (%s)" % article["_source"]["author"],
+            ])
             zf.writestr(
-                "%s.md" % article["_source"]["title"], article["_source"]["article"].encode("utf-8"))
+                "%s.md" % article["_source"]["title"], body.encode("utf-8"))
     finally:
         zf.close()
         zip_file.seek(0)
@@ -189,7 +196,7 @@ def modify():
             "tags": tags,
             "description": description,
             "title": title,
-            "article": "[comment]: <> (![](%s))\n%s" % (img_url, article),
+            "article": "[comment]: <image> (![](%s))\n%s" % (img_url, article),
             "author": author,
             "feature": feature,
             "updated_at": datetime.datetime.now(tz),

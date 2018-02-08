@@ -1,3 +1,4 @@
+import re
 import sys
 import glob
 import time
@@ -19,17 +20,28 @@ tz = pytz.timezone(app.config.get("TIME_ZONE"))
 db = DataBase(app.config)
 
 
+def retrieve(word, article):
+    regex = re.compile(r"\[comment\]: <%s> \((.+?)\)" % word)
+    for line in article[:]:
+        mth = regex.search(line)
+        if mth:
+            article.remove(line)
+            return mth.group(1)
+    return ""
+
+
 def insert(filename):
     id = time.strftime("%Y%m%d%H%M%S")
     title = basename(filename).replace(".md", "")
     if not db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), title=title):
+        article = open(filename).readlines()
         body = {
             "id": id,
-            "tags": "",
-            "description": "",
-            "title": title,
-            "article": open(filename).read(),
-            "author": "夏洛之枫",
+            "tags": retrieve("tags", article).split(","),
+            "description": retrieve("description", article),
+            "title": retrieve("title", article) or title,
+            "author": retrieve("author", article) or "夏洛之枫",
+            "article": "".join(article),
             "feature": 0,
             "created_at": datetime.datetime.now(tz),
             "updated_at": datetime.datetime.now(tz),
