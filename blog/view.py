@@ -1,19 +1,21 @@
 # -*- coding:utf-8 -*-
 import os
+import re
 import json
 import pytz
-import hashlib
 import zipfile
 import markdown
 import datetime
 import html2text
 
 from io import BytesIO
-from flask import Flask, render_template, request, session, url_for, redirect, make_response
+from flask import Flask, render_template, \
+    request, session, url_for, redirect, make_response
 
 from .db import DataBase
 from .html_cut import Cuter
-from .utils import project_path, decode, format_articles, code_generator, get_image
+from .utils import project_path, decode, format_articles, \
+    code_generator, get_image, get_cut_file_name
 
 app = Flask("blog")
 app.config.from_pyfile(os.path.join(project_path, "settings.py"))
@@ -50,7 +52,8 @@ def login():
 @app.route('/check', methods=["post"])
 def check():
     ref = request.form.get("ref")
-    if request.form.get("username") == app.config.get("USERNAME") and request.form.get("password") == app.config.get("PASSWORD"):
+    if request.form.get("username") == app.config.get("USERNAME") and \
+                    request.form.get("password") == app.config.get("PASSWORD"):
 
         session["login"] = "%s:%s" % (request.form.get("username"), request.form.get("password"))
         return render_template("%s.html"%ref, success="",
@@ -61,7 +64,8 @@ def check():
                                feature=request.form.get("feature"),
                                id=request.form.get("id", ""),
                                ref=ref,
-                               article=db.gen_article(app.config.get("INDEX"), app.config.get("DOC_TYPE"), request.form.get("id")))
+                               article=db.gen_article(
+                                   app.config.get("INDEX"), app.config.get("DOC_TYPE"), request.form.get("id")))
     else:
         return render_template("login.html", title=request.form.get("title", ""),
                                tags=request.form.get("tags", ""),
@@ -74,7 +78,8 @@ def check():
 
 @app.route('/load')
 def load():
-    if request.args.get("username") == app.config.get("USERNAME") and request.args.get("password") == app.config.get("PASSWORD"):
+    if request.args.get("username") == app.config.get("USERNAME") and \
+                    request.args.get("password") == app.config.get("PASSWORD"):
         session["login"] = "%s:%s"%(request.form.get("username"), request.form.get("password"))
         return json.dumps({"result": 1})
     else:
@@ -117,10 +122,11 @@ def export():
         articles = []
     else:
         ids = []
-        count, articles, feature_articles = db.search(app.config.get("INDEX"), app.config.get("DOC_TYPE"),
-                                                      request.args.get("searchField"),
-                                                      request.args.get("from", 0),
-                                                      request.args.get("size", 20))
+        count, articles, feature_articles = db.search(
+            app.config.get("INDEX"), app.config.get("DOC_TYPE"),
+            request.args.get("searchField"),
+            request.args.get("from", 0),
+            request.args.get("size", 20))
     zip_file = BytesIO()
     zf = zipfile.ZipFile(zip_file, "w")
     try:
@@ -131,14 +137,26 @@ def export():
             if id == "me":
                 if request.args.get("code") != next(code_generator) or not article:
                     return json.dumps({"error": True})
-                from weasyprint import HTML
-                html =  markdown.markdown(article["_source"]["article"], extensions=['markdown.extensions.extra'])
-                buffer = HTML(string=html).write_pdf(stylesheets=[os.path.join(project_path, "static/css/github.css")])
+                from html.parser import unescape
+                from weasyprint import HTML, Attachment
+                from urllib.parse import urlparse, urljoin
+                html = markdown.markdown(
+                    article["_source"]["article"], extensions=['markdown.extensions.extra'])
+                html = unescape(html)
+
+                def _repl(mth):
+                    parts = urlparse(mth.group(1))
+                    params = dict(p.split("=", 1) for p in parts.query.split("&"))
+                    return urljoin(request.host_url, get_cut_file_name("", **params).strip("/"))
+                html = re.sub(r'(?<=src\=")(.+?)(?=")', _repl, html)
+                buffer = HTML(string=html).write_pdf(
+                    stylesheets=[os.path.join(project_path, "static/css/github.css")])
                 ext = "pdf"
             zf.writestr("%s.%s" % (article["_source"]["title"], ext),
                         buffer or article["_source"]["article"].encode("utf-8"))
         for article in articles:
-            zf.writestr("%s.md" % article["_source"]["title"], article["_source"]["article"].encode("utf-8"))
+            zf.writestr(
+                "%s.md" % article["_source"]["title"], article["_source"]["article"].encode("utf-8"))
     finally:
         zf.close()
         zip_file.seek(0)
@@ -146,8 +164,8 @@ def export():
         zip_file.close()
     response = make_response(body)
     response.headers['Content-Type'] = 'application/zip'
-    response.headers['Content-Disposition'] = 'attachment; filename="%s.zip"' % datetime.datetime.now().strftime(
-        "%Y%m%d%H%M%S")
+    response.headers['Content-Disposition'] = \
+        'attachment; filename="%s.zip"' % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     return response
 
 
@@ -221,14 +239,19 @@ def update():
 def delete():
     if not session.get("login"):
         return render_template("login.html", ref="delete", id=request.args.get("id", ""))
-    db.delete(app.config.get("INDEX"), id=request.args.get("id"), doc_type=app.config.get("DOC_TYPE"))
+    db.delete(
+        app.config.get("INDEX"),
+        id=request.args.get("id"),
+        doc_type=app.config.get("DOC_TYPE"))
     return redirect(url_for("index"))
 
 
 @app.route("/article")
 def article():
-    article = db.get(app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=request.args.get("id"))
-    format_article_body = markdown.markdown(article["_source"]["article"], extensions=['markdown.extensions.extra'])
+    article = db.get(
+        app.config.get("INDEX"), app.config.get("DOC_TYPE"), id=request.args.get("id"))
+    format_article_body = markdown.markdown(
+        article["_source"]["article"], extensions=['markdown.extensions.extra'])
     _, articles = format_articles([article])
     article = articles[0]
     article["article"] = format_article_body
@@ -295,9 +318,10 @@ def contact():
 
 @app.route("/show")
 def show():
-    count, articles, feature_articles = db.search(app.config.get("INDEX"), app.config.get("DOC_TYPE"),
-                                                  request.args.get("searchField"), request.args.get("from", 0),
-                                                  request.args.get("size", 20), request.args.get("fulltext") == "true")
+    count, articles, feature_articles = db.search(
+        app.config.get("INDEX"), app.config.get("DOC_TYPE"),
+        request.args.get("searchField"), request.args.get("from", 0),
+        request.args.get("size", 20), request.args.get("fulltext") == "true")
     # es获取全部tag的方法未实现，只能返回总数
     if app.config.get("DB", "es").lower() != "es":
         tags = count
@@ -306,8 +330,11 @@ def show():
         tags = None
     tags, articles = format_articles(articles, tags=tags)
     _, feature_articles = format_articles(feature_articles)
-    return json.dumps({"count": count, "articles": articles, "feature_articles": feature_articles,
-                       "tags": [i for i in sorted(tags.items(), key=lambda x: x[1], reverse=True)]})
+    return json.dumps({
+        "count": count,
+        "articles": articles,
+        "feature_articles": feature_articles,
+        "tags": [i for i in sorted(tags.items(), key=lambda x: x[1], reverse=True)]})
 
 
 @app.route("/cut")
@@ -317,16 +344,11 @@ def cut():
     left = request.args.get("left", 0)
     width = request.args.get("width", 0)
     height = request.args.get("height", 0)
-    sh = hashlib.sha1(url.encode())
-    sh.update(bytes(str(top), encoding="utf-8"))
-    sh.update(bytes(str(left), encoding="utf-8"))
-    sh.update(bytes(str(width), encoding="utf-8"))
-    sh.update(bytes(str(height), encoding="utf-8"))
-    name = sh.hexdigest()[:10] + ".png"
-    save_name = os.path.join(project_path, "static/temp/", name)
+
+    save_name = get_cut_file_name(project_path, url, top, left, width, height)
     try:
         cuter.cut(url, save_name, top, left, width, height)
     except Exception:
         import traceback
         traceback.print_exc()
-    return redirect("/static/temp/" + name)
+    return redirect(save_name.replace(project_path, ""))

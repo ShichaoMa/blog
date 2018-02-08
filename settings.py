@@ -30,5 +30,3 @@ AUTHOR = os.environ.get("AUTHOR", "夏洛之枫")
 DB = os.environ.get("DB", "sqlite")
 
 PHANTOMJS_PATH = os.environ.get("PHANTOMJS_PATH", "/usr/local/bin/phantomjs")
-
-LOGGER_HANDLER_POLICY = os.environ.get("LOGGER_HANDLER_POLICY", "debug")

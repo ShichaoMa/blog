@@ -4,6 +4,7 @@ import os
 import time
 import random
 import sqlite3
+import hashlib
 import datetime
 
 from threading import local
@@ -93,3 +94,13 @@ def code_generator(interval, key="ABCDEFGHIGKLMNOPQISTUVWXYZ0123456789"):
                 f.write(code)
                 f.write("\n%d"%time.time())
         yield code
+
+
+def get_cut_file_name(project_path, url, top, left, width, height):
+    sh = hashlib.sha1(url.encode())
+    sh.update(bytes(str(top), encoding="utf-8"))
+    sh.update(bytes(str(left), encoding="utf-8"))
+    sh.update(bytes(str(width), encoding="utf-8"))
+    sh.update(bytes(str(height), encoding="utf-8"))
+    name = sh.hexdigest()[:10] + ".png"
+    return os.path.join(project_path, "static/temp/", name)
