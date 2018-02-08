@@ -15,10 +15,7 @@ from .db import DataBase
 from .html_cut import Cuter
 from .utils import project_path, decode, format_articles, code_generator, get_image
 
-
-
-
-app = Flask(__name__)
+app = Flask("blog")
 app.config.from_pyfile(os.path.join(project_path, "settings.py"))
 app.static_folder = os.path.join(project_path, app.config.get("STATIC_FOLDER"))
 app.static_url_path = app.config.get("STATIC_URL_PATH")
@@ -327,5 +324,9 @@ def cut():
     sh.update(bytes(str(height), encoding="utf-8"))
     name = sh.hexdigest()[:10] + ".png"
     save_name = os.path.join(project_path, "static/temp/", name)
-    cuter.cut(url, save_name, top, left, width, height)
+    try:
+        cuter.cut(url, save_name, top, left, width, height)
+    except Exception:
+        import traceback
+        traceback.print_exc()
     return redirect("/static/temp/" + name)
