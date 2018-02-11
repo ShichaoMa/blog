@@ -240,11 +240,11 @@
 
     $.jqPaginator.defaultOptions = {
         wrapper: '',
-        first: '<li class="first"><a href="#list">&lt;&lt;</a></li>',
-        prev: '<li class="prev"><a href="#list">&lt;</a></li>',
-        next: '<li class="next"><a href="#list">&gt;</a></li>',
-        last: '<li class="last"><a href="#list">&gt;&gt;</a></li>',
-        page: '<li class="page"><a href="#list">{{page}}</a></li>',
+        first: '<li class="first"><a href="#1">&lt;&lt;</a></li>',
+        prev: '<li class="prev"><a href="#{{page}}">&lt;</a></li>',
+        next: '<li class="next"><a href="#{{page}}">&gt;</a></li>',
+        last: '<li class="last"><a href="#{{totalPages}}">&gt;&gt;</a></li>',
+        page: '<li class="page"><a href="#{{page}}">{{page}}</a></li>',
         totalPages: 0,
         totalCounts: 0,
         pageSize: 0,

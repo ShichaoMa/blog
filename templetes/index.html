@@ -47,6 +47,23 @@
 </style>
 
 <script type="text/babel">
+    
+
+    var p = {
+            _path :"{{path}}",
+            get path(){
+                return this._path;
+            },
+            set path(val) {
+                if(val){
+                    val = `/?path=${encodeURI(val)}`;
+                }else{
+                    val = "/"
+                }
+                window.history.pushState("", "", val);
+                this._path = val;
+            }
+        };
 
     function gen_url(id){
         return '{{url_for("article")}}?id=' + id;
@@ -60,7 +77,7 @@
         if(article){
             return (<Block {...article}>
                 <div className="clearfix">
-                    <a value={gen_url(article.id)} href={"#" + gen_url(article.id)}
+                    <a value={gen_url(article.id)} href="#"
                        className="btn btn-clean-one" onClick={that.handleClick}>更多</a>
                 </div>
             </Block>)
@@ -82,12 +99,15 @@
         constructor(props) {
             super(props);
             this.handleClick = this.handleClick.bind(this);
-            window.location.hash = "list";
+            this.currentPage = parseInt(window.location.hash.substr(1)) || 1;
+            p.path = "list";
+            window.location.hash = common.from/common.size == 0 ?
+                this.currentPage : common.from/common.size + 1;
             this.state = {};
         }
 
         handleClick(e) {
-            e.preventDefault();
+            //e.preventDefault();
             e.stopPropagation();
             let target = $(e.currentTarget);
             common.row.setState({
@@ -99,7 +119,7 @@
         }
 
         handleReturn(e){
-            window.location.hash = "";
+            p.path = "";
             common.row.setState({url: null, showList: null});
         }
 
@@ -109,7 +129,8 @@
                 totalCounts: this.props.count,
                 pageSize: 20,
                 visiblePages: 10,
-                currentPage: common.from/common.size + 1,
+                currentPage: common.from/common.size == 0 ?
+                    this.currentPage : common.from/common.size + 1,
                 onPageChange: function (num, type) {
                     if(type == "change"){
                         that.setState({
@@ -163,7 +184,7 @@
                 </div>
                 <ul id="page" className="pagination"></ul>
                 <div className="clearfix">
-                    <span className="btn btn-clean-one span-right" onClick={this.handleReturn}>返回</span>
+                    <a href="#" className="btn btn-clean-one span-right" onClick={this.handleReturn}>返回</a>
                 </div>
             </div>)
         }
@@ -180,7 +201,7 @@
         }
 
         handleClick(e) {
-            e.preventDefault();
+            p.path = "";
             this.props.parent.setState({url: null})
         }
 
@@ -202,8 +223,8 @@
             input1.attr("name", "ids");
             input1.attr("value", this.props.id);
             form.append(input1);
-            if(window.location.hash.indexOf("code")!= -1){
-                let code = /code=(\w+)/.exec(window.location.hash)[1];
+            if(p.path.indexOf("code")!= -1){
+                let code = /code=(\w+)/.exec(p.path)[1];
                 let input2 = $("<input>");
                 input2.attr("type", "hidden");
                 input2.attr("name", "code");
@@ -337,10 +358,10 @@
             common.row = this;
             this.handleClick = this.handleClick.bind(this);
             this.handleList = this.handleList.bind(this);
-            if(window.location.hash && window.location.hash.indexOf("list") != -1){
+            if(p.path && p.path.indexOf("list") != -1){
                   this.state = {showList: true};
-            }else if(window.location.hash){
-                this.state = {url: window.location.hash.substr(1)};
+            }else if(p.path){
+                this.state = {url: p.path};
             }else{
                 this.state = {};
             }
@@ -357,12 +378,10 @@
         }
 
         handleList(e){
-            e.preventDefault();
             this.setState({"showList": true});
         }
 
         render() {
-            window.location.hash = "";
             if(this.state.url){
                 let data = null;
                 $.ajax({
@@ -378,12 +397,13 @@
                     let html = { __html: data.article};
                     data.article = null;
                     data.parent = this;
-                    window.location.hash = this.state.url;
+                    p.path = this.state.url;
                     return (<Article {...data}>
                         <div dangerouslySetInnerHTML={html} className="markdown-body"/>
                     </Article>)
                 }
             }
+
             if(this.state.showList){
                 let data = null;
                 $.ajax({
@@ -413,7 +433,7 @@
                 return (<div className="row" key={blocks[0].id}>{gen_block(blocks[0], that)} {gen_block(blocks[1], that)}</div>)
             })}
                 <div className="paging">
-                    <span className="btn btn-clean-one" onClick={this.handleList}>全部文章</span>
+                    <a href="#" className="btn btn-clean-one" onClick={this.handleList}>全部文章</a>
                 </div>
             </div>)
         }
@@ -428,7 +448,7 @@
         }
 
         handleClick(e) {
-            e.preventDefault();
+            //e.preventDefault();
             let target = $(e.currentTarget);
             common.row.setState({
                 url: target.val(),
@@ -459,7 +479,7 @@
                         </a>);
             });
             let tags = this.props.tags.map(
-                (tag) => (<li key={tag[0]}><a title={tag[1] + "篇相关文章"} onClick={common.container.handleClick} value={tag[0]}>{tag[0]}</a></li>)
+                (tag) => (<li key={tag[0]}><a title={tag[1] + "篇相关文章"} href="#" onClick={common.container.handleClick} value={tag[0]}>{tag[0]}</a></li>)
             );
             return (<aside className="col-md-4 blog-aside">
                         <div className="aside-widget">
@@ -529,8 +549,9 @@
         }
 
         handleClick(e){
-            e.preventDefault();
+            // e.preventDefault();
             e.stopPropagation();
+            p.path = "";
             if($(e.currentTarget).val()){
                 this.setState({searchField: $(e.currentTarget).val(), fulltext: false});
             }else{

@@ -32,7 +32,10 @@ next(code_generator)
 
 @app.route("/")
 def index():
-    return render_template('index.html', author=app.config.get("AUTHOR"))
+    return render_template(
+        'index.html',
+        author=app.config.get("AUTHOR"),
+        path=request.args.get("path", ""))
 
 
 @app.route("/import")
@@ -65,7 +68,9 @@ def check():
                                id=request.form.get("id", ""),
                                ref=ref,
                                article=db.gen_article(
-                                   app.config.get("INDEX"), app.config.get("DOC_TYPE"), request.form.get("id")))
+                                   app.config.get("INDEX"),
+                                   app.config.get("DOC_TYPE"),
+                                   request.form.get("id")))
     else:
         return render_template("login.html", title=request.form.get("title", ""),
                                tags=request.form.get("tags", ""),
@@ -80,7 +85,9 @@ def check():
 def load():
     if request.args.get("username") == app.config.get("USERNAME") and \
                     request.args.get("password") == app.config.get("PASSWORD"):
-        session["login"] = "%s:%s"%(request.form.get("username"), request.form.get("password"))
+        session["login"] = "%s:%s" % (
+            request.form.get("username"),
+            request.form.get("password"))
         return json.dumps({"result": 1})
     else:
         return json.dumps({"result": 0})
