@@ -220,9 +220,11 @@
             var opts = self.options;
 
             self.$container.off();
-            self.$container.on('click', '[jp-role]', function () {
+            self.$container.on('click', '[jp-role]', function (event) {
                 var $el = $(this);
                 if ($el.hasClass(opts.disableClass) || $el.hasClass(opts.activeClass)) {
+                    // 用来阻止a标签的默认行为
+                    event.preventDefault();
                     return;
                 }
 
