@@ -47,6 +47,9 @@
     a {
     	overflow: hidden;
     }
+    #pageTop + div {
+        margin: 20px 0px;
+    }
 </style>
 
 <script type="text/babel">
@@ -128,7 +131,7 @@
 
         componentDidMount(){
             let that = this;
-            $('#page').jqPaginator({
+            let pageOption = {
                 totalCounts: this.props.count,
                 pageSize: 20,
                 visiblePages: 10,
@@ -143,7 +146,9 @@
                         })
                     }
                 }
-            });
+            };
+            $('#pageTop').jqPaginator(pageOption);
+            $('#pageBottom').jqPaginator(pageOption);
         }
 
         render(){
@@ -160,9 +165,13 @@
                            success: function(resp){
                                 let data = eval("("+resp+")");
                                 articles = data.articles;
-                                $('#page').jqPaginator('option', {
-                                    totalPages: data.count
-                                });
+                                let option = {
+                                    totalPages: data.count,
+                                    currentPage: common.from/common.size + 1,
+                                }
+                                $('#pageTop').jqPaginator('option', option);
+                                $('#pageBottom').jqPaginator('option', option);
+                                //$('#page').jqPaginator();
                             }
                        });
             }
@@ -180,12 +189,16 @@
                 <header>
                     <h3>全部文章</h3>
                 </header>
+                <ul id="pageTop" className="pagination"></ul>
+                <div className="clearfix" >
+                    <a href="#" className="btn btn-clean-one span-right" onClick={this.handleReturn}>返回</a>
+                </div>
                 <div className="body">
                     <div className="list-group">
                         {list}
                     </div>
                 </div>
-                <ul id="page" className="pagination"></ul>
+                <ul id="pageBottom" className="pagination"></ul>
                 <div className="clearfix">
                     <a href="#" className="btn btn-clean-one span-right" onClick={this.handleReturn}>返回</a>
                 </div>
