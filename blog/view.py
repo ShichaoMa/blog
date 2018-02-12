@@ -35,7 +35,8 @@ def index():
     return render_template(
         'index.html',
         author=app.config.get("AUTHOR"),
-        path=request.args.get("path", ""))
+        path=request.args.get("path", ""),
+        page_size=app.config.get("PAGE_SIZE", 40))
 
 
 @app.route("/import")

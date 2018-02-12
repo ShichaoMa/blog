@@ -55,7 +55,7 @@
 <script type="text/babel">
     
 
-    var p = {
+    const p = {
             _path :"{{path}}",
             get path(){
                 return this._path;
@@ -70,6 +70,9 @@
                 this._path = val;
             }
         };
+
+    const pageSize = parseInt('{{page_size}}' || 40);
+    const common = {"from": 0, "size": pageSize};
 
     function gen_url(id){
         return '{{url_for("article")}}?id=' + id;
@@ -89,8 +92,6 @@
             </Block>)
         }
     }
-
-    const common = {"from": 0, "size": 20};
 
     $(document).ready(function(){
         document.onkeydown = function(e){
@@ -133,14 +134,14 @@
             let that = this;
             let pageOption = {
                 totalCounts: this.props.count,
-                pageSize: 20,
+                pageSize: pageSize,
                 visiblePages: 10,
                 currentPage: common.from/common.size == 0 ?
                     this.currentPage : common.from/common.size + 1,
                 onPageChange: function (num, type) {
                     if(type == "change"){
                         that.setState({
-                            from: (num -1) *20,
+                            from: (num -1) * pageSize,
                             size: common.size,
                             url: "{{url_for('show')}}"
                         })
