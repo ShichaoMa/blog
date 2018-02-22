@@ -96,7 +96,7 @@
     $(document).ready(function(){
         document.onkeydown = function(e){
             let ev = document.all ? window.event : e;
-            if(ev.keyCode == 13) {
+            if(ev.keyCode == 13 && ev.target.id == "searchField") {
                 $(".searchbutton").click();
             }
         }
