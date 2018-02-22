@@ -692,7 +692,7 @@ The blog main page boxes
 =============== */
 .blog-teaser {
   background-color: #fff;
-  border: 1px solid #ddd;
+  /*border: 1px solid #ddd;*/
   margin-bottom: 40px;
 }
 
