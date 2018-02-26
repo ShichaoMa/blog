@@ -32,3 +32,5 @@ AUTHOR = os.environ.get("AUTHOR", "夏洛之枫")
 DB = os.environ.get("DB", "sqlite")
 
 PHANTOMJS_PATH = os.environ.get("PHANTOMJS_PATH", "/usr/local/bin/phantomjs")
+
+CODE_EXPIRE_INTERVAL = 30*3600*24
