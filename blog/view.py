@@ -153,10 +153,13 @@ def export():
                 html = unescape(html)
 
                 def _repl(mth):
-                    parts = urlparse(mth.group(1))
+                    url = mth.group(1)
+                    if not url.startswith("/cut"):
+                        return url
+                    parts = urlparse(url)
                     params = dict(p.split("=", 1) for p in parts.query.split("&"))
                     return urljoin(request.host_url, get_cut_file_name("", **params).strip("/"))
-                html = re.sub(r'(?<=src\=")(.+?)(?=")', _repl, html)
+                html = '<div class="markdown-body">%s</div>' % re.sub(r'(?<=src\=")(.+?)(?=")', _repl, html)
                 buffer = HTML(string=html).write_pdf(
                     stylesheets=[os.path.join(project_path, "static/css/github.css")])
                 ext = "pdf"
