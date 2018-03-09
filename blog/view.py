@@ -161,7 +161,7 @@ def export():
                     return urljoin(request.host_url, get_cut_file_name("", **params).strip("/"))
                 html = '<div class="markdown-body">%s</div>' % re.sub(r'(?<=src\=")(.+?)(?=")', _repl, html)
                 buffer = HTML(string=html).write_pdf(
-                    stylesheets=[os.path.join(project_path, "static/css/github.css"),
+                    stylesheets=[#os.path.join(project_path, "static/css/github.css"),
                                  os.path.join(project_path, "static/css/pdf.css")])
                 ext = "pdf"
             zf.writestr("%s.%s" % (article["_source"]["title"], ext),
