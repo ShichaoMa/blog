@@ -1,25 +1,25 @@
 <html>
     <head>
         <title>更新</title>
-         <link href={{url_for("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
+         <link href={{reverse_url("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
     </head>
-    <link rel="stylesheet" href={{url_for("static", filename="css/bootstrap.min.css")}}>
-    <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
+    <link rel="stylesheet" href={{reverse_url("static", filename="css/bootstrap.min.css")}}>
+    <link rel="stylesheet" href={{reverse_url("static", filename="css/style.css")}} id="theme-styles">
 
-    <link rel="stylesheet" href={{url_for("static", filename="editor/index.css")}}>
+    <link rel="stylesheet" href={{reverse_url("static", filename="editor/index.css")}}>
 
     <script src="//cdn.bootcss.com/vue/2.1.4/vue.min.js"></script>
-    <script src={{url_for("static", filename="js/jquery-1.12.4.min.js")}}></script>
-    <script src={{url_for("static", filename="js/bootstrap.min.js")}}></script>
-    <script src={{url_for("static", filename="js/modernizr.js")}}></script>
-    <script src={{url_for("static", filename="editor/index.js")}}></script>
+    <script src={{reverse_url("static", filename="js/jquery-1.12.4.min.js")}}></script>
+    <script src={{reverse_url("static", filename="js/bootstrap.min.js")}}></script>
+    <script src={{reverse_url("static", filename="js/modernizr.js")}}></script>
+    <script src={{reverse_url("static", filename="editor/index.js")}}></script>
 
     <body>
         <div style="padding: 0% 10%;text-align: center">
             <aside style="width: 80%" class="create-comment">
 
                 <h2><i class="fa fa-pencil"></i> 修改文章</h2>
-                <form method="post" action="{{url_for('update')}}">
+                <form method="post" action="{{reverse_url('service:article:update')}}">
                     <input name="id" type="hidden" value="{{id}}" />
                     <div class="row">
                         <div class="col-md-6">

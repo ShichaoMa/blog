@@ -7,7 +7,7 @@ import elasticsearch
 
 from abc import ABC, abstractmethod
 
-from .utils import conn_wrapper, format_data, project_path
+from blog.blog.utils import conn_wrapper, format_data, project_path
 
 
 class Driver(ABC):

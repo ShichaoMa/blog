@@ -12,9 +12,9 @@ from io import BytesIO
 from flask import Flask, render_template, \
     request, session, url_for, redirect, make_response
 
-from .db import DataBase
-from .html_cut import Cuter
-from .utils import project_path, decode, format_articles, \
+from db import DataBase
+from blog.blog.lib.html_cut import Cuter
+from blog.blog.utils import project_path, decode, format_articles, \
     code_generator, get_image, get_cut_file_name
 
 app = Flask("blog")
@@ -44,7 +44,7 @@ def login():
     if not session.get("login"):
         return render_template("login.html", ref="imports")
     else:
-        return render_template("imports.html", success="",
+        return render_template("import.html", success="",
                                title=request.form.get("title", ""),
                                tags=request.form.get("tags", ""),
                                description=request.form.get("description", ""),
@@ -94,10 +94,10 @@ def load():
         return json.dumps({"result": 0})
 
 
-@app.route("/imports", methods=["post"])
-def imports():
+@app.route("/upload")
+def upload():
     if not session.get("login"):
-        return render_template("login.html", ref="imports")
+        return render_template("login.html", ref="upload")
     file = request.files["article"]
     title = request.form.get("title")
     article = decode(file.read())

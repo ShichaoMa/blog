@@ -10,8 +10,8 @@ from os.path import dirname, join, basename, abspath
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
-from blog.db import DataBase
-from blog.utils import project_path
+from db import DataBase
+from blog.blog.utils import project_path
 
 app = Flask(__name__)
 app.config.from_pyfile(join(project_path, "settings.py"))

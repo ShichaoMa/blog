@@ -1,16 +1,16 @@
 <html>
     <head>
     <title>导入</title>
-     <link href={{url_for("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
+     <link href={{reverse_url("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
          <!-- Bootstrap styles -->
-    <link rel="stylesheet" href={{url_for("static", filename="css/bootstrap.min.css")}}>
+    <link rel="stylesheet" href={{reverse_url("static", filename="css/bootstrap.min.css")}}>
 
     <!-- Styles -->
-    <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
+    <link rel="stylesheet" href={{reverse_url("static", filename="css/style.css")}} id="theme-styles">
 
-    <script src={{url_for("static", filename="js/jquery-1.12.4.min.js")}}></script>
-    <script src={{url_for("static", filename="js/bootstrap.min.js")}}></script>
-    <script src={{url_for("static", filename="js/modernizr.js")}}></script>
+    <script src={{reverse_url("static", filename="js/jquery-1.12.4.min.js")}}></script>
+    <script src={{reverse_url("static", filename="js/bootstrap.min.js")}}></script>
+    <script src={{reverse_url("static", filename="js/modernizr.js")}}></script>
     </head>
 
     <body>
@@ -19,7 +19,7 @@
 
                 <h2><i class="fa fa-pencil"></i>上传文章</h2>
                 <h3 style="color: green;">{{success}}</h3>
-                <form method="post" enctype="multipart/form-data" action="{{url_for('imports')}}">
+                <form method="post" enctype="multipart/form-data" action="{{reverse_url('service:article:upload')}}">
                     <div class="row">
                         <div class="col-md-6">
                             <input type="text" name="tags" placeholder="tags" required=required class="form-control input-lg"/>

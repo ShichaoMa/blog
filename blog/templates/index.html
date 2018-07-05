@@ -6,30 +6,30 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
 
-    <link href={{url_for("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
+    <link href={{reverse_url("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
 
     <!-- Bootstrap styles -->
-    <link rel="stylesheet" href={{url_for("static", filename="css/bootstrap.min.css")}}>
+    <link rel="stylesheet" href={{reverse_url("static", filename="css/bootstrap.min.css")}}>
 
     <!-- Font-Awesome -->
-    <link rel="stylesheet" href={{url_for("static", filename="css/font-awesome/css/font-awesome.min.css")}}>
+    <link rel="stylesheet" href={{reverse_url("static", filename="css/font-awesome/css/font-awesome.min.css")}}>
 
     <!-- Styles -->
-    <link rel="stylesheet" href={{url_for("static", filename="css/style.css")}} id="theme-styles">
-    <link rel="stylesheet" href={{url_for("static", filename="css/github.css")}}>
+    <link rel="stylesheet" href={{reverse_url("static", filename="css/style.css")}} id="theme-styles">
+    <link rel="stylesheet" href={{reverse_url("static", filename="css/github.css")}}>
 
     <!--[if lt IE 9]>
-        <script src={{url_for("static", filename="js/vendor/google/html5-3.6-respond-1.1.0.min.js")}}></script>
+        <script src={{reverse_url("static", filename="js/vendor/google/html5-3.6-respond-1.1.0.min.js")}}></script>
     <![endif]-->
 
-    <script src={{url_for("static", filename="js/jquery-1.12.4.min.js")}}></script>
-    <script src={{url_for("static", filename="js/bootstrap.min.js")}}></script>
-    <script src={{url_for("static", filename="js/modernizr.js")}}></script>
-    <script src={{url_for("static", filename="js/react.js")}}></script>
-    <script src={{url_for("static", filename="js/react-dom.js")}}></script>
-    <script src={{url_for("static", filename="js/browser.min.js")}}></script>
-    <script src={{url_for("static", filename="js/moment.min.js")}}></script>
-    <script src={{url_for("static", filename="js/jqpage.js")}}></script>
+    <script src={{reverse_url("static", filename="js/jquery-1.12.4.min.js")}}></script>
+    <script src={{reverse_url("static", filename="js/bootstrap.min.js")}}></script>
+    <script src={{reverse_url("static", filename="js/modernizr.js")}}></script>
+    <script src={{reverse_url("static", filename="js/react.js")}}></script>
+    <script src={{reverse_url("static", filename="js/react-dom.js")}}></script>
+    <script src={{reverse_url("static", filename="js/browser.min.js")}}></script>
+    <script src={{reverse_url("static", filename="js/moment.min.js")}}></script>
+    <script src={{reverse_url("static", filename="js/jqpage.js")}}></script>
 </head>
 <style>
     .span-right{
@@ -56,7 +56,7 @@
     
 
     const p = {
-            _path :"{{path}}",
+            _path :"{{_path}}",
             get path(){
                 return this._path;
             },
@@ -75,7 +75,7 @@
     const common = {"from": 0, "size": pageSize};
 
     function gen_url(id){
-        return '{{url_for("article")}}?id=' + id;
+        return '{{reverse_url("service:article:article")}}?id=' + id;
     }
 
     function parseDate(date){
@@ -132,24 +132,26 @@
 
         componentDidMount(){
             let that = this;
-            let pageOption = {
-                totalCounts: this.props.count,
-                pageSize: pageSize,
-                visiblePages: 10,
-                currentPage: common.from/common.size == 0 ?
-                    this.currentPage : common.from/common.size + 1,
-                onPageChange: function (num, type) {
-                    if(type == "change"){
-                        that.setState({
-                            from: (num -1) * pageSize,
-                            size: common.size,
-                            url: "{{url_for('show')}}"
-                        })
+            if(this.props.count){
+                let pageOption = {
+                    totalCounts: this.props.count,
+                    pageSize: pageSize,
+                    visiblePages: 10,
+                    currentPage: common.from/common.size == 0 ?
+                        this.currentPage : common.from/common.size + 1,
+                    onPageChange: function (num, type) {
+                        if(type == "change"){
+                            that.setState({
+                                from: (num -1) * pageSize,
+                                size: common.size,
+                                url: "{{reverse_url('service:article:show')}}"
+                            })
+                        }
                     }
-                }
-            };
-            $('#pageTop').jqPaginator(pageOption);
-            $('#pageBottom').jqPaginator(pageOption);
+                };
+                $('#pageTop').jqPaginator(pageOption);
+                $('#pageBottom').jqPaginator(pageOption);
+            }
         }
 
         render(){
@@ -159,12 +161,12 @@
                        $.ajax({
                            url: this.state.url,
                            data: {
-                               from: this.state.from,
+                               _from: this.state.from,
                                size: this.state.size
                            },
                            async: false,
                            success: function(resp){
-                                let data = eval("("+resp+")");
+                                let data = resp;//eval("("+resp+")");
                                 articles = data.articles;
                                 let option = {
                                     totalPages: data.count,
@@ -234,7 +236,7 @@
             form.attr("style", "display:none");
             form.attr("target", "");
             form.attr("method", "get");
-            form.attr("action", "{{url_for('export')}}");
+            form.attr("action", "{{reverse_url('service:article:export')}}");
             let input1 = $("<input>");
             input1.attr("type", "hidden");
             input1.attr("name", "ids");
@@ -257,7 +259,7 @@
             let have_not_send = true;
             while(have_not_send){
                 $.ajax({
-                       url: "{{url_for('modify')}}",
+                       url: "{{reverse_url('service:article:modify')}}",
                        method: "post",
                        data: {
                            id: this.props.id,
@@ -271,7 +273,7 @@
                        },
                        async: false,
                        success: function(resp){
-                            let data = eval("("+resp+")");
+                            let data = resp;//eval("("+resp+")");
                             if(!data.result){
                                 let have_not_login = true;
                                 while(have_not_login){
@@ -286,14 +288,14 @@
                                         break;
                                     }
                                     $.ajax({
-                                        url: "{{url_for('load')}}",
+                                        url: "{{reverse_url('service:article:load')}}",
                                         data: {
                                             username: username,
                                             password: password
                                         },
                                         async: false,
                                         success: function (resp) {
-                                            let data = eval("("+resp+")");
+                                            let data = resp;//eval("("+resp+")");
                                             if(data.result){
                                                 have_not_login = false;
                                             }else{
@@ -319,9 +321,9 @@
         }
 
         render() {
-            let img =  this.props.first_img || '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random() * 1) + ".jpg";
-            let edit_url = "{{url_for('edit')}}?id=" + this.props.id;
-            let delete_url = "{{url_for('delete')}}?id=" + this.props.id;
+            let img =  this.props.first_img || '{{reverse_url("static", filename="img/pretty")}}/' + Math.floor(Math.random() * 1) + ".jpg";
+            let edit_url = "{{reverse_url('service:article:edit')}}?id=" + this.props.id;
+            let delete_url = "{{reverse_url('service:article:delete')}}?id=" + this.props.id;
             return (<div className="col-md-8 blog-main">
                 <article className="blog-post">
                     <header>
@@ -348,7 +350,7 @@
     }
 
     function Block(props){
-        let img = props.first_img || '{{url_for("static", filename="img/pretty")}}/' + Math.floor(Math.random()*1) + ".jpg";
+        let img = props.first_img || '{{reverse_url("static", filename="img/pretty")}}/' + Math.floor(Math.random()*1) + ".jpg";
         return (<div className="col-md-6 col-sm-6">
                     <article className=" blog-teaser">
                         <header>
@@ -405,7 +407,7 @@
                     url: this.state.url,
                     async: false,
                     success: function(resp){
-                        data = eval("("+resp+")");
+                        data = resp;//eval("("+resp+")");
                     }
                 });
                 if(data.error){
@@ -424,11 +426,12 @@
             if(this.state.showList){
                 let data = null;
                 $.ajax({
-                    url: "{{url_for('show')}}",
-                    data: {"from": common.from, "size": common.size},
+                    url: "{{reverse_url('service:article:show')}}",
+                    data: {"_from": common.from, "size": common.size},
                     async: false,
                     success: function(resp){
-                        data = eval("("+resp+")");
+                        data = resp;
+                        // data = eval("("+resp+")");
                     }
                 });
                 return (<List {...data} />)
@@ -539,11 +542,13 @@
         let data = null;
         // 用来在多个并行组件之间传递参数
         $.ajax({
-            url: '{{url_for("show")}}',
+            url: '{{reverse_url("service:article:show")}}',
             data: {"searchField": props.searchField, "fulltext": props.fulltext || false},
             async: false,
             success: function(resp){
-                data = eval("("+resp+")");
+                data = resp;
+                // console.log(resp);
+                // data = eval("("+resp+")");
             }
         });
         let row = (<Row {...{"articles": data.articles.slice(0, Math.max(4, Math.floor(data.tags.length/15)*2))}}/>);
@@ -610,17 +615,17 @@
             e.preventDefault();
             let target = $(e.currentTarget);
             if(target.val() == "1"){
-                location.href = '{{url_for("index")}}';
+                location.href = '{{reverse_url("service:welcome:index")}}';
             }else if(target.val() == "2"){
                 let code = prompt("请输入密钥！");
                 if(code){
                     common.row.setState({
-                        url: `{{url_for('me')}}?code=${code}`,
+                        url: `{{reverse_url('service:article:me')}}?code=${code}`,
                     });
                 }
             }else{
                 common.row.setState({
-                    url: "{{url_for('contact')}}",
+                    url: "{{reverse_url('service:article:contact')}}",
                 });
             }
 
@@ -629,7 +634,7 @@
         render(){
             return (<div>
                         <a href="#" onClick={this.handleClick} id="logo">
-                            <img value="1" src='{{url_for("static", filename="img/logo.png")}}' alt="clean Blog"/>
+                            <img value="1" src='{{reverse_url("static", filename="img/logo.png")}}' alt="clean Blog"/>
                         </a>
                     <div id="mobile-nav-toggle" className="pull-right">
                         <a href="#" data-toggle="collapse" data-target=".clean-nav .navbar-collapse">

@@ -82,20 +82,16 @@ class Cuter(object):
 
     @cache_method()
     def cut(self, url, save_name, top=0, left=0, width=1024, height=768):
-        try:
-            os.system(("%s "*8) % (
-                self.phantomjs_path,
-                self.js_path,
-                url,
-                save_name,
-                top,
-                left,
-                width,
-                height))
-            if os.path.exists(save_name):
-                return True
-            else:
-                return False
-        except Exception as e:
-            print(e)
+        os.system(("%s "*8) % (
+            self.phantomjs_path,
+            self.js_path,
+            url,
+            save_name,
+            top,
+            left,
+            width,
+            height))
+        if os.path.exists(save_name):
+            return True
+        else:
             return False

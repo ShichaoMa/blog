@@ -1,0 +1,17 @@
+[Unit]
+# 描述
+Description=blog
+# 在哪个程序之后启动
+After=network.target
+# 依赖哪个程序
+Wants=network.target
+[Service]
+Environment=PASSWORD=12345
+Environment=USERNAME=test
+Type=simple
+# 执行命令
+ExecStart=cd ~/blog/blog && uvicorn blog:app
+StandardOutput=uvicorn
+StandardError=uvicorn
+[Install]
+WantedBy=multi-user.target

@@ -2,6 +2,7 @@
 import re
 import os
 import time
+import pytz
 import random
 import sqlite3
 import hashlib
@@ -12,6 +13,7 @@ from threading import local
 
 local = local()
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+default_tz = pytz.timezone('Asia/Shanghai')
 
 
 def conn_wrapper(func):
@@ -56,20 +58,19 @@ def format_data(data, tz):
 
 def format_articles(articles, tags=None):
     group_tags = {}
-    formated = []
+    formatted = []
     for article in articles:
-        article = article["_source"]
         article["first_img"] = get_image(article.pop("article"))
         if not tags:
             for tag in article["tags"]:
                 group_tags[tag.upper()] = group_tags.setdefault(tag.upper(), 0) + 1
-        formated.append(article)
+        formatted.append(article)
 
     if tags:
         for ts in tags:
-            for tag in ts[0].split(","):
+            for tag in ts.split(","):
                 group_tags[tag.upper()] = group_tags.setdefault(tag.upper(), 0) + 1
-    return group_tags, formated
+    return group_tags, formatted
 
 
 def get_image(body):
@@ -104,3 +105,11 @@ def get_cut_file_name(project_path, url, top, left, width, height):
     sh.update(bytes(str(height), encoding="utf-8"))
     name = sh.hexdigest()[:10] + ".png"
     return os.path.join(project_path, "static/temp/", name)
+
+
+def get_id():
+    return datetime.datetime.now(default_tz).strftime("%Y%m%d%H%M%S")
+
+
+def now(tz=None):
+    return datetime.datetime.now(tz or default_tz)
