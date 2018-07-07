@@ -1,1 +1,5 @@
 star-builder
+markdown
+pytz
+html2text
+weasyprint

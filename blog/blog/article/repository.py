@@ -11,15 +11,20 @@ from functools import partial
 from urllib.parse import urljoin, urlparse
 from toolkit.settings import FrozenSettings
 from star_builder import FileResponse, Repository
+from concurrent.futures import ProcessPoolExecutor
 
 from ..lib import Sqlite
-from ..lib.html_cut import Cuter
 from .article import Article
 from ..components import Code
-from ..utils import get_cut_file_name, project_path, get_id, format_articles, get_image
+from ..lib.html_cut import Cuter
+from ..utils import get_cut_file_name, project_path, \
+    get_id, format_articles, get_image
 
 
 class ArticleRepository(Repository):
+
+    def __init__(self):
+        self.executor = ProcessPoolExecutor()
 
     def resolve(self,
                 cuter: Cuter,
@@ -155,5 +160,7 @@ class ArticleRepository(Repository):
             project_path, url, top, left, width, height)
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(
-            None, self.cuter.cut, url, save_name, top, left, width, height)
+            self.executor,
+            self.cuter.cut,
+            url, save_name, top, left, width, height)
         return save_name

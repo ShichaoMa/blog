@@ -1,13 +1,13 @@
 import typing
-import markdown
 
 from apistar import http, App
 from toolkit.settings import FrozenSettings
 from star_builder.helper import redirect
 from star_builder import Service, route, get, post, Session
+
 from .article import Article
-from ..components import Code, FormParam, Cuter, Sqlite
-from ..utils import get_cut_file_name, now, format_articles, get_image, project_path
+from ..utils import project_path
+from ..components import FormParam
 from .repository import ArticleRepository
 
 
@@ -15,8 +15,7 @@ from .repository import ArticleRepository
 class ArticleService(Service):
 
     @get("/import")
-    async def _import(self: Service,
-                app: App,
+    async def _import(app: App,
                 article: Article,
                 session: Session):
         if not session.get("login"):
@@ -25,8 +24,7 @@ class ArticleService(Service):
             return app.render_template("import.html", success="", **article.to_json())
 
     @post("/check")
-    async def check(self: Service,
-                app: App,
+    async def check(app: App,
                 article: Article,
                 username: FormParam,
                 password: FormParam,
@@ -43,8 +41,7 @@ class ArticleService(Service):
             return app.render_template("login.html", ref=ref, **article.to_json())
 
     @get('/load')
-    async def load(self: Service,
-             username: FormParam,
+    async def load(username: FormParam,
              password: FormParam,
              settings: FrozenSettings,
              session: Session):
@@ -55,8 +52,7 @@ class ArticleService(Service):
             return {"result": 0}
 
     @post("/upload")
-    async def upload(self: Service,
-               app: App,
+    async def upload(app: App,
                article: Article,
                session: Session):
         if not session.get("login"):
@@ -65,16 +61,14 @@ class ArticleService(Service):
         return app.render_template("import.html", success="success")
 
     @get("/export")
-    async def export(self: Service,
-               code: http.QueryParam,
+    async def export(code: http.QueryParam,
                repo: ArticleRepository,
                article_list: typing.List[Article],
                ):
         return await repo.export(article_list, code)
 
     @post("/modify")
-    async def modify(self: Service,
-               img_url: FormParam,
+    async def modify(img_url: FormParam,
                repo: ArticleRepository,
                article: Article,
                session: Session):
@@ -84,8 +78,7 @@ class ArticleService(Service):
         return {"result": 1}
 
     @get("/edit")
-    async def edit(self: Service,
-             app: App,
+    async def edit(app: App,
              article: Article,
              session: Session):
         await article.load()
@@ -95,8 +88,7 @@ class ArticleService(Service):
             return app.render_template("edit.html", ref="update", **article)
 
     @post("/update")
-    async def update(self: Service,
-             app: App,
+    async def update(app: App,
              article: Article,
              repo: ArticleRepository,
              session: Session):
@@ -106,8 +98,7 @@ class ArticleService(Service):
         return redirect(app.reverse_url("service:welcome:index"))
 
     @get("/delete")
-    async def delete(self: Service,
-             app: App,
+    async def delete(app: App,
              article: Article,
              repo: ArticleRepository,
              session: Session):
@@ -118,14 +109,12 @@ class ArticleService(Service):
         return redirect(app.reverse_url("service:welcome:index"))
 
     @get("/article", name="article")
-    async def get_article(self: Service,
-             article: Article,
+    async def get_article(article: Article,
              repo: ArticleRepository):
         return await repo.get(article)
 
     @get("/me")
-    async def me(self: Service,
-                 article: Article,
+    async def me(article: Article,
                  code: http.QueryParam,
                  repo: ArticleRepository):
         if not repo.check_code(code):
@@ -133,14 +122,12 @@ class ArticleService(Service):
         return await repo.about(article, "me")
 
     @get("/contact")
-    async def contact(self: Service,
-                 article: Article,
+    async def contact(article: Article,
                  repo: ArticleRepository):
         return await repo.about(article, "contact")
 
     @get("/show")
-    async def show(self: Service,
-             searchField: http.QueryParam,
+    async def show(searchField: http.QueryParam,
              fulltext: http.QueryParam,
              repo: ArticleRepository,
              _from: http.QueryParam,

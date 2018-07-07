@@ -160,8 +160,12 @@ class Article(Type):
             cur.execute(
                 f"INSERT INTO {self.TABLE} "
                 f"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", (
-                self.id, self.description, ",".join(self.tags),
-                self.article, self.author, self.title,
+                self.id,
+                self.description,
+                ",".join(self.tags),
+                self.article,
+                self.author,
+                self.title,
                 self.feature,
                 self.created_at,
                 self.updated_at,
@@ -195,7 +199,6 @@ class Article(Type):
                 sub = f"AND (article LIKE ? OR tags LIKE ?)"
                 args.append(f"%{search_field}%")
                 args.append(f"%{search_field}%")
-
         else:
             if search_field:
                 sub = "AND tags LIKE ?"
@@ -236,8 +239,8 @@ class ArticleListComponent(Component):
     async def resolve(self,
                       sqlite: Sqlite,
                       ids: QueryParam,
-                      _from: QueryParam=0,
-                      size: QueryParam=20) -> typing.List[Article]:
+                      _from: QueryParam,
+                      size: QueryParam) -> typing.List[Article]:
         if ids:
             ids = ids.split(",")
         else:
