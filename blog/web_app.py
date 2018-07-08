@@ -5,6 +5,7 @@ import logging
 from uvicorn import run
 from star_builder import Application
 from whitenoise import WhiteNoise
+
 # 静态文件每次请求重新查找
 WhiteNoise.autorefresh = True
 

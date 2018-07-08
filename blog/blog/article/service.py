@@ -10,7 +10,7 @@ from apistar import http
 from functools import partial
 from urllib.parse import urljoin, urlparse
 from toolkit.settings import FrozenSettings
-from star_builder import FileResponse, Repository
+from star_builder import FileResponse, Service
 from concurrent.futures import ProcessPoolExecutor
 
 from ..lib import Sqlite
@@ -21,7 +21,7 @@ from ..utils import get_cut_file_name, project_path, \
     get_id, format_articles, get_image
 
 
-class ArticleRepository(Repository):
+class ArticleService(Service):
 
     def __init__(self):
         self.executor = ProcessPoolExecutor()

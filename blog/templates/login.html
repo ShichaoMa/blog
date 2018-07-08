@@ -4,7 +4,7 @@
          <link href={{reverse_url("static", filename="img/favicon.ico")}} rel="icon" type="image/x-icon" />
     </head>
     <body>
-        <form method="post" action="{{reverse_url('service:article:check')}}" >
+        <form method="post" action="{{reverse_url('view:article:check')}}" >
             <h1>这里不是你该来的地方</h1>
             <input type="hidden" name="ref" value="{{ref}}" />
             <input type="hidden" name="title" value="{{title}}" />

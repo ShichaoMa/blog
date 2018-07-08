@@ -3,16 +3,16 @@ import typing
 from apistar import http, App
 from toolkit.settings import FrozenSettings
 from star_builder.helper import redirect
-from star_builder import Service, route, get, post, Session
+from star_builder import Controller, route, get, post, Session
 
 from .article import Article
 from ..utils import project_path
 from ..components import FormParam
-from .repository import ArticleRepository
+from .service import ArticleService
 
 
 @route("", name="article")
-class ArticleService(Service):
+class ArticleController(Controller):
 
     @get("/import")
     async def _import(app: App,
@@ -21,7 +21,7 @@ class ArticleService(Service):
         if not session.get("login"):
             return app.render_template("login.html", ref="import")
         else:
-            return app.render_template("import.html", success="", **article.to_json())
+            return app.render_template("import.html", success="", **article.to_dict())
 
     @post("/check")
     async def check(app: App,
@@ -36,9 +36,9 @@ class ArticleService(Service):
             if hasattr(article, "id"):
                 article = await article.load()
             return app.render_template(
-                f"{ref}.html", success="", ref=ref, **article.to_json())
+                f"{ref}.html", success="", ref=ref, **article.to_dict())
         else:
-            return app.render_template("login.html", ref=ref, **article.to_json())
+            return app.render_template("login.html", ref=ref, **article.to_dict())
 
     @get('/load')
     async def load(username: FormParam,
@@ -62,19 +62,18 @@ class ArticleService(Service):
 
     @get("/export")
     async def export(code: http.QueryParam,
-               repo: ArticleRepository,
-               article_list: typing.List[Article],
-               ):
-        return await repo.export(article_list, code)
+               service: ArticleService,
+               article_list: typing.List[Article]):
+        return await service.export(article_list, code)
 
     @post("/modify")
     async def modify(img_url: FormParam,
-               repo: ArticleRepository,
+               service: ArticleService,
                article: Article,
                session: Session):
         if not session.get("login"):
             return {"result": 0}
-        await repo.modify(article, img_url)
+        await service.modify(article, img_url)
         return {"result": 1}
 
     @get("/edit")
@@ -90,60 +89,56 @@ class ArticleService(Service):
     @post("/update")
     async def update(app: App,
              article: Article,
-             repo: ArticleRepository,
+             service: ArticleService,
              session: Session):
         if not session.get("login"):
             return app.render_template("login.html", ref="edit", **article)
-        await repo.update(article)
-        return redirect(app.reverse_url("service:welcome:index"))
+        await service.update(article)
+        return redirect(app.reverse_url("view:welcome:index"))
 
     @get("/delete")
     async def delete(app: App,
              article: Article,
-             repo: ArticleRepository,
+             service: ArticleService,
              session: Session):
         if not session.get("login"):
             return app.render_template(
                 "login.html", ref="delete", id=article.id)
-        await repo.delete(article)
-        return redirect(app.reverse_url("service:welcome:index"))
+        await service.delete(article)
+        return redirect(app.reverse_url("view:welcome:index"))
 
     @get("/article", name="article")
     async def get_article(article: Article,
-             repo: ArticleRepository):
-        return await repo.get(article)
+             service: ArticleService):
+        return await service.get(article)
 
     @get("/me")
     async def me(article: Article,
                  code: http.QueryParam,
-                 repo: ArticleRepository):
-        if not repo.check_code(code):
+                 service: ArticleService):
+        if not service.check_code(code):
             return {"error": True}
-        return await repo.about(article, "me")
+        return await service.about(article, "me")
 
     @get("/contact")
     async def contact(article: Article,
-                 repo: ArticleRepository):
-        return await repo.about(article, "contact")
+                 service: ArticleService):
+        return await service.about(article, "contact")
 
     @get("/show")
     async def show(searchField: http.QueryParam,
              fulltext: http.QueryParam,
-             repo: ArticleRepository,
+             service: ArticleService,
              _from: http.QueryParam,
              size: http.QueryParam):
-       return await repo.show(searchField, _from, size, fulltext)
+       return await service.show(searchField, _from, size, fulltext)
 
     @get("/cut")
-    async def cut(repo: ArticleRepository,
+    async def cut(service: ArticleService,
             url: http.QueryParam,
-            top: http.QueryParam,
-            left: http.QueryParam,
-            width: http.QueryParam,
-            height: http.QueryParam):
-        top = top or 0
-        left = left or 0
-        width = width or 1024
-        height = height or 768
-        save_name = await repo.cut(url, top, left, width, height)
+            top: int=0,
+            left: int=0,
+            width: int=1024,
+            height: int=768):
+        save_name = await service.cut(url, top, left, width, height)
         return redirect(save_name.replace(project_path, ""))

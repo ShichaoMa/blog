@@ -48,7 +48,6 @@ class TagsFormat(BaseFormat):
         return isinstance(value, self.type)
 
     def validate(self, value):
-
         if isinstance(value, str):
             return value.split(",")
         if isinstance(value, bytes):
