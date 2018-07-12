@@ -3,7 +3,7 @@ import typing
 from apistar import http, App
 from toolkit.settings import FrozenSettings
 from star_builder.helper import redirect
-from star_builder import Controller, route, get, post, Session
+from star_builder import Controller, route, get, post, Session, require
 
 from .article import Article
 from ..utils import project_path
@@ -15,6 +15,7 @@ from .service import ArticleService
 class ArticleController(Controller):
 
     @get("/import")
+    @require(Session)
     async def _import(app: App,
                 article: Article,
                 session: Session):

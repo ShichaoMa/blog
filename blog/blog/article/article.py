@@ -23,6 +23,11 @@ class TsFormat(BaseFormat):
         return isinstance(value, self.type)
 
     def validate(self, value):
+        """
+        赋值和format会调用valiate，转普通类型转换成self.type类型
+        :param value:
+        :return:
+        """
         if isinstance(value, (str, bytes)):
             match = DATETIME_REGEX.match(value)
             if match:
@@ -33,6 +38,11 @@ class TsFormat(BaseFormat):
         raise ValidationError('Must be a valid timestamp.')
 
     def to_string(self, value):
+        """
+        所有最终会调用__getitem__的方法，会调用这个方法来反序列化，__getattr__则不会。
+        :param value:
+        :return:
+        """
         try:
             return datetime.datetime.fromtimestamp(
                 value, self.default_tz).strftime("%Y-%m-%d %H:%M:%S")
@@ -161,7 +171,8 @@ class Article(Type):
                 f"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", (
                 self.id,
                 self.description,
-                ",".join(self.tags),
+                # 通过下标获取，可以调用其formatter的to_string方法返回
+                self["tags"],
                 self.article,
                 self.author,
                 self.title,

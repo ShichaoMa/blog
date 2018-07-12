@@ -28,6 +28,7 @@ class Import(Solo):
         业务逻辑
         :return:
         """
+        import ipdb;ipdb.set_trace()
         for path in self.paths:
             for filename in glob.glob(join(path, "*")):
                 await self.insert(filename)
