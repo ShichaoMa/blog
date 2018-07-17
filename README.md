@@ -14,7 +14,7 @@
 git clone https://github.com/ShichaoMa/blog.git
 cd blog
 pip install -e .
-uvicorn blog.web_app:app
+uvicorn blog.web_app:app --log-level debug
 
 ```
 

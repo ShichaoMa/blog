@@ -1,6 +1,6 @@
 [Unit]
 # 描述
-Description=blog
+Description=blog server
 # 在哪个程序之后启动
 After=network.target
 # 依赖哪个程序
@@ -10,8 +10,8 @@ Environment=PASSWORD=12345
 Environment=USERNAME=test
 Type=simple
 # 执行命令
-ExecStart=cd ~/blog/blog && uvicorn blog:app
-StandardOutput=uvicorn
-StandardError=uvicorn
+ExecStart=/root/.pyenv/shims/uvicorn blog.web_app:app --log-level debug --host 0.0.0.0 --port 80
+StandardOutput=syslog
+StandardError=syslog
 [Install]
 WantedBy=multi-user.target
