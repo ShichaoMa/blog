@@ -56,7 +56,7 @@ def cache_method(timeout=3600):
         @wraps(func)
         def inner(*args, **kwargs):
             with lock:
-                for k in data.keys():
+                for k in data.copy().keys():
                     if time.time() - timeout > data[k].ts:
                         del data[k]
 
