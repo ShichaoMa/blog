@@ -3,3 +3,4 @@ markdown
 pytz
 html2text
 weasyprint
+aiofiles
