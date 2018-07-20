@@ -16,25 +16,6 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 default_tz = pytz.timezone('Asia/Shanghai')
 
 
-def conn_wrapper(func):
-    """
-    sqlite的conn不能多个线程使用
-    :param func:
-    :return:
-    """
-    def wrapper(*args, **kwargs):
-        self = args[0]
-        index = args[1]
-        self.conn = getattr(local, "conn", None)
-        if not self.conn:
-            self.conn = sqlite3.connect(os.path.join(project_path, "db", index))
-            self.cur = self.conn.cursor()
-        result = func(*args, **kwargs)
-        self.conn.commit()
-        return result
-    return wrapper
-
-
 def decode(buffer):
     try:
         return buffer.decode("utf-8")
