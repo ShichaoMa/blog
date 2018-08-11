@@ -62,10 +62,11 @@ class ArticleController(Controller):
         return app.render_template("import.html", success="success")
 
     @get("/export")
-    async def export(code: http.QueryParam,
-               service: ArticleService,
-               article_list: typing.List[Article]):
-        return await service.export(article_list, code)
+    async def export(url: http.URL,
+                code: http.QueryParam,
+                service: ArticleService,
+                article_list: typing.List[Article]):
+        return await service.export(article_list, code, url)
 
     @post("/modify")
     async def modify(img_url: FormParam,

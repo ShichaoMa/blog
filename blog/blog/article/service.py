@@ -6,12 +6,11 @@ import markdown
 import html2text
 
 from io import BytesIO
-from apistar import http
 from functools import partial
 from urllib.parse import urljoin, urlparse
 from toolkit.settings import FrozenSettings
-from star_builder import FileResponse, Service
 from concurrent.futures import ProcessPoolExecutor
+from star_builder import FileResponse, Service, inject
 
 from ..lib import Sqlite
 from .article import Article
@@ -22,30 +21,22 @@ from ..utils import get_cut_file_name, project_path, \
 
 
 class ArticleService(Service):
+    # 注入属性
+    cuter = inject << Cuter
+    code = inject << Code
+    sqlite = inject << Sqlite
+    settings = inject << FrozenSettings
 
     def __init__(self):
         self.executor = ProcessPoolExecutor()
 
-    def resolve(self,
-                cuter: Cuter,
-                code: Code,
-                url: http.URL,
-                sqlite: Sqlite,
-                settings: FrozenSettings):
-        self.cuter = cuter
-        self.code = code
-        self.url = url
-        self.sqlite = sqlite
-        self.settings = settings
-        return self
-
-    def _repl(self, mth):
+    def _repl(self, mth, current_url):
         url = mth.group(1)
         if not url.startswith("/cut"):
             return url
         parts = urlparse(url)
         params = dict(p.split("=", 1) for p in parts.query.split("&"))
-        return urljoin(self.url, get_cut_file_name("", **params).strip("/"))
+        return urljoin(current_url, get_cut_file_name("", **params).strip("/"))
 
     def check_code(self, code):
         return code == self.code
@@ -60,7 +51,7 @@ class ArticleService(Service):
         article["article"] = format_article_body
         return article
 
-    async def export(self, article_list, code):
+    async def export(self, article_list, code, url):
         zip_file = BytesIO()
         zf = zipfile.ZipFile(zip_file, "w")
         for article in article_list:
@@ -76,7 +67,9 @@ class ArticleService(Service):
                 html = unescape(html)
 
                 html = '<div class="markdown-body">%s</div>' % re.sub(
-                    r'(?<=src\=")(.+?)(?=")', self._repl, html)
+                    r'(?<=src\=")(.+?)(?=")',
+                    partial(self._repl, current_url=url)
+                    , html)
                 loop = asyncio.get_event_loop()
                 buffer = await loop.run_in_executor(
                     None, partial(HTML(string=html).write_pdf, stylesheets=[
