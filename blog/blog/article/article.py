@@ -8,7 +8,7 @@ from toolkit.settings import FrozenSettings
 from apistar.http import QueryParam, RequestData
 
 from star_builder.types import Type
-from star_builder import validators, Component
+from star_builder import validators, ModelFactory, inject
 from star_builder.types.formats import BaseFormat, DATETIME_REGEX, ValidationError
 from ..utils import decode, get_id, default_tz
 from ..components import Sqlite
@@ -103,7 +103,9 @@ validators.FORMATS["tags"] = TagsFormat()
 
 
 class Article(Type):
+    sqlite = inject << Sqlite
     TABLE = "articles"
+
     title = validators.String()
     id = validators.String(default=get_id)
     tags = Tags()
@@ -217,14 +219,13 @@ class Article(Type):
         return await cls.load_list(None, None, _from, size, sub, args, **kwargs)
 
 
-class ArticleComponent(Component):
+class ArticleFactory(ModelFactory):
+    model = Article
 
-    async def resolve(self,
-                      sqlite: Sqlite,
+    async def product(self,
                       form: RequestData,
                       id: QueryParam,
                       settings: FrozenSettings) -> Article:
-        Article.init(sqlite=sqlite)
         params = {}
         if not form:
             form = {}
@@ -245,9 +246,10 @@ class ArticleComponent(Component):
         return Article(params)
 
 
-class ArticleListComponent(Component):
-    async def resolve(self,
-                      sqlite: Sqlite,
+class ArticleListFactory(ModelFactory):
+    model = Article
+
+    async def product(self,
                       ids: QueryParam,
                       _from: QueryParam,
                       size: QueryParam) -> typing.List[Article]:
@@ -255,5 +257,4 @@ class ArticleListComponent(Component):
             ids = ids.split(",")
         else:
             ids = []
-        Article.init(sqlite=sqlite)
         return await Article.load_list(ids, _from, size)
