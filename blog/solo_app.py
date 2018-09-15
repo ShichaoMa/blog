@@ -1,7 +1,7 @@
 import os
 import logging
 
-from star_builder import SoloManager
+from apistellar import SoloManager
 
 app_name = "blog"
 

@@ -2,12 +2,11 @@ import typing
 
 from apistar import http, App
 from toolkit.settings import FrozenSettings
-from star_builder.helper import redirect
-from star_builder import Controller, route, get, post, Session, require
+from apistellar.helper import redirect
+from apistellar import Controller, route, get, post, Session, require, FormParam
 
 from .article import Article
 from ..utils import project_path
-from ..components import FormParam
 from .service import ArticleService
 
 

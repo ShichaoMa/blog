@@ -71,6 +71,7 @@
             }
         };
 
+    const code_swatch = {{code_swatch}};
     const pageSize = parseInt('{{page_size}}' || 40);
     const common = {"from": 0, "size": pageSize};
 
@@ -617,7 +618,12 @@
             if(target.val() == "1"){
                 location.href = '{{reverse_url("view:welcome:index")}}';
             }else if(target.val() == "2"){
-                let code = prompt("请输入密钥！");
+                if(code_swatch){
+                    var code =  prompt("请输入密钥！");
+                }else{
+                    var code = "12345";
+                }
+
                 if(code){
                     common.row.setState({
                         url: `{{reverse_url('view:article:me')}}?code=${code}`,

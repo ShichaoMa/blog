@@ -2,7 +2,7 @@ import re
 import glob
 import time
 from os.path import join, basename
-from star_builder import Solo
+from apistellar import Solo
 from toolkit.settings import FrozenSettings
 
 from ..lib import Sqlite

@@ -19,21 +19,21 @@ uvicorn blog.web_app:app --log-level debug
 ```
 
 ### 首页
-![](https://github.com/ShichaoMa/blog/blob/master/1.jpg)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/1.jpg)
 ### 文章正文
-![](https://github.com/ShichaoMa/blog/blob/master/2.jpg)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/2.jpg)
 ### 全部文章
-![](https://github.com/ShichaoMa/blog/blob/master/3.jpg)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/3.jpg)
 ### 登录
-![](https://github.com/ShichaoMa/blog/blob/master/4.jpg)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/4.jpg)
 ### 上传文章
-![](https://github.com/ShichaoMa/blog/blob/master/5.jpg)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/5.jpg)
 ### 个人介绍
-![](https://github.com/ShichaoMa/blog/blob/master/6.jpg)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/6.jpg)
 ### 联系方式
-![](https://github.com/ShichaoMa/blog/blob/master/7.jpg)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/7.jpg)
 ### 修改文章
-![](https://github.com/ShichaoMa/blog/blob/master/10.png)
-![](https://github.com/ShichaoMa/blog/blob/master/8.png)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/10.png)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/8.png)
 ### 新增少量实时修改功能
-![](https://github.com/ShichaoMa/blog/blob/master/9.png)
+![](https://github.com/ShichaoMa/blog/blob/master/resources/9.png)

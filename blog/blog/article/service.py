@@ -10,7 +10,7 @@ from functools import partial
 from urllib.parse import urljoin, urlparse
 from toolkit.settings import FrozenSettings
 from concurrent.futures import ProcessPoolExecutor
-from star_builder import FileResponse, Service, inject
+from apistellar import FileResponse, Service, inject
 
 from ..lib import Sqlite
 from .article import Article
@@ -39,7 +39,10 @@ class ArticleService(Service):
         return urljoin(current_url, get_cut_file_name("", **params).strip("/"))
 
     def check_code(self, code):
-        return code == self.code
+        if self.settings.get_bool("NEED_CODE"):
+            return code == self.code
+        else:
+            return True
 
     async def get(self, article):
         await article.load()

@@ -1,25 +1,14 @@
 import os
 import sqlite3
 import typing
-import inspect
 
-from apistar import http
-from star_builder import Component
+from apistellar import Component
 from toolkit.settings import FrozenSettings
 
 from .utils import code_generator, project_path
 from .lib import Sqlite
 from .lib.html_cut import Cuter
-FormParam = typing.NewType("FormParam", str)
 Code = typing.NewType("Code", str)
-
-
-class FormParamComponent(Component):
-
-    def resolve(self, parameter: inspect.Parameter,
-                form: http.RequestData) -> FormParam:
-        if parameter.name in form:
-            return FormParam(form[parameter.name])
 
 
 class SqliteComponent(Component):

@@ -34,3 +34,5 @@ PAGE_SIZE = 40
 CODE_EXPIRE_INTERVAL = 30*24*3600
 
 PHANTOMJS_PATH = "/usr/local/bin/phantomjs"
+
+NEED_CODE = True

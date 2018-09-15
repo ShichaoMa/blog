@@ -7,9 +7,10 @@ from collections import Sequence
 from toolkit.settings import FrozenSettings
 from apistar.http import QueryParam, RequestData
 
-from star_builder.types import Type
-from star_builder import validators, ModelFactory, inject
-from star_builder.types.formats import BaseFormat, DATETIME_REGEX, ValidationError
+from apistellar.types import Type
+from apistellar import validators, ModelFactory, inject
+from apistellar.types.formats import BaseFormat, DATETIME_REGEX, ValidationError
+
 from ..utils import decode, get_id, default_tz
 from ..components import Sqlite
 
@@ -18,6 +19,7 @@ class TsFormat(BaseFormat):
 
     type = numbers.Number
     default_tz = default_tz
+    name = "ts"
 
     def is_native_type(self, value):
         return isinstance(value, self.type)
@@ -53,6 +55,7 @@ class TsFormat(BaseFormat):
 class TagsFormat(BaseFormat):
 
     type = list
+    name = "tags"
 
     def is_native_type(self, value):
         return isinstance(value, self.type)
@@ -96,10 +99,6 @@ class Boolean(validators.Validator):
 class Tags(validators.String):
     def __init__(self, **kwargs):
         super().__init__(format='tags', **kwargs)
-
-
-validators.FORMATS["ts"] = TsFormat()
-validators.FORMATS["tags"] = TagsFormat()
 
 
 class Article(Type):
