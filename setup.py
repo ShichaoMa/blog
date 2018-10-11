@@ -30,7 +30,7 @@ def install_requires():
 setup(
     name="blog",
     version=get_version("blog"),
-    packages=find_packages(),
+    packages=find_packages(exclude=("tests",)),
     include_package_data=True,
     install_requires=install_requires(),
     author="",

@@ -1,5 +1,13 @@
-*.logs
-.idea/
+.coverage
 *.pyc
+*egg-info
+dist/
+.pytest_cache
+.eggs/
+.idea/
+htmlcov/
+*log
+*logs
+*lock.json
+node_modules/
 code
-*egg*
