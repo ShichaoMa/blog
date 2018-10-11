@@ -140,9 +140,8 @@ class Article(Type):
             sub += 'and id in ({})'.format(", ".join(repeat("?", len(ids))))
             args.extend(ids)
         if size:
-            sub += f"limit {size} offset {_from};"
-        else:
-            sub += ";"
+            sub += f"limit {size} offset {_from}"
+        sub += " order by updated_at desc;"
         if projection:
             fields = ", ".join(projection)
         else:
