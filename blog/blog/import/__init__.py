@@ -1,11 +1,11 @@
 import re
 import glob
 import time
+
 from os.path import join, basename
 from apistellar import Solo
 from toolkit.settings import FrozenSettings
 
-from ..lib import Sqlite
 from ..article.article import Article
 
 
@@ -15,12 +15,11 @@ class Import(Solo):
         self.paths = paths
         super(Import, self).__init__(**kwargs)
 
-    async def setup(self, settings: FrozenSettings, sqlite: Sqlite):
+    async def setup(self, settings: FrozenSettings):
         """
         初始化
         :return:
         """
-        Article.init(sqlite=sqlite)
         self.settings = settings
 
     async def run(self):
@@ -28,7 +27,6 @@ class Import(Solo):
         业务逻辑
         :return:
         """
-        import ipdb;ipdb.set_trace()
         for path in self.paths:
             for filename in glob.glob(join(path, "*")):
                 await self.insert(filename)

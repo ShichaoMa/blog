@@ -7,12 +7,13 @@ from collections import Sequence
 from toolkit.settings import FrozenSettings
 from apistar.http import QueryParam, RequestData
 
-from apistellar.types import Type
-from apistellar import validators, ModelFactory, inject
+from apistellar.types import PersistentType
+from apistellar import validators, ModelFactory
+from apistellar.persistence import conn_ignore
 from apistellar.types.formats import BaseFormat, DATETIME_REGEX, ValidationError
 
+from ..lib import SqliteDriverMixin
 from ..utils import decode, get_id, default_tz
-from ..components import Sqlite
 
 
 class TsFormat(BaseFormat):
@@ -101,8 +102,7 @@ class Tags(validators.String):
         super().__init__(format='tags', **kwargs)
 
 
-class Article(Type):
-    sqlite = inject << Sqlite
+class Article(PersistentType, SqliteDriverMixin):
     TABLE = "articles"
 
     title = validators.String()
@@ -120,16 +120,16 @@ class Article(Type):
         if not kwargs:
             kwargs["id"] = self.id
         sub, args = self.build_sub_sql(kwargs)
-        with self.sqlite as cur:
-            cur.execute(f"SELECT * FROM {self.TABLE} WHERE 1=1 {sub}", args)
-            data = cur.fetchone()
-            if data:
-                new = Article(dict(zip(
-                    (col[0] for col in cur.description), data)))
-            else:
-                new = Article()
-            super(Article, self).update(**new)
-            return new
+        self.store.execute(f"SELECT * FROM {self.TABLE} WHERE 1=1 {sub}", args)
+        data = self.store.fetchone()
+
+        if data:
+            new = Article(dict(zip(
+                (col[0] for col in self.store.description), data)))
+        else:
+            new = Article()
+        super(Article, self).update(**new)
+        return new
 
     @classmethod
     async def load_list(cls, ids, projection=None,
@@ -139,20 +139,20 @@ class Article(Type):
         if ids:
             sub += 'and id in ({})'.format(", ".join(repeat("?", len(ids))))
             args.extend(ids)
+        sub += " order by updated_at desc"
         if size:
-            sub += f"limit {size} offset {_from}"
-        sub += " order by updated_at desc;"
+            sub += f" limit {size} offset {_from}"
+        sub += ";"
         if projection:
             fields = ", ".join(projection)
         else:
             fields = "*"
-
-        with cls.sqlite as cur:
-            cur.execute(f"SELECT {fields} FROM {cls.TABLE} WHERE 1=1 {sub}", args)
-            data_list = cur.fetchall()
-            return [Article(dict(zip(
-                (col[0] for col in cur.description), data)))
-                for data in data_list]
+        sql = f"SELECT {fields} FROM {cls.TABLE} WHERE 1=1 {sub}"
+        cls.store.execute(sql, args)
+        data_list = cls.store.fetchall()
+        return [Article(dict(zip(
+            (col[0] for col in cls.store.description), data)))
+            for data in data_list]
 
     @staticmethod
     def build_sub_sql(kwargs, sub="", args=None):
@@ -165,26 +165,24 @@ class Article(Type):
 
     async def save(self):
         self.format()
-        with self.sqlite as cur:
-            cur.execute(
-                f"INSERT INTO {self.TABLE} "
-                f"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", (
-                self.id,
-                self.description,
-                # 通过下标获取，可以调用其formatter的to_string方法返回
-                self["tags"],
-                self.article,
-                self.author,
-                self.title,
-                self.feature,
-                self.created_at,
-                self.updated_at,
-                self.show))
+        self.store.execute(
+            f"INSERT INTO {self.TABLE} "
+            f"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", (
+            self.id,
+            self.description,
+            # 通过下标获取，可以调用其formatter的to_string方法返回
+            self["tags"],
+            self.article,
+            self.author,
+            self.title,
+            self.feature,
+            self.created_at,
+            self.updated_at,
+            self.show))
 
     async def remove(self):
-        with self.sqlite as cur:
-            cur.execute(
-                f"DELETE FROM {self.TABLE} WHERE show=1 and id=?;", (self.id, ))
+        self.store.execute(
+            f"DELETE FROM {self.TABLE} WHERE show=1 and id=?;", (self.id, ))
 
     async def update(self):
         sql = f"UPDATE {self.TABLE} SET "
@@ -198,10 +196,10 @@ class Article(Type):
         args.append(int(datetime.datetime.now().timestamp()))
         args.append(self.id)
 
-        with self.sqlite as cur:
-            cur.execute(sql, args)
+        self.store.execute(sql, args)
 
     @classmethod
+    @conn_ignore
     async def search(cls, search_field, _from, size, fulltext=False, **kwargs):
         sub, args = "", []
         if fulltext:
@@ -218,7 +216,6 @@ class Article(Type):
 
 
 class ArticleFactory(ModelFactory):
-    model = Article
 
     async def product(self,
                       form: RequestData,
@@ -245,7 +242,6 @@ class ArticleFactory(ModelFactory):
 
 
 class ArticleListFactory(ModelFactory):
-    model = Article
 
     async def product(self,
                       ids: QueryParam,

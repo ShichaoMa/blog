@@ -9,10 +9,9 @@ from io import BytesIO
 from functools import partial
 from urllib.parse import urljoin, urlparse
 from toolkit.settings import FrozenSettings
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 from apistellar import FileResponse, Service, inject
 
-from ..lib import Sqlite
 from .article import Article
 from ..components import Code
 from ..lib.html_cut import Cuter
@@ -24,11 +23,10 @@ class ArticleService(Service):
     # 注入属性
     cuter = inject << Cuter
     code = inject << Code
-    sqlite = inject << Sqlite
     settings = inject << FrozenSettings
 
     def __init__(self):
-        self.executor = ProcessPoolExecutor()
+        self.executor = ThreadPoolExecutor()
 
     def _repl(self, mth, current_url):
         url = mth.group(1)
@@ -129,7 +127,6 @@ class ArticleService(Service):
         return article
 
     async def show(self, searchField, _from, size, fulltext):
-        Article.init(sqlite=self.sqlite)
         articles = await Article.search(
             searchField, _from=_from, size=size,
             fulltext=fulltext == "true", show=True)

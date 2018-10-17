@@ -5,27 +5,9 @@ import typing
 from apistellar import Component
 from toolkit.settings import FrozenSettings
 
-from .utils import code_generator, project_path
-from .lib import Sqlite
 from .lib.html_cut import Cuter
+from .utils import code_generator, project_path
 Code = typing.NewType("Code", str)
-
-
-class SqliteComponent(Component):
-
-    def __init__(self):
-        os.makedirs(os.path.join(project_path, "db"), exist_ok=True)
-        self.table_initialize = open(
-            os.path.join(project_path, "blog.sql")).read()
-        self.conn = sqlite3.connect(os.path.join(project_path, "db/blog"))
-        self.cur = self.conn.cursor()
-        try:
-            self.cur.execute(self.table_initialize)
-        except sqlite3.OperationalError as e:
-            pass
-
-    def resolve(self) -> Sqlite:
-        return Sqlite(self.cur, self.conn)
 
 
 class CodeComponent(Component):
