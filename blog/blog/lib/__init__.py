@@ -1,8 +1,7 @@
 import os
 import sqlite3
 
-from contextlib import contextmanager
-from apistellar.persistence import DriverMixin, proxy
+from apistellar.persistence import DriverMixin, proxy, contextmanager
 from apistellar.helper import cache_classproperty
 
 from ..utils import project_path
