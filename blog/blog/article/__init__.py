@@ -116,7 +116,7 @@ class ArticleController(Controller):
     async def me(article: Article,
                  code: http.QueryParam,
                  service: ArticleService):
-        if not service.check_code(code):
+        if not article.right_code(code):
             return {"error": True}
         return await service.about(article, "me")
 

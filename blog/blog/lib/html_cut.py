@@ -62,14 +62,12 @@ def cache_method(timeout=3600):
         def inner(*args, **kwargs):
             with lock:
                 for k in data.copy().keys():
-                    print(111111111111111, time.time() - timeout, data[k].ts)
                     if time.time() - timeout > data[k].ts:
                         del data[k]
 
                 entry = entry_class(*args[1:], **kwargs)
                 entry.ts = time.time()
                 stored = data.get(entry, entry)
-                print(222222222, entry, data, stored)
                 if entry not in data or time.time() - timeout > stored.ts:
                     entry.result = func(*args, **kwargs)
                     if entry.result:

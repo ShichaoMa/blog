@@ -1,4 +1,3 @@
-import re
 import os
 import asyncio
 import zipfile
@@ -6,11 +5,8 @@ import markdown
 import html2text
 
 from io import BytesIO
-from functools import partial
-from urllib.parse import urljoin, urlparse
-from toolkit.settings import FrozenSettings
 from concurrent.futures import ThreadPoolExecutor
-from apistellar import FileResponse, Service, inject
+from apistellar import FileResponse, Service, inject, SettingsMixin
 
 from .article import Article
 from ..components import Code
@@ -19,30 +15,23 @@ from ..utils import get_cut_file_name, project_path, \
     get_id, format_articles, get_image
 
 
-class ArticleService(Service):
+class ArticleService(Service, SettingsMixin):
     # 注入属性
-    cuter = inject << Cuter
     code = inject << Code
-    settings = inject << FrozenSettings
 
     def __init__(self):
+        # 之前cutter使注入的方式实现，感觉被过度设计了
+        self.cuter = Cuter(
+            self.settings["PHANTOMJS_PATH"],
+            os.path.join(project_path, "cut_html.js"))
         self.executor = ThreadPoolExecutor()
 
-    def _repl(self, mth, current_url):
-        url = mth.group(1)
-        if not url.startswith("/cut"):
-            return url
-        parts = urlparse(url)
-        params = dict(p.split("=", 1) for p in parts.query.split("&"))
-        return urljoin(current_url, get_cut_file_name("", **params).strip("/"))
-
-    def check_code(self, code):
-        if self.settings.get_bool("NEED_CODE"):
-            return code == self.code
-        else:
-            return True
-
     async def get(self, article):
+        """
+        获取文章对象，并渲染文章正文
+        :param article:
+        :return:
+        """
         await article.load()
         format_article_body = markdown.markdown(
             article.article,
@@ -53,38 +42,19 @@ class ArticleService(Service):
         return article
 
     async def export(self, article_list, code, url):
+        """
+        导出文章或文章列表，生成压缩包
+        :param article_list:
+        :param code:
+        :param url:
+        :return:
+        """
         zip_file = BytesIO()
         zf = zipfile.ZipFile(zip_file, "w")
         for article in article_list:
-            ext = "md"
-            if article.id == "me":
-                if not self.check_code(code):
-                    return {"error": True}
-                from html.parser import unescape
-                from weasyprint import HTML
-                from urllib.parse import urlparse, urljoin
-                html = markdown.markdown(
-                    article.article, extensions=['markdown.extensions.extra'])
-                html = unescape(html)
+            if not await article.add_to_zip(code, url, zf):
+                return {"error": True}
 
-                html = '<div class="markdown-body">%s</div>' % re.sub(
-                    r'(?<=src\=")(.+?)(?=")',
-                    partial(self._repl, current_url=url)
-                    , html)
-                loop = asyncio.get_event_loop()
-                buffer = await loop.run_in_executor(
-                    None, partial(HTML(string=html).write_pdf, stylesheets=[
-                        os.path.join(project_path, "static/css/pdf.css")]))
-                ext = "pdf"
-            else:
-                buffer = "\n".join(
-                    [article.article,
-                     "[comment]: <tags> (%s)" % article.tags,
-                     "[comment]: <description> (%s)" % article.description,
-                     "[comment]: <title> (%s)" % article.title,
-                     "[comment]: <author> (%s)" % article.author,
-                ]).encode()
-            zf.writestr("%s.%s" % (article.title, ext),  buffer)
         zf.close()
         zip_file.seek(0)
         body = zip_file.read()
@@ -92,6 +62,12 @@ class ArticleService(Service):
         return FileResponse(body, filename=f"{get_id()}.zip")
 
     async def modify(self, article, img_url):
+        """
+        修改文章
+        :param article:
+        :param img_url:
+        :return:
+        """
         h2t = html2text.HTML2Text()
         h2t.ignore_links = False
         h2t.ignore_images = False
@@ -101,16 +77,32 @@ class ArticleService(Service):
         await article.update()
 
     async def update(self, article):
+        """
+        更新文章
+        :param article:
+        :return:
+        """
         await article.update()
 
     async def delete(self, article):
+        """
+        删除文章
+        :param article:
+        :return:
+        """
         await article.remove()
 
     async def about(self, article, id):
+        """
+        返回或者生成关于我和我的联系方式文章模板
+        :param article:
+        :param id:
+        :return:
+        """
         await article.load(id=id)
         if not article:
             article.id = id
-            article.author = self.settings.AUTHOR
+            article.author = self.settings.get("AUTHOR")
             article.tags = [id]
             article.description = id
             article.feature = False
@@ -127,6 +119,14 @@ class ArticleService(Service):
         return article
 
     async def show(self, searchField, _from, size, fulltext):
+        """
+        首页展示
+        :param searchField:
+        :param _from:
+        :param size:
+        :param fulltext:
+        :return:
+        """
         articles = await Article.search(
             searchField, _from=_from, size=size,
             fulltext=fulltext == "true", show=True)
@@ -149,6 +149,15 @@ class ArticleService(Service):
                      sorted(tags.items(), key=lambda x: x[1], reverse=True)]}
 
     async def cut(self, url, top, left, width, height):
+        """
+        按指定位置尺寸切网页
+        :param url:
+        :param top:
+        :param left:
+        :param width:
+        :param height:
+        :return:
+        """
         save_name = get_cut_file_name(
             project_path, url, top, left, width, height)
         loop = asyncio.get_event_loop()

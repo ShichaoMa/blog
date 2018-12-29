@@ -1,108 +1,27 @@
-import numbers
+import os
+import re
 import typing
+import asyncio
 import datetime
+import markdown
 
 from itertools import repeat
-from collections import Sequence
+from functools import partial
+from urllib.parse import urljoin, urlparse
 from toolkit.settings import FrozenSettings
 from apistar.http import QueryParam, RequestData
 
 from apistellar.types import PersistentType
-from apistellar import validators, ModelFactory
 from apistellar.persistence import conn_ignore
-from apistellar.types.formats import BaseFormat, DATETIME_REGEX, ValidationError
+from apistellar import validators, ModelFactory, SettingsMixin
 
 from ..lib import SqliteDriverMixin
-from ..utils import decode, get_id, default_tz
+from .format import Tags, Boolean, Timestamp
+from ..utils import decode, get_id, code_generator, \
+    project_path, get_cut_file_name
 
 
-class TsFormat(BaseFormat):
-
-    type = numbers.Number
-    default_tz = default_tz
-    name = "ts"
-
-    def is_native_type(self, value):
-        return isinstance(value, self.type)
-
-    def validate(self, value):
-        """
-        赋值和format会调用valiate，转普通类型转换成self.type类型
-        :param value:
-        :return:
-        """
-        if isinstance(value, (str, bytes)):
-            match = DATETIME_REGEX.match(value)
-            if match:
-                kwargs = {k: int(v) for k, v in
-                          match.groupdict().items() if v is not None}
-                return datetime.datetime(
-                    **kwargs, tzinfo=self.default_tz).timestamp()
-        raise ValidationError('Must be a valid timestamp.')
-
-    def to_string(self, value):
-        """
-        所有最终会调用__getitem__的方法，会调用这个方法来反序列化，__getattr__则不会。
-        :param value:
-        :return:
-        """
-        try:
-            return datetime.datetime.fromtimestamp(
-                value, self.default_tz).strftime("%Y-%m-%d %H:%M:%S")
-        except AttributeError:
-            return str(value)
-
-
-class TagsFormat(BaseFormat):
-
-    type = list
-    name = "tags"
-
-    def is_native_type(self, value):
-        return isinstance(value, self.type)
-
-    def validate(self, value):
-        if isinstance(value, str):
-            return value.split(",")
-        if isinstance(value, bytes):
-            return value.decode().split(",")
-        if isinstance(value, Sequence):
-            return list(value)
-        raise ValidationError('Must be a valid tags.')
-
-    def to_string(self, value):
-        if isinstance(value, str):
-            value = value.split(",")
-        return ",".join(value)
-
-
-class Timestamp(validators.String):
-
-    def __init__(self, **kwargs):
-        super().__init__(format='ts', **kwargs)
-
-
-class Boolean(validators.Validator):
-    def validate(self, value, definitions=None, allow_coerce=False):
-        if value is None and self.has_default():
-            return self.get_default()
-        elif value is None and self.allow_null:
-            return None
-        elif value is None:
-            self.error('null')
-
-        elif not isinstance(value, bool):
-            return bool(value)
-
-        return value
-
-
-class Tags(validators.String):
-    def __init__(self, **kwargs):
-        super().__init__(format='tags', **kwargs)
-
-
-class Article(PersistentType, SqliteDriverMixin):
+class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
     TABLE = "articles"
 
     title = validators.String()
@@ -116,7 +35,69 @@ class Article(PersistentType, SqliteDriverMixin):
     show = Boolean(default=True)
     article = validators.String(default=str)
 
+    @property
+    def code(self, code_gen=None):
+        # 每次访问获取一次code
+        if code_gen is None:
+            code_gen = code_generator(
+                self.settings.get_int("CODE_EXPIRE_INTERVAL"))
+        return next(code_gen)
+
+    def right_code(self, code):
+        """
+        code是否正确
+        :param code:
+        :return:
+        """
+        if self.settings.get_bool("NEED_CODE"):
+            return code == self.code
+        else:
+            return True
+
+    async def add_to_zip(self, code, url, zf):
+        """
+        将文章导出到zip中
+        :param code:
+        :param url:
+        :param zf:
+        :return:
+        """
+        if self.id == "me":
+            if not self.right_code(code):
+                return False
+            from html.parser import unescape
+            from weasyprint import HTML
+            html = markdown.markdown(
+                self.article, extensions=['markdown.extensions.extra'])
+            html = unescape(html)
+
+            html = '<div class="markdown-body">%s</div>' % re.sub(
+                r'(?<=src\=")(.+?)(?=")',
+                partial(self._repl, current_url=url)
+                , html)
+            loop = asyncio.get_event_loop()
+            buffer = await loop.run_in_executor(
+                None, partial(HTML(string=html).write_pdf, stylesheets=[
+                    os.path.join(project_path, "static/css/pdf.css")]))
+            ext = "pdf"
+        else:
+            buffer = "\n".join(
+                [self.article,
+                 "[comment]: <tags> (%s)" % self.tags,
+                 "[comment]: <description> (%s)" % self.description,
+                 "[comment]: <title> (%s)" % self.title,
+                 "[comment]: <author> (%s)" % self.author,
+                 ]).encode()
+            ext = "md"
+        zf.writestr("%s.%s" % (self.title, ext), buffer)
+        return True
+
     async def load(self, **kwargs):
+        """
+        查找一篇文章
+        :param kwargs:
+        :return:
+        """
         if not kwargs:
             kwargs["id"] = self.id
         sub, args = self.build_sub_sql(kwargs)
@@ -132,9 +113,19 @@ class Article(PersistentType, SqliteDriverMixin):
         return new
 
     @classmethod
-    async def load_list(cls, ids, projection=None,
-                        _from=None, size=None, sub="",
-                        args=None, **kwargs):
+    async def load_list(cls, ids, projection=None, _from=None,
+                        size=None, sub="", args=None, **kwargs):
+        """
+        查询文章列表
+        :param ids:
+        :param projection:
+        :param _from:
+        :param size:
+        :param sub:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         sub, args = cls.build_sub_sql(kwargs, sub, args)
         if ids:
             sub += 'and id in ({})'.format(", ".join(repeat("?", len(ids))))
@@ -156,6 +147,13 @@ class Article(PersistentType, SqliteDriverMixin):
 
     @staticmethod
     def build_sub_sql(kwargs, sub="", args=None):
+        """
+        创建查询子串
+        :param kwargs:
+        :param sub:
+        :param args:
+        :return:
+        """
         if args is None:
             args = list()
         for k, v in kwargs.items():
@@ -163,7 +161,26 @@ class Article(PersistentType, SqliteDriverMixin):
             args.append(v)
         return sub, args
 
+    @staticmethod
+    def _repl(mth, current_url):
+        """
+        将匹配到的/cut开头的url替换成切割成的静态图片地址
+        :param mth:
+        :param current_url:
+        :return:
+        """
+        url = mth.group(1)
+        if not url.startswith("/cut"):
+            return url
+        parts = urlparse(url)
+        params = dict(p.split("=", 1) for p in parts.query.split("&"))
+        return urljoin(current_url, get_cut_file_name("", **params).strip("/"))
+
     async def save(self):
+        """
+        保存文章
+        :return:
+        """
         self.format()
         self.store.execute(
             f"INSERT INTO {self.TABLE} "
@@ -181,10 +198,18 @@ class Article(PersistentType, SqliteDriverMixin):
             self.show))
 
     async def remove(self):
+        """
+        删除文章
+        :return:
+        """
         self.store.execute(
             f"DELETE FROM {self.TABLE} WHERE show=1 and id=?;", (self.id, ))
 
     async def update(self):
+        """
+        更新文章
+        :return:
+        """
         sql = f"UPDATE {self.TABLE} SET "
         args = []
         for name, value in self.items():
@@ -201,6 +226,15 @@ class Article(PersistentType, SqliteDriverMixin):
     @classmethod
     @conn_ignore
     async def search(cls, search_field, _from, size, fulltext=False, **kwargs):
+        """
+        搜索文章
+        :param search_field:
+        :param _from:
+        :param size:
+        :param fulltext:
+        :param kwargs:
+        :return:
+        """
         sub, args = "", []
         if fulltext:
             if search_field:
