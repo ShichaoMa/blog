@@ -2,7 +2,7 @@ import os
 import sqlite3
 
 from contextlib import contextmanager
-from apistellar.persistence import DriverMixin
+from apistellar.persistence import DriverMixin, proxy
 from apistellar.helper import cache_classproperty
 
 from ..utils import project_path
@@ -31,10 +31,12 @@ class SqliteDriverMixin(DriverMixin):
 
     @classmethod
     @contextmanager
-    def get_store(cls, **kwargs):
+    def get_store(cls, self_or_cls, **callargs):
         conn, cur = cls.init_sqlite
-        try:
-            yield cur
-        finally:
-            conn.commit()
+        with super(SqliteDriverMixin, cls).get_store(
+                self_or_cls, **callargs) as self_or_cls:
+            try:
+                yield proxy(self_or_cls, prop_name="store", prop=conn.cursor())
+            finally:
+                conn.commit()
 
