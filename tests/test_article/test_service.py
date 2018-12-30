@@ -7,7 +7,6 @@ from blog.blog.article.service import ArticleService
 arti_ser = prop_alias("blog.blog.article.service.ArticleService")
 
 
-@pytest.mark.usefixtures("mock")
 @pytest.mark.asyncio
 class TestService(object):
     pytestmark = [
