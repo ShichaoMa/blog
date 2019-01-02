@@ -9,20 +9,17 @@ from concurrent.futures import ThreadPoolExecutor
 from apistellar import FileResponse, Service, inject, SettingsMixin
 
 from .article import Article
-from ..components import Code
 from ..lib.html_cut import Cuter
+from .article_exporter import ArticleExporter
 from ..utils import get_cut_file_name, project_path, \
     get_id, format_articles, get_image
 
 
 class ArticleService(Service, SettingsMixin):
-    # 注入属性
-    code = inject << Code
-
     def __init__(self):
-        # 之前cutter使注入的方式实现，感觉被过度设计了
+        # 之前cutter使用注入的方式实现，感觉被过度设计了
         self.cuter = Cuter(
-            self.settings["PHANTOMJS_PATH"],
+            self.settings.get("PHANTOMJS_PATH"),
             os.path.join(project_path, "cut_html.js"))
         self.executor = ThreadPoolExecutor()
 
@@ -52,8 +49,7 @@ class ArticleService(Service, SettingsMixin):
         zip_file = BytesIO()
         zf = zipfile.ZipFile(zip_file, "w")
         for article in article_list:
-            if not await article.add_to_zip(code, url, zf):
-                return {"error": True}
+            zf.writestr(*await ArticleExporter(article, code, url).export())
 
         zf.close()
         zip_file.seek(0)

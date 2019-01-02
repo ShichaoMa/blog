@@ -14,7 +14,7 @@ from ..utils import project_path
 class WelcomeController(Controller):
 
     @get("/")
-    def index(app: App, path: QueryParam, settings: FrozenSettings):
+    def index(self, app: App, path: QueryParam, settings: FrozenSettings):
         return app.render_template(
             'index.html',
             author=settings.AUTHOR,
@@ -25,13 +25,13 @@ class WelcomeController(Controller):
 
     @post("/upload_image")
     @require(Session, judge=lambda x: x.get("login"))
-    def upload(file: FormParam):
+    def upload(self, file: FormParam):
         file.save(os.path.join(project_path, "static/img", file.filename))
         return {"success": True}
 
     @post("/upload_secret")
     @require(Session, judge=lambda x: x.get("login"))
-    async def upload_secret(stream: FileStream):
+    async def upload_secret(self, stream: FileStream):
         file_dir = os.path.join(project_path, "static/secret")
         os.makedirs(file_dir, exist_ok=True)
         async for file in stream:
@@ -44,7 +44,7 @@ class WelcomeController(Controller):
 
     @get("/list")
     @require(Session, judge=lambda x: x.get("login"))
-    def list(self: Controller):
+    def list(self):
          file_dir = os.path.join(project_path, "static/secret")
          html_tmpl = "<html><header><title>我的私货</title></header><body><ul>%s</ul></body></html>"
 

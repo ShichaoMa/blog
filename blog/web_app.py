@@ -10,7 +10,8 @@ WhiteNoise.autorefresh = True
 
 app_name = "blog"
 logging.basicConfig(level=logging.DEBUG)
-app = Application(app_name, static_dir="static", template_dir="templates",
+app = Application(app_name, debug=False,
+                  static_dir="static", template_dir="templates",
                   current_dir=os.path.dirname(os.path.abspath(__file__)))
 
 

@@ -411,7 +411,7 @@
                         data = resp;//eval("("+resp+")");
                     }
                 });
-                if(data.error){
+                if(data.errcode){
                     alert("code错误，请联系作者！");
                 }else{
                     let html = { __html: data.article};
