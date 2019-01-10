@@ -43,9 +43,6 @@ class ArticleExporter(object):
                 os.path.join(project_path, "static/css/pdf.css")]))
         return ArticleFile(f"{self.article.title}.pdf", buffer)
 
-    def _replace_url(self, html):
-        return re.sub(r'(?<=src=")(.+?)(?=")', self._repl, html)
-
     async def export_other(self):
         """
         导出其它文章
@@ -63,6 +60,9 @@ class ArticleExporter(object):
 
     def _choice_function(self):
         return getattr(self, f"export_{self.article.id}", self.export_other)
+
+    def _replace_url(self, html):
+        return re.sub(r'(?<=src=")(.+?)(?=")', self._repl, html)
 
     def _repl(self, mth):
         """

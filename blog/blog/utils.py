@@ -59,7 +59,7 @@ def get_image(body):
         image_part = body[:body.index("\n")]
     except ValueError:
         image_part = body
-    mth = re.search(r"\!\[.*?\]\((.*?)\)", image_part)
+    mth = re.search(r"!\[.*?\]\((.*?)\)", image_part)
     return mth.group(1) if mth else ""
 
 

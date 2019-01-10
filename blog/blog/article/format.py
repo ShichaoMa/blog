@@ -74,7 +74,7 @@ class Timestamp(validators.String):
         super().__init__(format='ts', **kwargs)
 
 
-class Boolean(validators.Validator):
+class Boolean(validators.Boolean):
     def validate(self, value, definitions=None, allow_coerce=False):
         if value is None and self.has_default():
             return self.get_default()

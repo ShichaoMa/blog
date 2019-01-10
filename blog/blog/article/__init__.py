@@ -4,11 +4,14 @@ from apistar import http, App
 from toolkit.settings import FrozenSettings
 from apistellar.helper import redirect
 from apistellar import Controller, route, get, post, Session, FormParam
+#from apistellar.bases.entities import comment
 
 from .article import Article
 from ..utils import project_path
 from .service import ArticleService
 
+def comment(type, _):
+    return type
 
 @route("", name="article")
 class ArticleController(Controller):
@@ -126,10 +129,13 @@ class ArticleController(Controller):
 
     @get("/cut")
     async def cut(self,
-                  url: http.QueryParam,
-                  top: int = 0,
-                  left: int = 0,
-                  width: int = 1024,
-                  height: int = 768):
+                  url: comment(http.QueryParam, "要截图的url连接"),
+                  top: comment(int, "截图尺寸top值") = 0,
+                  left: comment(int, "截图尺寸left值") = 0,
+                  width: comment(int, "截图尺寸width值") = 1024,
+                  height: comment(int, "截图尺寸height值") = 768) -> comment(Article, "返回"):
+        """
+        截图api
+        """
         save_name = await self.service.cut(url, top, left, width, height)
         return redirect(save_name.replace(project_path, ""))
