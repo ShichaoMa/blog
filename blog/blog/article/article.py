@@ -17,6 +17,16 @@ from ..utils import decode, get_id, get_cut_file_name, code_generator
 
 
 class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
+    """
+    文章模型
+    :param title: 标题
+    :ex `我的主页`
+    :param created_at: 创建时间
+    :ex `2018-10-10 10:10:10`
+    :param tags: 关键字
+    :ex tags:
+    `["python", "apistellar"]`
+    """
     TABLE = "articles"
 
     title = validators.String()

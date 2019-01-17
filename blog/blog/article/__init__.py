@@ -4,14 +4,11 @@ from apistar import http, App
 from toolkit.settings import FrozenSettings
 from apistellar.helper import redirect
 from apistellar import Controller, route, get, post, Session, FormParam
-#from apistellar.bases.entities import comment
 
 from .article import Article
 from ..utils import project_path
 from .service import ArticleService
 
-def comment(type, _):
-    return type
 
 @route("", name="article")
 class ArticleController(Controller):
@@ -24,22 +21,39 @@ class ArticleController(Controller):
         self.service = ArticleService()
 
     @get("/import")
-    async def _import(self, app: App, article: Article, session: Session):
+    async def _import(self, app: App, session: Session):
+        """
+        导入文章
+        :param app:
+        :param session:
+        :return: 导入文章页面
+        """
         if not session.get("login"):
             return app.render_template("login.html", ref="import")
         else:
-            return app.render_template("import.html", success="",
-                                       **article.to_dict())
+            return app.render_template("import.html", success="")
 
     @post("/check")
     async def check(self,
                     app: App,
-                    article: Article,
+                    form: http.RequestData,
                     username: FormParam,
                     password: FormParam,
                     ref: FormParam,
                     settings: FrozenSettings,
                     session: Session):
+        """
+        检查用户名和密码是否正确
+        :param app:
+        :param article:
+        :param username:
+        :param password:
+        :param ref:
+        :param settings:
+        :param session:
+        :return:
+        """
+        article = Article(form)
         if username == settings.USERNAME and password == settings.PASSWORD:
             session["login"] = f'{username}:{password}'
             if hasattr(article, "id"):
@@ -129,11 +143,11 @@ class ArticleController(Controller):
 
     @get("/cut")
     async def cut(self,
-                  url: comment(http.QueryParam, "要截图的url连接"),
-                  top: comment(int, "截图尺寸top值") = 0,
-                  left: comment(int, "截图尺寸left值") = 0,
-                  width: comment(int, "截图尺寸width值") = 1024,
-                  height: comment(int, "截图尺寸height值") = 768) -> comment(Article, "返回"):
+                  url: http.QueryParam,
+                  top: int=0,
+                  left: int=0,
+                  width: int=1024,
+                  height: int= 768):
         """
         截图api
         """
