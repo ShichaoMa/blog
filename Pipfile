@@ -8,7 +8,6 @@ pytest = "*"
 pytest-apistellar = "*"
 pytest-cov = "*"
 pytest-asyncio = "*"
-apistellar = {editable = true,path = "./../apistellar"}
 
 [packages]
 pytz = "*"
@@ -16,7 +15,7 @@ html2text = "*"
 aiofiles = "*"
 Markdown = "*"
 WeasyPrint = "*"
-apistellar = "==1.1.0"
+apistellar = "*"
 
 [requires]
 python_version = "3.6"
