@@ -6,8 +6,8 @@ dist/
 .eggs/
 .idea/
 htmlcov/
-*log
-*logs
+*.log
+*.logs
 *lock.json
 node_modules/
 setup.cfg

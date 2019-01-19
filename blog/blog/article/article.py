@@ -1,11 +1,7 @@
-import os
-import re
-import typing
+import logging
 import datetime
 
 from itertools import repeat
-from toolkit.settings import FrozenSettings
-from apistar.http import QueryParam, RequestData
 
 from apistellar.types import PersistentType
 from apistellar.persistence import conn_ignore
@@ -16,31 +12,46 @@ from .format import Tags, Boolean, Timestamp
 from ..utils import decode, get_id, get_cut_file_name, code_generator
 
 
+settings_wrapper = SettingsMixin()
+
+
+logger = logging.getLogger(__file__)
+
+
 class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
     """
     文章模型
     :param title: 标题
     :ex `我的主页`
-    :param created_at: 创建时间
-    :ex `2018-10-10 10:10:10`
+    :param id: 每篇文章的唯一id，日期字符串的形式表示
     :param tags: 关键字
     :ex tags:
     `["python", "apistellar"]`
+    :param description: 描述信息
+    :param author: 作者信息
+    :param feature: 是否为精品
+    :ex feature: True/False
+    :param updated_at: 更新时间
+    :param created_at: 创建时间
+    :param show: 是否在文章列表中展示
+    :ex show: True/False
+    :param article: 文章正文
     """
     TABLE = "articles"
 
     title = validators.String()
     id = validators.String(default=get_id)
     tags = Tags()
-    description = validators.String()
-    author = validators.String()
+    description = validators.String(default="")
+    author = validators.String(default=settings_wrapper.settings["AUTHOR"])
     feature = Boolean(default=False)
     created_at = Timestamp(default=datetime.datetime.now().timestamp)
     updated_at = Timestamp(default=datetime.datetime.now().timestamp)
     show = Boolean(default=True)
     article = validators.String(default=str)
 
-    def right_code(self, code, code_gen=None):
+    @classmethod
+    def right_code(cls, code, code_gen=None):
         """
         code是否正确
         :param code:
@@ -48,9 +59,9 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
         """
         if code_gen is None:
             code_gen = code_generator(
-                self.settings.get_int("CODE_EXPIRE_INTERVAL"))
+                cls.settings.get_int("CODE_EXPIRE_INTERVAL"))
 
-        if self.settings.get_bool("NEED_CODE"):
+        if cls.settings.get_bool("NEED_CODE"):
             return next(code_gen) == code
         else:
             return True
@@ -161,15 +172,19 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
         """
         sql = f"UPDATE {self.TABLE} SET "
         args = []
-        for name, value in self.items():
-            if name != "id":
+        self.format()
+
+        for name, val in self.items():
+            # 在调用update之前使用了format,目前format会创建字符串时间
+            # 无法使用，在这里进行一次排除
+            if name not in ("id", "updated_at", "created_at", "show"):
                 sql += f"{name}=?, "
-                args.append(value)
+                args.append(val)
 
         sql += f"updated_at=? WHERE id=?;"
         args.append(int(datetime.datetime.now().timestamp()))
         args.append(self.id)
-
+        logger.debug(f"Execute sql: {sql}, args: {args}")
         self.store.execute(sql, args)
 
     @classmethod
@@ -196,42 +211,3 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
                 args.append(f"%{search_field}%")
 
         return await cls.load_list(None, None, _from, size, sub, args, **kwargs)
-
-
-class ArticleFactory(ModelFactory):
-
-    async def product(self,
-                      form: RequestData,
-                      id: QueryParam,
-                      settings: FrozenSettings) -> Article:
-        params = {}
-        if not form:
-            form = {}
-
-        file = form.get("article")
-        if hasattr(file, "read"):
-            params["article"] = decode(file.read())
-        else:
-            params["article"] = file
-
-        params["id"] = form.get("id") or id
-        params["author"] = form.get("author") or settings.AUTHOR
-        params["title"] = form.get("title") or \
-                          file and file.filename.replace(".md", "")
-        params["feature"] = eval(form.get("feature") or "False")
-        params["description"] = form.get("description") or ""
-        params["tags"] = form.get("tags") or ""
-        return Article(params)
-
-
-class ArticleListFactory(ModelFactory):
-
-    async def product(self,
-                      ids: QueryParam,
-                      _from: QueryParam,
-                      size: QueryParam) -> typing.List[Article]:
-        if ids:
-            ids = ids.split(",")
-        else:
-            ids = []
-        return await Article.load_list(ids, _from, size)

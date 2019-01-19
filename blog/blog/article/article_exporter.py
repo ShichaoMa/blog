@@ -5,7 +5,7 @@ import markdown
 
 from functools import partial
 from collections import namedtuple
-from urllib.parse import urlunparse, urlparse
+from urllib.parse import urljoin
 
 from ..utils import project_path
 
@@ -14,15 +14,13 @@ ArticleFile = namedtuple("ArticleFile", "filename,buffer")
 
 
 class ArticleExporter(object):
-    __slots__ = ("article", "code", "netloc", "scheme")
+    __slots__ = ("article", "code", "url")
     desc_fields = ("tags", "description", "title", "author")
 
     def __init__(self, article, code, url):
         self.article = article
         self.code = code
-        parts = urlparse(url)
-        self.netloc = parts.netloc
-        self.scheme = parts.scheme
+        self.url = url
 
     async def export_me(self):
         """
@@ -66,13 +64,12 @@ class ArticleExporter(object):
 
     def _repl(self, mth):
         """
-        将匹配到的内部地址替换成带协议和域名的绝对地址，不然pdf渲染工具无法访问。
+        由于weasyprint有bug会让svg失真，所以将svg的图片截一下。
         :param mth:
         :return:
         """
         url = mth.group(1)
-        if url.startswith("http"):
+        if not url.count("img.shields.io"):
             return url
 
-        parts = urlparse(url)
-        return urlunparse(parts._replace(scheme=self.scheme, netloc=self.netloc))
+        return urljoin(self.url, "/cut") + f"?width=60&height=20&url={url}"
