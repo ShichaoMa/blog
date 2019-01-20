@@ -1,7 +1,7 @@
 from apistar import http, App
 from apistellar.helper import redirect, return_wrapped
 from apistellar import Controller, route, get, post, \
-    Session, FormParam, SettingsMixin, require
+    Session, FormParam, SettingsMixin, require, UrlEncodeForm, MultiPartForm
 
 from .article import Article
 from blog.utils import project_path, decode
@@ -49,6 +49,7 @@ class ArticleController(Controller, SettingsMixin):
         ```json
         {"title": "xxx"}
         ```
+        :type article: form
         :param username: 用户名
         :ex username: `test`
         :param password: 密码
@@ -144,6 +145,7 @@ class ArticleController(Controller, SettingsMixin):
         :param img_url: 首图地址
         :ex img_url: `http://www.csdn.....jpg`
         :param article: 文章对象
+        :type article: form
         :param session:
         :return:
         ```json
@@ -180,6 +182,7 @@ class ArticleController(Controller, SettingsMixin):
         编辑之后更新文章内容
         :param app:
         :param article: 文章对象
+        :type article: form
         :param session:
         :return: 如果登录了，跳转到首页，否则，跳转到登录页
         """

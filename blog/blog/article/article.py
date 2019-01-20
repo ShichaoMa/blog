@@ -75,7 +75,9 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
         if not kwargs:
             kwargs["id"] = self.id
         sub, args = self.build_sub_sql(kwargs)
-        self.store.execute(f"SELECT * FROM {self.TABLE} WHERE 1=1 {sub}", args)
+        sql = f"SELECT * FROM {self.TABLE} WHERE 1=1 {sub}"
+        logger.debug(f"Execute sql: {sql}, args: {args}")
+        self.store.execute(sql, args)
         data = self.store.fetchone()
 
         if data:

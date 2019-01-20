@@ -6,13 +6,13 @@
 字段名|类型|是否必须|是否可为空值|默认值|描述|示例
 :--|:--|:--|:--|:--|:--|:--
 title|String|是|否||标题|
-id|String|否|否|20190120002707|每篇文章的唯一id，日期字符串的形式表示|
+id|String|否|否|20190120160852|每篇文章的唯一id，日期字符串的形式表示|
 tags|Tags|是|否||关键字|`["python", "apistellar"]`
 description|String|否|否||描述信息|
 author|String|否|否|夏洛之枫|作者信息|
 feature|Boolean|否|否|False|是否为精品|
-created_at|Timestamp|否|否|1547915227.567512|创建时间|
-updated_at|Timestamp|否|否|1547915227.567542|更新时间|
+created_at|Timestamp|否|否|1547971732.899315|创建时间|
+updated_at|Timestamp|否|否|1547971732.899348|更新时间|
 show|Boolean|否|否|True|是否在文章列表中展示|
 article|String|否|否||文章正文|
 
@@ -46,22 +46,10 @@ article|String|否|否||文章正文|
 #### 表单参数:
 参数名|类型|是否必须|默认值|描述|示例
 :--|:--|:--|:--|:--|:--
+article|blog.article.article.Article|是|||`{"title": "xxx"}`
 username|str|是||用户名|`test`
 password|str|是||密码|`12345`
 ref|str|是||从哪里跳过来的|
-
-#### json请求体
-
-##### 模型类型
-```blog.article.article.Article```
-
-
-##### 请求示例
-
-
-```json
-        {"title": "xxx"}
-```
 
 
 
@@ -131,7 +119,7 @@ password|str|是||密码|`12345`
 文章相关信息
 
 ##### 模型类型
-```blog.article.article.Article```
+blog.article.article.Article
 
 
 
@@ -183,14 +171,7 @@ ids|str|是||要导出的文章id，使用,连接成字符串|`20181010111111,20
 参数名|类型|是否必须|默认值|描述|示例
 :--|:--|:--|:--|:--|:--
 img_url|str|是||首图地址|`http://www.csdn.....jpg`
-
-#### json请求体
-
-##### 请求描述
-文章对象
-
-##### 模型类型
-```blog.article.article.Article```
+article|blog.article.article.Article|是||文章对象|
 
 
 
@@ -253,13 +234,10 @@ id|str|是||文章的id|`20111111111111`
 #### URL: /update
 #### 方法: POST
 
-#### json请求体
-
-##### 请求描述
-文章对象
-
-##### 模型类型
-```blog.article.article.Article```
+#### 表单参数:
+参数名|类型|是否必须|默认值|描述|示例
+:--|:--|:--|:--|:--|:--
+article|blog.article.article.Article|是||文章对象|
 
 
 
@@ -315,7 +293,7 @@ id|str|是||要获取的文章id|
 
 #### 返回信息
 ##### 返回类型
-```blog.article.article.Article```
+blog.article.article.Article
 
 
 ##### 返回描述
@@ -342,7 +320,7 @@ code|str|是||后端生成的用于验证的code|
 
 #### 返回信息
 ##### 返回类型
-```blog.article.article.Article```
+blog.article.article.Article
 
 
 ##### 返回描述
@@ -364,7 +342,7 @@ code|str|是||后端生成的用于验证的code|
 
 #### 返回信息
 ##### 返回类型
-```blog.article.article.Article```
+blog.article.article.Article
 
 
 ##### 返回描述

@@ -73,7 +73,7 @@
 <td align="left">String</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">20190120002707</td>
+<td align="left">20190120160852</td>
 <td align="left">每篇文章的唯一id，日期字符串的形式表示</td>
 <td align="left"></td>
 </tr>
@@ -118,7 +118,7 @@
 <td align="left">Timestamp</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">1547915227.567512</td>
+<td align="left">1547971732.899315</td>
 <td align="left">创建时间</td>
 <td align="left"></td>
 </tr>
@@ -127,7 +127,7 @@
 <td align="left">Timestamp</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">1547915227.567542</td>
+<td align="left">1547971732.899348</td>
 <td align="left">更新时间</td>
 <td align="left"></td>
 </tr>
@@ -180,7 +180,7 @@
 </table>
 <h4>返回信息</h4>
 <h5>返回类型</h5>
-<p><code>builtins.str</code></p>
+<p>builtins.str</p>
 <h5>返回示例</h5>
 <pre><code class="html">        &lt;html&gt;...&lt;/html&gt;
 </code></pre>
@@ -286,7 +286,7 @@
 <td align="left">str</td>
 <td align="left">是</td>
 <td align="left"></td>
-<td align="left">输入地址</td>
+<td align="left">输入名字</td>
 <td align="left"><code>abcd</code></td>
 </tr>
 </tbody>
@@ -295,7 +295,7 @@
 <h5>请求描述</h5>
 <p>post过来的参数集合</p>
 <h5>模型类型</h5>
-<p><code>blog.article.article.Article</code></p>
+<p>blog.article.article.Article</p>
 <h5>请求示例</h5>
 <h6>示例1</h6>
 <pre><code class="json">        {&quot;a&quot;: 1}
@@ -307,7 +307,7 @@
 
 <h4>返回信息</h4>
 <h5>返回类型</h5>
-<p><code>{"code": xx, "data": typing.List[blog.article.article.Article], "message": "xx"}</code></p>
+<p>{"code": 0, "data": typing.List[blog.article.article.Article], "message": "xx"}</p>
 <h5>返回示例</h5>
 <pre><code class="json">        {&quot;code&quot;: 0, &quot;data&quot;: {&quot;a&quot;: 1}}
 </code></pre>
@@ -325,8 +325,44 @@
 <td align="left">0</td>
 <td align="left">返回成功</td>
 </tr>
+<tr>
+<td align="left">1</td>
+<td align="left">错误1</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">错误2</td>
+</tr>
 </tbody>
 </table>
+<h3>4.</h3>
+<h4>URL: /test/b</h4>
+<h4>方法: POST</h4>
+<h4>表单参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>file1</code>, <code>file2</code>, ...</td>
+<td align="left">file</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">这一个文件流</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回描述</h5>
     </article>
     </html>
     

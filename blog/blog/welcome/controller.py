@@ -5,7 +5,7 @@ from apistar import App, http
 from apistar.http import QueryParam
 
 from apistellar import Controller, route, get, post, require, Session, \
-    FormParam, SettingsMixin, MultiPartForm
+    FormParam, SettingsMixin, MultiPartForm, FileStream
 from apistellar.helper import return_wrapped
 
 from blog.utils import project_path
@@ -47,12 +47,12 @@ class WelcomeController(Controller, SettingsMixin):
         return {"success": True}
 
     @post("/a/{+path}")
-    @return_wrapped()
+    @return_wrapped(error_info={1: "错误1", 2: "错误2"})
     def test(self, path: str, b: http.QueryParams, name: FormParam, data: Article) -> typing.List[Article]:
         """
         测试
         :param path: 传个地址
-        :param name: 输入地址
+        :param name: 输入名字
         :ex name: `abcd`
         :param b: 测试QueryParams
         :ex b:
@@ -75,3 +75,10 @@ class WelcomeController(Controller, SettingsMixin):
         """
         return [data]
 
+    @post("/test/b")
+    def test2(self, stream: FileStream):
+        """
+
+        :param stream: 这一个文件流
+        :return:
+        """
