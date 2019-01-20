@@ -40,7 +40,7 @@ class ArticleController(Controller, SettingsMixin):
                     username: FormParam,
                     password: FormParam,
                     ref: FormParam,
-                    session: Session):
+                    session: Session) -> str:
         """
         检查用户名和密码是否正确
         :param app:
