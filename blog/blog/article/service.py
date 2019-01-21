@@ -23,12 +23,13 @@ class ArticleService(Service, SettingsMixin):
             os.path.join(project_path, "cut_html.js"))
         self.executor = ThreadPoolExecutor()
 
-    async def get(self, article):
+    async def get(self, id):
         """
         获取文章对象，并渲染文章正文
-        :param article:
+        :param id:
         :return:
         """
+        article = Article(id=id)
         await article.load()
         format_article_body = markdown.markdown(
             article.article,
@@ -69,7 +70,7 @@ class ArticleService(Service, SettingsMixin):
         h2t.ignore_images = False
         article.article = "[comment]: <image> (![](%s))\n%s" % (
             img_url, h2t.handle(article.article)
-        ),
+        )
         await article.update()
 
     async def update(self, article):
@@ -88,13 +89,13 @@ class ArticleService(Service, SettingsMixin):
         """
         await article.remove()
 
-    async def about(self, article, id):
+    async def about(self, id):
         """
         返回或者生成关于我和我的联系方式文章模板
-        :param article:
         :param id:
         :return:
         """
+        article = Article()
         await article.load(id=id)
         if not article:
             article.id = id
@@ -124,12 +125,11 @@ class ArticleService(Service, SettingsMixin):
         :return:
         """
         articles = await Article.search(
-            searchField, _from=_from, size=size,
-            fulltext=fulltext == "true", show=True)
-
+            searchField, _from=_from, size=size, fulltext=fulltext, show=True)
         feature_articles = await Article.search(
             searchField, _from=_from, size=size,
-            fulltext=fulltext == "true", feature=True, show=True)
+            fulltext=fulltext, feature=True, show=True)
+
         tags = [article.tags for article in
                 await Article.load_list(None, projection=["tags"], show=True)]
         count = len(tags)

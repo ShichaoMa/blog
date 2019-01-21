@@ -8,6 +8,7 @@ from apistellar.types.formats import BaseFormat, DATETIME_REGEX, ValidationError
 
 from ..utils import default_tz
 
+
 class TsFormat(BaseFormat):
 
     type = numbers.Number
@@ -63,9 +64,9 @@ class TagsFormat(BaseFormat):
         raise ValidationError('Must be a valid tags.')
 
     def to_string(self, value):
-        if isinstance(value, str):
-            value = value.split(",")
-        return ",".join(value)
+        if isinstance(value, list):
+            value = ",".join(value)
+        return value
 
 
 class Timestamp(validators.String):

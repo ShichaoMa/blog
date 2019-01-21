@@ -265,9 +265,9 @@
                        data: {
                            id: this.props.id,
                            author: this.props.author,
-                           tags: this.props.tags.join(","),
+                           tags: this.props.tags,
                            title: this.props.title,
-                           feature: this.props.feature ? "True": "False",
+                           feature: this.props.feature,
                            description: this.props.description,
                            img_url: document.getElementsByClassName("img-responsive")[0].src,
                            article: $(".markdown-body").html()
@@ -275,7 +275,7 @@
                        async: false,
                        success: function(resp){
                             let data = resp;//eval("("+resp+")");
-                            if(!data.result){
+                            if(data.code != 0){
                                 let have_not_login = true;
                                 while(have_not_login){
                                     let username = prompt("请输入用户名：");
@@ -297,7 +297,7 @@
                                         async: false,
                                         success: function (resp) {
                                             let data = resp;//eval("("+resp+")");
-                                            if(data.result){
+                                            if(data.code == 0 ){
                                                 have_not_login = false;
                                             }else{
                                                 alert("用户名密码错误！");
