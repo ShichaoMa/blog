@@ -18,7 +18,7 @@ class WelcomeController(Controller, SettingsMixin):
     欢迎页
     """
     @get("/")
-    def index(self, app: App, path: QueryParam) -> str:
+    def index(self, app: App, path: QueryParam=None) -> str:
         """
         首页
         :param app:
@@ -45,40 +45,3 @@ class WelcomeController(Controller, SettingsMixin):
         for name, file in files.items():
             file.save(os.path.join(project_path, "static/img", file.filename))
         return {"success": True}
-
-    @post("/a/{+path}")
-    @return_wrapped(error_info={1: "错误1", 2: "错误2"})
-    def test(self, path: str, b: http.QueryParams, name: FormParam, data: Article) -> typing.List[Article]:
-        """
-        测试
-        :param path: 传个地址
-        :param name: 输入名字
-        :ex name: `abcd`
-        :param b: 测试QueryParams
-        :ex b:
-        ```json
-        {"a": 1, "b": 2}
-        ```
-        :param data: post过来的参数集合
-        :ex data:
-        ```json
-        {"a": 1}
-        ```
-        :ex data:
-        ```json
-        {"ab": 1}
-        ```
-        :return:
-        ```json
-        {"code": 0, "data": {"a": 1}}
-        ```
-        """
-        return [data]
-
-    @post("/test/b")
-    def test2(self, stream: FileStream):
-        """
-
-        :param stream: 这一个文件流
-        :return:
-        """

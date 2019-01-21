@@ -119,8 +119,8 @@ class ArticleController(Controller, SettingsMixin):
     @get("/export")
     async def export(self,
                      url: http.URL,
-                     code: http.QueryParam,
-                     ids: http.QueryParam):
+                     ids: http.QueryParam,
+                     code: http.QueryParam=None):
         """
         导出文章
         :param url: 当前访问的url地址
