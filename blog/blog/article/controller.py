@@ -4,7 +4,7 @@ from apistellar import Controller, route, get, post, \
     Session, FormParam, SettingsMixin, require
 
 from .article import Article
-from blog.utils import project_path, decode
+from blog.blog.utils import project_path, decode
 from .service import ArticleService
 
 

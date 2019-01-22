@@ -8,8 +8,8 @@ from apistellar import Controller, route, get, post, require, Session, \
     FormParam, SettingsMixin, MultiPartForm
 from apistellar.helper import return_wrapped
 
-from blog.utils import project_path
-from blog.article.article import Article
+from blog.blog.utils import project_path
+from blog.blog.article.article import Article
 
 
 @route("/", name="welcome")
