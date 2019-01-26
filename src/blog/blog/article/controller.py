@@ -11,7 +11,7 @@ from .service import ArticleService
 @route("", name="article")
 class ArticleController(Controller, SettingsMixin):
     """
-    文章相关的api
+    文章相关
     """
     def __init__(self):
         # 通过在controller中初始化service会失去service的注入功能，
@@ -40,7 +40,7 @@ class ArticleController(Controller, SettingsMixin):
                     username: FormParam,
                     password: FormParam,
                     ref: FormParam,
-                    session: Session) -> str:
+                    session: Session):
         """
         检查用户名和密码是否正确
         :param app:
@@ -105,6 +105,7 @@ class ArticleController(Controller, SettingsMixin):
         用于上传文章
         :param app:
         :param article: 文章相关信息
+        :type article: form
         :param session:
         :return: 返回上传页面继续上传
         """
@@ -243,7 +244,7 @@ class ArticleController(Controller, SettingsMixin):
                    searchField: http.QueryParam="",
                    fulltext: bool=True,
                    _from: int=0,
-                   size: int=10):
+                   size: int=10) -> dict:
         """
         首页展示接口
         :param searchField: 搜索关键词

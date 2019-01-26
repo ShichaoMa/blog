@@ -1,0 +1,645 @@
+
+    <html>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../github-markdown.css">
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+
+        @media (max-width: 767px) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+    </style> 
+    <article class="markdown-body">
+        <h1>文章相关 API文档</h1>
+<h2>模型定义</h2>
+<h3>blog.blog.article.article.Article</h3>
+<table>
+<thead>
+<tr>
+<th align="left">字段名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">是否可为空值</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">title</td>
+<td align="left">String</td>
+<td align="left">是</td>
+<td align="left">否</td>
+<td align="left"></td>
+<td align="left">标题</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">id</td>
+<td align="left">String</td>
+<td align="left">否</td>
+<td align="left">否</td>
+<td align="left">20190126144151</td>
+<td align="left">每篇文章的唯一id，日期字符串的形式表示</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">tags</td>
+<td align="left">Tags</td>
+<td align="left">是</td>
+<td align="left">否</td>
+<td align="left"></td>
+<td align="left">关键字</td>
+<td align="left"><code>["python", "apistellar"]</code></td>
+</tr>
+<tr>
+<td align="left">description</td>
+<td align="left">String</td>
+<td align="left">否</td>
+<td align="left">否</td>
+<td align="left"></td>
+<td align="left">描述信息</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">author</td>
+<td align="left">String</td>
+<td align="left">否</td>
+<td align="left">否</td>
+<td align="left">夏洛之枫</td>
+<td align="left">作者信息</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">feature</td>
+<td align="left">Boolean</td>
+<td align="left">否</td>
+<td align="left">否</td>
+<td align="left">False</td>
+<td align="left">是否为精品</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">created_at</td>
+<td align="left">Timestamp</td>
+<td align="left">否</td>
+<td align="left">否</td>
+<td align="left">1548484911.842833</td>
+<td align="left">创建时间</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">updated_at</td>
+<td align="left">Timestamp</td>
+<td align="left">否</td>
+<td align="left">否</td>
+<td align="left">1548484911.842863</td>
+<td align="left">更新时间</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">show</td>
+<td align="left">Boolean</td>
+<td align="left">否</td>
+<td align="left">否</td>
+<td align="left">True</td>
+<td align="left">是否在文章列表中展示</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">article</td>
+<td align="left">String</td>
+<td align="left">否</td>
+<td align="left">否</td>
+<td align="left"></td>
+<td align="left">文章正文</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h2>接口定义</h2>
+<h3>1. 导入文章</h3>
+<h4>URL: /import</h4>
+<h4>方法: GET</h4>
+<h4>返回信息</h4>
+<h5>返回描述</h5>
+<p>导入文章页面</p>
+<h3>2. 检查用户名和密码是否正确</h3>
+<h4>URL: /check</h4>
+<h4>方法: POST</h4>
+<h4>表单参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">article</td>
+<td align="left">blog.blog.article.article.Article</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"><code>{"title": "xxx"}</code></td>
+</tr>
+<tr>
+<td align="left">username</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">用户名</td>
+<td align="left"><code>test</code></td>
+</tr>
+<tr>
+<td align="left">password</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">密码</td>
+<td align="left"><code>12345</code></td>
+</tr>
+<tr>
+<td align="left">ref</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">从哪里跳过来的</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回类型</h5>
+<p>str</p>
+<h5>返回描述</h5>
+<p>返回网页</p>
+<h3>3. 检查用户名密码是否正确，返回检查结果</h3>
+<h4>URL: /load</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">username</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">用户名</td>
+<td align="left"><code>test</code></td>
+</tr>
+<tr>
+<td align="left">password</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">密码</td>
+<td align="left"><code>12345</code></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回示例</h5>
+<h6>示例1</h6>
+<pre><code class="json">        {&quot;code&quot;: 0, &quot;data&quot;: null}
+</code></pre>
+
+<h6>示例2</h6>
+<pre><code class="json">        {&quot;code&quot;: 401, &quot;message&quot;: &quot;密码错误&quot;}
+</code></pre>
+
+<h4>返回响应码</h4>
+<table>
+<thead>
+<tr>
+<th align="left">响应码</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">0</td>
+<td align="left">返回成功</td>
+</tr>
+<tr>
+<td align="left">401</td>
+<td align="left">密码错误</td>
+</tr>
+</tbody>
+</table>
+<h3>4. 用于上传文章</h3>
+<h4>URL: /upload</h4>
+<h4>方法: POST</h4>
+<h4>json请求体</h4>
+<h5>请求描述</h5>
+<p>文章相关信息</p>
+<h5>模型类型</h5>
+<p>blog.blog.article.article.Article</p>
+<h4>返回信息</h4>
+<h5>返回描述</h5>
+<p>返回上传页面继续上传</p>
+<h3>5. 导出文章</h3>
+<h4>URL: /export</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">ids</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">要导出的文章id，使用,连接成字符串</td>
+<td align="left"><code>20181010111111,20181020111111</code></td>
+</tr>
+<tr>
+<td align="left">code</td>
+<td align="left">str</td>
+<td align="left">否</td>
+<td align="left">None</td>
+<td align="left">后端生成的用于验证的code</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回描述</h5>
+<p>导出生成的压缩包</p>
+<h3>6. 这个接口用于直接在网页上修改文章内容</h3>
+<h4>URL: /modify</h4>
+<h4>方法: POST</h4>
+<h4>表单参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">img_url</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">首图地址</td>
+<td align="left"><code>http://www.csdn.....jpg</code></td>
+</tr>
+<tr>
+<td align="left">article</td>
+<td align="left">blog.blog.article.article.Article</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">文章对象</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回示例</h5>
+<h6>示例1</h6>
+<pre><code class="json">        {&quot;code&quot;: 0, &quot;data&quot;: null}
+</code></pre>
+
+<h6>示例2</h6>
+<pre><code class="json">        {&quot;code&quot;: 401, &quot;message&quot;: &quot;Login required!&quot;}
+</code></pre>
+
+<h4>返回响应码</h4>
+<table>
+<thead>
+<tr>
+<th align="left">响应码</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">0</td>
+<td align="left">返回成功</td>
+</tr>
+<tr>
+<td align="left">401</td>
+<td align="left">Login required!</td>
+</tr>
+</tbody>
+</table>
+<h3>7. 打开文章编辑页面</h3>
+<h4>URL: /edit</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">id</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">文章的id</td>
+<td align="left"><code>20111111111111</code></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回描述</h5>
+<p>如果登录了，跳转到编辑页面，否则，跳转到登录页。</p>
+<h3>8. 编辑之后更新文章内容</h3>
+<h4>URL: /update</h4>
+<h4>方法: POST</h4>
+<h4>表单参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">article</td>
+<td align="left">blog.blog.article.article.Article</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">文章对象</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回描述</h5>
+<p>如果登录了，跳转到首页，否则，跳转到登录页</p>
+<h3>9. 删除文章接口</h3>
+<h4>URL: /delete</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">id</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">要删除的文章id</td>
+<td align="left"><code>19911111111111</code></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回描述</h5>
+<p>如果登录了，跳转到首页，否则跳转到登录页。</p>
+<h3>10. 获取文章</h3>
+<h4>URL: /article</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">id</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">要获取的文章id</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回类型</h5>
+<p>blog.blog.article.article.Article</p>
+<h5>返回描述</h5>
+<p>获取到的文章对象</p>
+<h3>11. 获取关于我的文章</h3>
+<h4>URL: /me</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">code</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">后端生成的用于验证的code</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回类型</h5>
+<p>blog.blog.article.article.Article</p>
+<h5>返回描述</h5>
+<p>获取到的文章对象</p>
+<h3>12. 获取我的联系方式</h3>
+<h4>URL: /contact</h4>
+<h4>方法: GET</h4>
+<h4>返回信息</h4>
+<h5>返回类型</h5>
+<p>blog.blog.article.article.Article</p>
+<h5>返回描述</h5>
+<p>获取到的文章对象</p>
+<h3>13. 首页展示接口</h3>
+<h4>URL: /show</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">searchField</td>
+<td align="left">str</td>
+<td align="left">否</td>
+<td align="left"></td>
+<td align="left">搜索关键词</td>
+<td align="left"><code>python</code></td>
+</tr>
+<tr>
+<td align="left">fulltext</td>
+<td align="left">bool</td>
+<td align="left">否</td>
+<td align="left">True</td>
+<td align="left">是否全文搜索</td>
+<td align="left"><code>true/false</code></td>
+</tr>
+<tr>
+<td align="left">_from</td>
+<td align="left">int</td>
+<td align="left">否</td>
+<td align="left">0</td>
+<td align="left">从第几篇文章开始搜</td>
+<td align="left"><code>0</code></td>
+</tr>
+<tr>
+<td align="left">size</td>
+<td align="left">int</td>
+<td align="left">否</td>
+<td align="left">10</td>
+<td align="left">每页大小</td>
+<td align="left"><code>10</code></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回示例</h5>
+<pre><code class="json">        {
+            &quot;count&quot;: 10,
+            &quot;articles&quot;: [...],
+            &quot;feature_articles&quot;: [..],
+            &quot;tags&quot;: [&quot;python&quot;, &quot;ubuntu&quot;...]
+        }
+</code></pre>
+
+<h3>14. 截图api</h3>
+<h4>URL: /cut</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">url</td>
+<td align="left">str</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">要截图的地址</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">top</td>
+<td align="left">int</td>
+<td align="left">否</td>
+<td align="left">0</td>
+<td align="left">截图区域的top</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">left</td>
+<td align="left">int</td>
+<td align="left">否</td>
+<td align="left">0</td>
+<td align="left">截图区域的left</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">width</td>
+<td align="left">int</td>
+<td align="left">否</td>
+<td align="left">1024</td>
+<td align="left">截图区域的width</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">height</td>
+<td align="left">int</td>
+<td align="left">否</td>
+<td align="left">768</td>
+<td align="left">截图区域的height</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回描述</h5>
+<p>重定向到截图的静态地址</p>
+    </article>
+    </html>
+    

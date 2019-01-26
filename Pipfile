@@ -8,6 +8,7 @@ pytest = "*"
 pytest-apistellar = "*"
 pytest-cov = "*"
 pytest-asyncio = "*"
+aiohttp = "*"
 
 [packages]
 pytz = "*"

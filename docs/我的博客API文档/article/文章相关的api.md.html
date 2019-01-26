@@ -20,7 +20,7 @@
     <article class="markdown-body">
         <h1>文章相关的api API文档</h1>
 <h2>模型定义</h2>
-<h3>blog.article.article.Article</h3>
+<h3>blog.blog.article.article.Article</h3>
 <table>
 <thead>
 <tr>
@@ -48,7 +48,7 @@
 <td align="left">String</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">20190120211712</td>
+<td align="left">20190126144023</td>
 <td align="left">每篇文章的唯一id，日期字符串的形式表示</td>
 <td align="left"></td>
 </tr>
@@ -93,7 +93,7 @@
 <td align="left">Timestamp</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">1547990231.990121</td>
+<td align="left">1548484823.313708</td>
 <td align="left">创建时间</td>
 <td align="left"></td>
 </tr>
@@ -102,7 +102,7 @@
 <td align="left">Timestamp</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">1547990231.990146</td>
+<td align="left">1548484823.313737</td>
 <td align="left">更新时间</td>
 <td align="left"></td>
 </tr>
@@ -151,7 +151,7 @@
 <tbody>
 <tr>
 <td align="left">article</td>
-<td align="left">blog.article.article.Article</td>
+<td align="left">blog.blog.article.article.Article</td>
 <td align="left">是</td>
 <td align="left"></td>
 <td align="left"></td>
@@ -185,7 +185,7 @@
 </table>
 <h4>返回信息</h4>
 <h5>返回类型</h5>
-<p>builtins.str</p>
+<p>str</p>
 <h5>返回描述</h5>
 <p>返回网页</p>
 <h3>3. 检查用户名密码是否正确，返回检查结果</h3>
@@ -258,7 +258,7 @@
 <h5>请求描述</h5>
 <p>文章相关信息</p>
 <h5>模型类型</h5>
-<p>blog.article.article.Article</p>
+<p>blog.blog.article.article.Article</p>
 <h4>返回信息</h4>
 <h5>返回描述</h5>
 <p>返回上传页面继续上传</p>
@@ -279,20 +279,20 @@
 </thead>
 <tbody>
 <tr>
-<td align="left">code</td>
-<td align="left">str</td>
-<td align="left">是</td>
-<td align="left"></td>
-<td align="left">后端生成的用于验证的code</td>
-<td align="left"></td>
-</tr>
-<tr>
 <td align="left">ids</td>
 <td align="left">str</td>
 <td align="left">是</td>
 <td align="left"></td>
 <td align="left">要导出的文章id，使用,连接成字符串</td>
 <td align="left"><code>20181010111111,20181020111111</code></td>
+</tr>
+<tr>
+<td align="left">code</td>
+<td align="left">str</td>
+<td align="left">否</td>
+<td align="left">None</td>
+<td align="left">后端生成的用于验证的code</td>
+<td align="left"></td>
 </tr>
 </tbody>
 </table>
@@ -325,7 +325,7 @@
 </tr>
 <tr>
 <td align="left">article</td>
-<td align="left">blog.article.article.Article</td>
+<td align="left">blog.blog.article.article.Article</td>
 <td align="left">是</td>
 <td align="left"></td>
 <td align="left">文章对象</td>
@@ -409,7 +409,7 @@
 <tbody>
 <tr>
 <td align="left">article</td>
-<td align="left">blog.article.article.Article</td>
+<td align="left">blog.blog.article.article.Article</td>
 <td align="left">是</td>
 <td align="left"></td>
 <td align="left">文章对象</td>
@@ -477,7 +477,7 @@
 </table>
 <h4>返回信息</h4>
 <h5>返回类型</h5>
-<p>blog.article.article.Article</p>
+<p>blog.blog.article.article.Article</p>
 <h5>返回描述</h5>
 <p>获取到的文章对象</p>
 <h3>11. 获取关于我的文章</h3>
@@ -508,7 +508,7 @@
 </table>
 <h4>返回信息</h4>
 <h5>返回类型</h5>
-<p>blog.article.article.Article</p>
+<p>blog.blog.article.article.Article</p>
 <h5>返回描述</h5>
 <p>获取到的文章对象</p>
 <h3>12. 获取我的联系方式</h3>
@@ -516,7 +516,7 @@
 <h4>方法: GET</h4>
 <h4>返回信息</h4>
 <h5>返回类型</h5>
-<p>blog.article.article.Article</p>
+<p>blog.blog.article.article.Article</p>
 <h5>返回描述</h5>
 <p>获取到的文章对象</p>
 <h3>13. 首页展示接口</h3>

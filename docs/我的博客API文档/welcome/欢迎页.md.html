@@ -1,0 +1,85 @@
+
+    <html>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../github-markdown.css">
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+
+        @media (max-width: 767px) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+    </style> 
+    <article class="markdown-body">
+        <h1>欢迎页 API文档</h1>
+<h2>模型定义</h2>
+<h2>接口定义</h2>
+<h3>1. 首页</h3>
+<h4>URL: /</h4>
+<h4>方法: GET</h4>
+<h4>查询参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">path</td>
+<td align="left">str</td>
+<td align="left">否</td>
+<td align="left">None</td>
+<td align="left">子路径</td>
+<td align="left"><code>"/article?a=3"</code></td>
+</tr>
+</tbody>
+</table>
+<h4>返回信息</h4>
+<h5>返回类型</h5>
+<p>str</p>
+<h5>返回示例</h5>
+<pre><code class="html">        &lt;html&gt;...&lt;/html&gt;
+</code></pre>
+
+<h3>2.</h3>
+<h4>URL: /upload_image</h4>
+<h4>方法: POST</h4>
+<h4>表单参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>file1</code>, <code>file2</code>, ...</td>
+<td align="left">file</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+    </article>
+    </html>
+    

@@ -45,3 +45,7 @@ class WelcomeController(Controller, SettingsMixin):
         for name, file in files.items():
             file.save(os.path.join(project_path, "static/img", file.filename))
         return {"success": True}
+
+    @post("/a/{b}/{+path}")
+    async def test(self, b: int, path: str):
+        print(b, path)
