@@ -51,6 +51,7 @@ with cfg_manage(__file__.replace(".py", ".cfg.tpl")):
         name="blog",
         version=get_version("src/blog"),
         packages=find_packages('src'),
+        package_dir={'': 'src'},
         include_package_data=True,
         install_requires=install_requires(),
         author="",
