@@ -32,9 +32,10 @@ class Import(Solo):
                 await self.insert(filename)
 
     async def insert(self, filename):
-        article = Article()
         title = basename(filename).replace(".md", "")
-        if not await article.load(title=title):
+        article = await Article.load(title=title)
+
+        if not article:
             article.title = title
             lines = open(filename).readlines()
             article.tags = self.retrieve("tags", lines)

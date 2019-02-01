@@ -29,8 +29,7 @@ class ArticleService(Service, SettingsMixin):
         :param id:
         :return:
         """
-        article = Article(id=id)
-        await article.load()
+        article = await Article.load(id=id)
         format_article_body = markdown.markdown(
             article.article,
             extensions=['markdown.extensions.extra'])
@@ -95,8 +94,7 @@ class ArticleService(Service, SettingsMixin):
         :param id:
         :return:
         """
-        article = Article()
-        await article.load(id=id)
+        article = await Article.load(id=id)
         if not article:
             article.id = id
             article.author = self.settings.get("AUTHOR")
@@ -131,7 +129,7 @@ class ArticleService(Service, SettingsMixin):
             fulltext=fulltext, feature=True, show=True)
 
         tags = [article.tags for article in
-                await Article.load_list(None, projection=["tags"], show=True)]
+                await Article.load_list(projection=["tags"], show=True)]
         count = len(tags)
         tags, articles = format_articles(
             [article.to_dict() for article in articles], tags=tags)

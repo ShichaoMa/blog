@@ -63,7 +63,7 @@ class ArticleController(Controller, SettingsMixin):
                 password == self.settings["PASSWORD"]:
             session["login"] = f'{username}:{password}'
             if ref == "edit" and hasattr(article, "id"):
-                article = await article.load()
+                article = await Article.load(id=article.id)
             if ref:
                 return app.render_template(
                     f"{ref}.html", success="", **article.to_dict())
@@ -134,7 +134,7 @@ class ArticleController(Controller, SettingsMixin):
             ids = ids.split(",")
         else:
             ids = []
-        article_list = await Article.load_list(ids)
+        article_list = await Article.load_list(id=ids)
         return await self.service.export(article_list, code, url)
 
     @post("/modify")
@@ -169,9 +169,7 @@ class ArticleController(Controller, SettingsMixin):
         :param session:
         :return: 如果登录了，跳转到编辑页面，否则，跳转到登录页。
         """
-        article = Article(id=id)
-        await article.load()
-
+        article = await Article.load(id=id)
         if not session.get("login"):
             return app.render_template("login.html", ref="edit", **article)
         else:

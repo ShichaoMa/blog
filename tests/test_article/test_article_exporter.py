@@ -37,10 +37,11 @@ class TestArticleExporter(object):
     @article("right_code", ret_val=True)
     async def test__replace_url(self):
         article_exporter = ArticleExporter("", "", "http://www.baidu.com/abc")
-        html = '<img src="/static/img/01.jpg">' \
+        html = '<img src="http://img.shields.io/aaa">' \
                '<img src="http://www.amazon.com/01.jpg">'
         html = article_exporter._replace_url(html)
-        assert html.count("http://www.baidu.com/static/img/01.jpg")
+        assert html.count("http://www.baidu.com/cut"
+                          "?width=60&height=20&url=http://img.shields.io/aaa")
         assert html.count("http://www.amazon.com/01.jpg")
 
     @article("right_code", ret_val=False)

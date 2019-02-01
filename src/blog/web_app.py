@@ -9,7 +9,9 @@ from whitenoise import WhiteNoise
 WhiteNoise.autorefresh = True
 
 app_name = "blog"
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(name)s] %(levelname)s: %(message)s')
 
 app = Application(app_name, debug=False,
                   static_dir="static", template_dir="templates",

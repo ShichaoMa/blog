@@ -1,10 +1,23 @@
 import os
 import sqlite3
+import logging
 
+from pyaop import AOP, Proxy
 from apistellar.persistence import DriverMixin, proxy, contextmanager
 from apistellar.helper import cache_classproperty
 
 from ..utils import project_path
+
+
+logger = logging.getLogger("sql")
+
+
+class SqliteProxy(Proxy):
+    proxy_methods = ["execute"]
+
+
+def execute_before(self, *args, **kwargs):
+    logger.debug(f"Execute sql: `{args[0]}`  args: `{args[1]}`")
 
 
 class SqliteDriverMixin(DriverMixin):
@@ -34,8 +47,11 @@ class SqliteDriverMixin(DriverMixin):
         conn, cur = cls.init_sqlite
         with super(SqliteDriverMixin, cls).get_store(
                 self_or_cls, **callargs) as self_or_cls:
+            cur = conn.cursor()
+            store = SqliteProxy(
+                cur, before=[AOP.Hook(execute_before, ["execute"])])
             try:
-                yield proxy(self_or_cls, prop_name="store", prop=conn.cursor())
+                yield proxy(self_or_cls, prop_name="store", prop=store)
             finally:
                 conn.commit()
 
