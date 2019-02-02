@@ -3,7 +3,7 @@ import logging
 import datetime
 
 from itertools import repeat
-from collections import MutableSequence, MutableSet
+from collections import MutableSequence, MutableSet, defaultdict
 
 from apistellar.types import PersistentType
 from apistellar.persistence import conn_ignore
@@ -105,6 +105,20 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
         return [Article(dict(zip(
             (col[0] for col in cls.store.description), data)))
             for data in data_list]
+
+    @classmethod
+    async def get_total_tags(cls):
+        """
+        获取全部文章数量及每个tag的数量
+        :return:
+        """
+        count = 0
+        group_tags = defaultdict()
+        for article in await cls.load_list(projection=["tags"], show=True):
+            for tag in article.tags.split(","):
+                group_tags[tag] += 1
+                count += 1
+        return count, group_tags
 
     async def save(self):
         """

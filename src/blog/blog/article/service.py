@@ -1,4 +1,6 @@
 import os
+import re
+import hashlib
 import asyncio
 import zipfile
 import markdown
@@ -6,13 +8,12 @@ import html2text
 
 from io import BytesIO
 from concurrent.futures import ThreadPoolExecutor
-from apistellar import FileResponse, Service, inject, SettingsMixin
+from apistellar import FileResponse, Service, SettingsMixin
 
 from .article import Article
 from ..lib.html_cut import Cuter
 from .article_exporter import ArticleExporter
-from ..utils import get_cut_file_name, project_path, \
-    get_id, format_articles, get_image
+from ..utils import project_path, get_id
 
 
 class ArticleService(Service, SettingsMixin):
@@ -33,8 +34,8 @@ class ArticleService(Service, SettingsMixin):
         format_article_body = markdown.markdown(
             article.article,
             extensions=['markdown.extensions.extra'])
-        _, articles = format_articles([article.to_dict()])
-        article = articles.pop()
+        article = article.to_dict()
+        article["first_img"] = self._get_image(article.pop("article"))
         article["article"] = format_article_body
         return article
 
@@ -108,7 +109,7 @@ class ArticleService(Service, SettingsMixin):
             await article.save()
 
         article = article.to_dict()
-        article["first_img"] = get_image(article["article"])
+        article["first_img"] = self._get_image(article["article"])
         article["article"] = markdown.markdown(
             article["article"], extensions=['markdown.extensions.extra'])
         return article
@@ -122,25 +123,25 @@ class ArticleService(Service, SettingsMixin):
         :param fulltext:
         :return:
         """
-        articles = await Article.search(
-            searchField, _from=_from, size=size, fulltext=fulltext, show=True)
+        # 获取精品文档
         feature_articles = await Article.search(
             searchField, _from=_from, size=size,
             fulltext=fulltext, feature=True, show=True)
+        self._enrich_first_img(feature_articles)
 
-        tags = [article.tags for article in
-                await Article.load_list(projection=["tags"], show=True)]
-        count = len(tags)
-        tags, articles = format_articles(
-            [article.to_dict() for article in articles], tags=tags)
-        _, feature_articles = format_articles(
-            [article.to_dict() for article in feature_articles])
+        # 获取首页文档
+        articles = await Article.search(
+            searchField, _from=_from, size=size, fulltext=fulltext, show=True)
+        self._enrich_first_img(articles)
+        # 获取全部tags
+        count, tags = await Article.get_total_tags()
+
         return {
             "count": count,
             "articles": articles,
             "feature_articles": feature_articles,
-            "tags": [i for i in
-                     sorted(tags.items(), key=lambda x: x[1], reverse=True)]}
+            "tags": list(sorted(tags.items(), key=lambda x: x[1], reverse=True))
+        }
 
     async def cut(self, url, top, left, width, height):
         """
@@ -152,11 +153,33 @@ class ArticleService(Service, SettingsMixin):
         :param height:
         :return:
         """
-        save_name = get_cut_file_name(
-            project_path, url, top, left, width, height)
+
+        sh = hashlib.sha1(url.encode())
+        sh.update(bytes(str(top), encoding="utf-8"))
+        sh.update(bytes(str(left), encoding="utf-8"))
+        sh.update(bytes(str(width), encoding="utf-8"))
+        sh.update(bytes(str(height), encoding="utf-8"))
+        save_name = sh.hexdigest()[:10] + ".png"
+
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(
             self.executor,
             self.cuter.cut,
             url, save_name, top, left, width, height)
         return save_name
+
+    @classmethod
+    def _enrich_first_img(cls, articles):
+        for index in range(len(articles)):
+            article = articles[index].to_dict()
+            article["first_img"] = cls._get_image(article.pop("article"))
+            articles[index] = article
+
+    @staticmethod
+    def _get_image(body):
+        try:
+            image_part = body[:body.index("\n")]
+        except ValueError:
+            image_part = body
+        mth = re.search(r"!\[.*?\]\((.*?)\)", image_part)
+        return mth.group(1) if mth else ""
