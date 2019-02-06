@@ -6,7 +6,7 @@ from apistellar import validators
 from apistellar.types.formats import BaseFormat, DATETIME_REGEX, ValidationError
 
 
-from ..utils import default_tz
+from blog.blog.utils import default_tz
 
 
 class TsFormat(BaseFormat):
@@ -73,21 +73,6 @@ class Timestamp(validators.String):
 
     def __init__(self, **kwargs):
         super().__init__(format='ts', **kwargs)
-
-#
-# class Boolean(validators.Boolean):
-#     def validate(self, value, definitions=None, allow_coerce=False):
-#         if value is None and self.has_default():
-#             return self.get_default()
-#         elif value is None and self.allow_null:
-#             return None
-#         elif value is None:
-#             self.error('null')
-#
-#         elif not isinstance(value, bool):
-#             return bool(value)
-#
-#         return value
 
 
 class Tags(validators.String):

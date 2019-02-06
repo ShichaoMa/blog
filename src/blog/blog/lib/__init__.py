@@ -3,10 +3,9 @@ import sqlite3
 import logging
 
 from pyaop import AOP, Proxy
-from apistellar.persistence import DriverMixin, proxy, contextmanager
+from apistellar import settings
 from apistellar.helper import cache_classproperty
-
-from ..utils import project_path
+from apistellar.persistence import DriverMixin, proxy, contextmanager
 
 
 logger = logging.getLogger("sql")
@@ -29,11 +28,13 @@ class SqliteDriverMixin(DriverMixin):
 
     @cache_classproperty
     def init_sqlite(cls):
+        project_path = settings["PROJECT_PATH"]
         os.makedirs(os.path.join(
             project_path, os.path.dirname(cls.DB_PATH)), exist_ok=True)
         table_initialize = open(
             os.path.join(project_path, cls.INIT_SQL_FILE)).read()
-        conn = sqlite3.connect(os.path.join(project_path, cls.DB_PATH))
+        conn = sqlite3.connect(
+            os.path.join(project_path, cls.DB_PATH))
         cur = conn.cursor()
         try:
             cur.execute(table_initialize)

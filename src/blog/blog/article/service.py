@@ -13,7 +13,7 @@ from apistellar import FileResponse, Service, SettingsMixin
 from .article import Article
 from ..lib.html_cut import Cuter
 from .article_exporter import ArticleExporter
-from ..utils import project_path, get_id
+from ..utils import get_id
 
 
 class ArticleService(Service, SettingsMixin):
@@ -21,7 +21,7 @@ class ArticleService(Service, SettingsMixin):
         # 之前cutter使用注入的方式实现，感觉被过度设计了
         self.cuter = Cuter(
             self.settings.get("PHANTOMJS_PATH"),
-            os.path.join(project_path, "cut_html.js"))
+            os.path.join(self.settings["PROJECT_PATH"], "cut_html.js"))
         self.executor = ThreadPoolExecutor()
 
     async def get(self, id):

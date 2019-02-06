@@ -2,11 +2,11 @@ import os
 import sqlite3
 import typing
 
-from apistellar import Component
 from toolkit.settings import FrozenSettings
+from apistellar import Component, settings
 
 from .lib.html_cut import Cuter
-from .utils import code_generator, project_path
+from .utils import code_generator
 Code = typing.NewType("Code", str)
 
 
@@ -28,5 +28,6 @@ class CuterComponent(Component):
     def resolve(self, settings: FrozenSettings) -> Cuter:
         if self.cutter is None:
             self.cutter = Cuter(
-                settings.PHANTOMJS_PATH, os.path.join(project_path, "cut_html.js"))
+                settings.PHANTOMJS_PATH, os.path.join(
+                    settings["PROJECT_PATH"], "cut_html.js"))
         return self.cutter

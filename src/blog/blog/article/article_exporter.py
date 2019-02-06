@@ -4,10 +4,9 @@ import asyncio
 import markdown
 
 from functools import partial
-from collections import namedtuple
 from urllib.parse import urljoin
-
-from ..utils import project_path
+from collections import namedtuple
+from apistellar import settings
 
 
 ArticleFile = namedtuple("ArticleFile", "filename,buffer")
@@ -38,7 +37,7 @@ class ArticleExporter(object):
         loop = asyncio.get_event_loop()
         buffer = await loop.run_in_executor(
             None, partial(HTML(string=html).write_pdf, stylesheets=[
-                os.path.join(project_path, "static/css/pdf.css")]))
+                os.path.join(settings["PROJECT_PATH"], "static/css/pdf.css")]))
         return ArticleFile(f"{self.article.title}.pdf", buffer)
 
     async def export_other(self):

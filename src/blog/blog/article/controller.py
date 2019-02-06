@@ -1,15 +1,15 @@
 from apistar import http, App
 from apistellar.helper import redirect, return_wrapped
 from apistellar import Controller, route, get, post, \
-    Session, FormParam, SettingsMixin, require
+    Session, FormParam, require, settings
 
 from .article import Article
-from blog.blog.utils import project_path, decode
+from blog.blog.utils import decode
 from .service import ArticleService
 
 
 @route("", name="article")
-class ArticleController(Controller, SettingsMixin):
+class ArticleController(Controller):
     """
     文章相关
     """
@@ -59,8 +59,7 @@ class ArticleController(Controller, SettingsMixin):
         :return: 返回网页
         """
         # article由于没有经过format会带有多余的信息
-        if username == self.settings["USERNAME"] and \
-                password == self.settings["PASSWORD"]:
+        if username == settings["USERNAME"] and password == settings["PASSWORD"]:
             session["login"] = f'{username}:{password}'
             if ref == "edit" and hasattr(article, "id"):
                 article = await Article.load(id=article.id)
@@ -95,8 +94,8 @@ class ArticleController(Controller, SettingsMixin):
         {"code": 401, "message": "密码错误"}
         ```
         """
-        assert username == self.settings["USERNAME"] and \
-                password == self.settings["PASSWORD"], (401, "密码错误")
+        assert username == settings["USERNAME"] and \
+                password == settings["PASSWORD"], (401, "密码错误")
         session["login"] = f'{username}:{password}'
 
     @post("/upload")
@@ -282,4 +281,5 @@ class ArticleController(Controller, SettingsMixin):
         :return: 重定向到截图的静态地址
         """
         save_name = await self.service.cut(url, top, left, width, height)
-        return redirect(save_name.replace(project_path, ""))
+        return redirect(save_name.replace(
+            settings["PROJECT_PATH"], ""))

@@ -1,14 +1,16 @@
 import os
+import blog
 import pytest
 
 from pytest_apistellar import prop_alias
 from pytest_apistellar.parser import Attr
 
 from blog.blog.article.article import Article
-from blog.blog.utils import project_path
 
 
 article = prop_alias("blog.blog.article.article.Article")
+
+project_path = blog.__path__[0]
 
 
 def get_code():
@@ -23,6 +25,7 @@ def assert_execute(sql, args, assert_sql, assert_args, **kwargs):
 
 @article("code", ret_val=get_code())
 @pytest.mark.env(NEED_CODE="False")
+@pytest.mark.env(PROJECT_PATH=project_path)
 @pytest.mark.env(CODE_EXPIRE_INTERVAL=30 * 24 * 3600)
 @pytest.mark.asyncio
 class TestArticle(object):

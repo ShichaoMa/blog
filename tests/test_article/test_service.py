@@ -1,3 +1,4 @@
+import blog
 import pytest
 
 from io import BytesIO
@@ -11,13 +12,13 @@ from blog.blog.article.article_exporter import ArticleFile
 arti_ser = prop_alias("blog.blog.article.service.ArticleService")
 article = prop_alias("blog.blog.article.article.Article")
 
+project_path = blog.__path__[0]
 
+
+@arti_ser("settings", ret_val=SettingsLoader().load("blog.settings"))
+@pytest.mark.env(PROJECT_PATH=project_path)
 @pytest.mark.asyncio
 class TestService(object):
-
-    pytestmark = [
-        arti_ser("settings", ret_val=SettingsLoader().load("blog.settings"))
-    ]
 
     @article("load", ret_val=Article(id="20181010101010",
                                      article="![](http://www.baidu.com/)"))

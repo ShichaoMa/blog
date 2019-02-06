@@ -7,19 +7,22 @@ from collections import MutableSequence, MutableSet, defaultdict
 
 from apistellar.types import PersistentType
 from apistellar.persistence import conn_ignore
-from apistellar import validators, SettingsMixin
+from apistellar import validators, settings
 
-from ..lib import SqliteDriverMixin
-from ..utils import get_id, code_generator
+from blog.blog.lib import SqliteDriverMixin
+from blog.blog.utils import get_id, code_generator
+
 from .format import Tags, Timestamp
 
-
-settings_wrapper = SettingsMixin()
 
 logger = logging.getLogger("article")
 
 
-class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
+def get_author():
+    return settings.get("AUTHOR")
+
+
+class Article(PersistentType, SqliteDriverMixin):
     """
     文章模型
     :param title: 标题
@@ -44,7 +47,7 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
     id = validators.String(default=get_id)
     tags = Tags()
     description = validators.String(default="")
-    author = validators.String(default=settings_wrapper.settings["AUTHOR"])
+    author = validators.String(default=get_author)
     feature = validators.Boolean(default=False)
     created_at = Timestamp(default=datetime.datetime.now().timestamp)
     updated_at = Timestamp(default=datetime.datetime.now().timestamp)
@@ -61,9 +64,9 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
         """
         if code_gen is None:
             code_gen = code_generator(
-                cls.settings.get_int("CODE_EXPIRE_INTERVAL"))
+                settings.get_int("CODE_EXPIRE_INTERVAL"))
 
-        if cls.settings.get_bool("NEED_CODE"):
+        if settings.get_bool("NEED_CODE"):
             return next(code_gen) == code
         else:
             return True
@@ -113,11 +116,11 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
         :return:
         """
         count = 0
-        group_tags = defaultdict()
+        group_tags = defaultdict(int)
         for article in await cls.load_list(projection=["tags"], show=True):
             for tag in article.tags.split(","):
                 group_tags[tag] += 1
-                count += 1
+            count += 1
         return count, group_tags
 
     async def save(self):
@@ -200,10 +203,10 @@ class Article(PersistentType, SqliteDriverMixin, SettingsMixin):
         if search_field:
             vals = list()
             if fulltext:
-                sub = f"AND (article LIKE ? OR tags LIKE ?)"
+                sub = f" AND (article LIKE ? OR tags LIKE ?)"
                 vals.append(f"%{search_field}%")
             else:
-                sub = "AND tags LIKE ?"
+                sub = " AND tags LIKE ?"
             vals.append(f"%{search_field}%")
         return sub, vals
 
