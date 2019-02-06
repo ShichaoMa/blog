@@ -8,10 +8,8 @@ app_name = "blog"
 
 def run():
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s.%(msecs)d %(filename)s[line:%(lineno)d] %(levelname)s: %(message)s',
-        datefmt='%Y/%m/%d %H:%M:%S'
-    )
+        level=logging.DEBUG,
+        format='%(asctime)s [%(name)s] %(levelname)s: %(message)s')
     SoloManager(
         app_name, current_dir=os.path.dirname(os.path.abspath(__file__))).start()
 

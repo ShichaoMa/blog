@@ -1,16 +1,13 @@
-import blog
 import pytest
 
 from pytest_apistellar import prop_alias
 from blog.blog.article.article import Article
 from blog.blog.article.article_exporter import ArticleExporter
 
-project_path = blog.__path__[0]
 article = prop_alias("blog.blog.article.article.Article")
 
 
 @pytest.mark.asyncio
-@pytest.mark.env(PROJECT_PATH=project_path)
 class TestArticleExporter(object):
     async def test__choice_function(self):
         article = Article(id="me")

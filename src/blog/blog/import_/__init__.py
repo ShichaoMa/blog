@@ -1,12 +1,15 @@
 import re
 import glob
 import time
+from logging import getLogger
 
 from os.path import join, basename
-from apistellar import Solo
-from toolkit.settings import FrozenSettings
+from apistellar import Solo, settings
 
 from ..article.article import Article
+
+
+logger = getLogger("import")
 
 
 class Import(Solo):
@@ -15,12 +18,11 @@ class Import(Solo):
         self.paths = paths
         super(Import, self).__init__(**kwargs)
 
-    async def setup(self, settings: FrozenSettings):
+    async def setup(self):
         """
         初始化
         :return:
         """
-        self.settings = settings
 
     async def run(self):
         """
@@ -31,21 +33,26 @@ class Import(Solo):
             for filename in glob.glob(join(path, "*")):
                 await self.insert(filename)
 
-    async def insert(self, filename):
+    @classmethod
+    async def insert(cls, filename):
         title = basename(filename).replace(".md", "")
         article = await Article.load(title=title)
 
         if not article:
             article.title = title
-            lines = open(filename).readlines()
-            article.tags = self.retrieve("tags", lines)
-            article.description = self.retrieve("description", lines)
-            article.title = self.retrieve("title", lines) or title
-            article.author = self.retrieve("author", lines) or "夏洛之枫"
+            lines = open(filename, encoding="utf-8").readlines()
+            article.tags = cls.retrieve("tags", lines) or []
+            article.description = cls.retrieve("description", lines)
+            article.title = cls.retrieve("title", lines) or title
+            article.author = cls.retrieve("author", lines) or settings["AUTHOR"]
             article.article = "".join(lines)
             article.format()
             await article.save()
             time.sleep(1)
+            logger.debug(f"Import {filename} to db. ")
+        else:
+            logger.info(f"Article {filename} exist. ")
+        return article
 
     @staticmethod
     def retrieve(word, article):

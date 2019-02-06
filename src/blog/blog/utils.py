@@ -24,6 +24,7 @@ def code_generator(interval, key="ABCDEFGHIGKLMNOPQISTUVWXYZ0123456789"):
         last_time = int(last_time)
     except OSError:
         last_time = 0
+
     while True:
         if time.time() - last_time > interval:
             code, last_time = "".join(random.choices(key, 6)), time.time()

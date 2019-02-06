@@ -1,3 +1,3 @@
-from apistellar import SettingsMixin
+from apistellar import init_settings
 
-SettingsMixin.register_path("blog.settings")
+init_settings("blog.settings")

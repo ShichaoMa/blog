@@ -3,10 +3,10 @@ import sqlite3
 import logging
 
 from pyaop import AOP, Proxy
+
 from apistellar import settings
 from apistellar.helper import cache_classproperty
 from apistellar.persistence import DriverMixin, proxy, contextmanager
-
 
 logger = logging.getLogger("sql")
 

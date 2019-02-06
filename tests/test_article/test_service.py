@@ -1,8 +1,9 @@
-import blog
+import os
 import pytest
 
 from io import BytesIO
 from zipfile import ZipFile
+from apistellar import settings
 from collections import defaultdict
 from pytest_apistellar import prop_alias
 from toolkit.settings import SettingsLoader
@@ -12,11 +13,8 @@ from blog.blog.article.article_exporter import ArticleFile
 arti_ser = prop_alias("blog.blog.article.service.ArticleService")
 article = prop_alias("blog.blog.article.article.Article")
 
-project_path = blog.__path__[0]
-
 
 @arti_ser("settings", ret_val=SettingsLoader().load("blog.settings"))
-@pytest.mark.env(PROJECT_PATH=project_path)
 @pytest.mark.asyncio
 class TestService(object):
 
@@ -92,8 +90,10 @@ class TestService(object):
         assert rs["feature_articles"][0] == article
         assert rs["articles"][0] == article
 
-    @pytest.mark.prop("asyncio.unix_events._UnixSelectorEventLoop.run_in_executor", asyncable=True)
+    @pytest.mark.prop("asyncio.unix_events."
+                      "_UnixSelectorEventLoop.run_in_executor", asyncable=True)
     async def test_cut(self):
         save_name = await ArticleService().cut(
             "http://www.baidu.com/", 0, 0, 1024, 768)
-        assert save_name == "1169ee22f8.png"
+        assert save_name == os.path.join(
+            settings["PROJECT_PATH"], "static/temp/1169ee22f8.png")

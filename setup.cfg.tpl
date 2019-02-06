@@ -13,3 +13,4 @@ usefixtures =
 ;to be false.
 env =
     UNIT_TEST_MODE=true
+    PROJECT_PATH=blog.__path__[0]

@@ -5,10 +5,11 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-pytest-apistellar = "*"
 pytest-cov = "*"
 pytest-asyncio = "*"
 aiohttp = "*"
+apistellar = {editable = true,path = "./../apistellar"}
+pytest-apistellar = ">=0.1.8"
 
 [packages]
 pytz = "*"
@@ -16,7 +17,7 @@ html2text = "*"
 aiofiles = "*"
 Markdown = "*"
 WeasyPrint = "*"
-apistellar = ">=1.1.22"
+apistellar = ">=1.1.23"
 
 [requires]
 python_version = "3.6"

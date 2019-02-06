@@ -4,11 +4,11 @@ from apistar import App
 from apistar.http import QueryParam
 
 from apistellar import Controller, route, get, post, require, Session, \
-    SettingsMixin, MultiPartForm
+    settings, MultiPartForm
 
 
 @route("/", name="welcome")
-class WelcomeController(Controller, SettingsMixin):
+class WelcomeController(Controller):
     """
     欢迎页
     """
@@ -28,18 +28,18 @@ class WelcomeController(Controller, SettingsMixin):
         """
         return app.render_template(
             'index.html',
-            author=self.settings["AUTHOR"],
+            author=settings["AUTHOR"],
             _path=path or "",
-            page_size=self.settings["PAGE_SIZE"],
+            page_size=settings["PAGE_SIZE"],
             url_for=app.reverse_url,
-            code_swatch=str(self.settings.get_bool("NEED_CODE")).lower())
+            code_swatch=str(settings.get_bool("NEED_CODE")).lower())
 
     @post("/upload_image")
     @require(Session, judge=lambda x: x.get("login"))
     def upload(self, files: MultiPartForm):
         for name, file in files.items():
             file.save(os.path.join(
-                self.settings["PROJECT_PATH"], "static/img", file.filename))
+                settings["PROJECT_PATH"], "static/img", file.filename))
         return {"success": True}
 
     @post("/a/{b}/{+path}")

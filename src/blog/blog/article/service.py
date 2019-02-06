@@ -7,21 +7,19 @@ import markdown
 import html2text
 
 from io import BytesIO
+from toolkit import cache_method
 from concurrent.futures import ThreadPoolExecutor
-from apistellar import FileResponse, Service, SettingsMixin
+from apistellar import FileResponse, Service, settings
 
-from .article import Article
-from ..lib.html_cut import Cuter
-from .article_exporter import ArticleExporter
 from ..utils import get_id
+from .article import Article
+from .article_exporter import ArticleExporter
 
 
-class ArticleService(Service, SettingsMixin):
+class ArticleService(Service):
     def __init__(self):
-        # 之前cutter使用注入的方式实现，感觉被过度设计了
-        self.cuter = Cuter(
-            self.settings.get("PHANTOMJS_PATH"),
-            os.path.join(self.settings["PROJECT_PATH"], "cut_html.js"))
+        self.phantomjs_path = settings.get("PHANTOMJS_PATH")
+        self.js_path = os.path.join(settings["PROJECT_PATH"], "cut_html.js")
         self.executor = ThreadPoolExecutor()
 
     async def get(self, id):
@@ -160,11 +158,12 @@ class ArticleService(Service, SettingsMixin):
         sh.update(bytes(str(width), encoding="utf-8"))
         sh.update(bytes(str(height), encoding="utf-8"))
         save_name = sh.hexdigest()[:10] + ".png"
-
+        save_name = os.path.join(
+            settings["PROJECT_PATH"], "static/temp/", save_name)
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(
             self.executor,
-            self.cuter.cut,
+            self._cut,
             url, save_name, top, left, width, height)
         return save_name
 
@@ -183,3 +182,9 @@ class ArticleService(Service, SettingsMixin):
             image_part = body
         mth = re.search(r"!\[.*?\]\((.*?)\)", image_part)
         return mth.group(1) if mth else ""
+
+    @cache_method(3600)
+    def _cut(self, url, save_name, top=0, left=0, width=1024, height=768):
+        os.system(("%s " * 8) % (
+            self.phantomjs_path, self.js_path, url,
+            save_name, top, left, width, height))

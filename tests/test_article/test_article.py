@@ -1,7 +1,7 @@
 import os
-import blog
 import pytest
 
+from apistellar import settings
 from pytest_apistellar import prop_alias
 from pytest_apistellar.parser import Attr
 
@@ -10,11 +10,10 @@ from blog.blog.article.article import Article
 
 article = prop_alias("blog.blog.article.article.Article")
 
-project_path = blog.__path__[0]
-
 
 def get_code():
-    code, _ = open(os.path.join(project_path, "code")).read().split("\n")
+    code, _ = open(os.path.join(
+        settings["PROJECT_PATH"], "code")).read().split("\n")
     return code
 
 
@@ -23,9 +22,8 @@ def assert_execute(sql, args, assert_sql, assert_args, **kwargs):
     assert args == assert_args
 
 
-@article("code", ret_val=get_code())
+@article("code", ret_factory=get_code)
 @pytest.mark.env(NEED_CODE="False")
-@pytest.mark.env(PROJECT_PATH=project_path)
 @pytest.mark.env(CODE_EXPIRE_INTERVAL=30 * 24 * 3600)
 @pytest.mark.asyncio
 class TestArticle(object):
@@ -102,12 +100,12 @@ class TestArticle(object):
 
     async def test_fuzzy_search_sub_sql_with_field_fulltext(self):
         sub, vals = Article._fuzzy_search_sub_sql("abc", True)
-        assert sub == "AND (article LIKE ? OR tags LIKE ?)"
+        assert sub == " AND (article LIKE ? OR tags LIKE ?)"
         assert vals == ['%abc%', '%abc%']
 
     async def test_fuzzy_search_sub_sql_with_field_fulltext_false(self):
         sub, vals = Article._fuzzy_search_sub_sql("abc", False)
-        assert sub == "AND tags LIKE ?"
+        assert sub == " AND tags LIKE ?"
         assert vals == ['%abc%']
 
     async def test_build_select_sql_with_no_args(self):

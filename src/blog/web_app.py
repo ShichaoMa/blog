@@ -13,9 +13,9 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s [%(name)s] %(levelname)s: %(message)s')
 
-app = Application(app_name, debug=False,
-                  static_dir="static", template_dir="templates",
-                  current_dir=os.path.dirname(os.path.abspath(__file__)))
+app = Application(
+    app_name, debug=False,
+    current_dir=os.path.dirname(os.path.abspath(__file__)))
 
 if __name__ == "__main__":
     run(app)

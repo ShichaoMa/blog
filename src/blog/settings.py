@@ -1,9 +1,9 @@
 # -*- coding:utf-8 -*-
-STATIC_FOLDER = "static"
+STATIC_DIR = "static"
 
 STATIC_URL_PATH = "/static"
 
-TEMPLATE_FOLDER = "templates"
+TEMPLATE_DIR = "templates"
 
 USERNAME = "test"
 

@@ -281,5 +281,4 @@ class ArticleController(Controller):
         :return: 重定向到截图的静态地址
         """
         save_name = await self.service.cut(url, top, left, width, height)
-        return redirect(save_name.replace(
-            settings["PROJECT_PATH"], ""))
+        return redirect(save_name.replace(settings["PROJECT_PATH"], ""))
