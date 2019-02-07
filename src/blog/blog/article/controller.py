@@ -4,7 +4,6 @@ from apistellar import Controller, route, get, post, \
     Session, FormParam, require, settings
 
 from .article import Article
-from blog.blog.utils import decode
 from .service import ArticleService
 
 
@@ -110,10 +109,8 @@ class ArticleController(Controller):
         """
         if not session.get("login"):
             return app.render_template("login.html", ref="import")
-        article["title"] = article.title or \
-                           article.article.filename.replace(".md", "")
-        article["article"] = decode(article.article.read())
-        await article.save()
+
+        await self.service.upload(article)
         return app.render_template("import.html", success="success")
 
     @get("/export")

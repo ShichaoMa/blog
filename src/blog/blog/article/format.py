@@ -1,19 +1,21 @@
+import pytz
 import numbers
+import warnings
 import datetime
 
 from collections import Sequence
-from apistellar import validators
+from apistellar import validators, settings
 from apistellar.types.formats import BaseFormat, DATETIME_REGEX, ValidationError
-
-
-from blog.blog.utils import default_tz
 
 
 class TsFormat(BaseFormat):
 
     type = numbers.Number
-    default_tz = default_tz
     name = "ts"
+
+    @property
+    def default_tz(self):
+        return pytz.timezone(settings["TIME_ZONE"])
 
     def is_native_type(self, value):
         return isinstance(value, self.type)
@@ -78,4 +80,3 @@ class Timestamp(validators.String):
 class Tags(validators.String):
     def __init__(self, **kwargs):
         super().__init__(format='tags', **kwargs)
-

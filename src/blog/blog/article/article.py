@@ -1,3 +1,4 @@
+import pytz
 import typing
 import logging
 import datetime
@@ -10,7 +11,7 @@ from apistellar.persistence import conn_ignore
 from apistellar import validators, settings
 
 from blog.blog.lib import SqliteDriverMixin
-from blog.blog.utils import get_id, code_generator
+from blog.blog.utils import code_generator
 
 from .format import Tags, Timestamp
 
@@ -44,7 +45,8 @@ class Article(PersistentType, SqliteDriverMixin):
     TABLE = "articles"
 
     title = validators.String()
-    id = validators.String(default=get_id)
+    id = validators.String(default=lambda: datetime.datetime.now(
+            pytz.timezone(settings["TIME_ZONE"])).strftime("%Y%m%d%H%M%S"))
     tags = Tags()
     description = validators.String(default="")
     author = validators.String(default=get_author)
@@ -105,9 +107,8 @@ class Article(PersistentType, SqliteDriverMixin):
             kwargs, _from, size, projection, [("updated_at", "desc")], sub, vals)
         cls.store.execute(sql, vals)
         data_list = cls.store.fetchall()
-        return [Article(dict(zip(
-            (col[0] for col in cls.store.description), data)))
-            for data in data_list]
+        desc = [col[0] for col in cls.store.description]
+        return [Article(dict(zip(desc, data))) for data in data_list]
 
     @classmethod
     async def get_total_tags(cls):
@@ -189,7 +190,8 @@ class Article(PersistentType, SqliteDriverMixin):
         :return:
         """
         sub, vals = cls._fuzzy_search_sub_sql(search_field, fulltext)
-        return await cls.load_list(_from, size, sub, vals, **kwargs)
+        return await cls.load_list(
+            _from=_from, size=size, sub=sub, vals=vals, **kwargs)
 
     @staticmethod
     def _fuzzy_search_sub_sql(search_field, fulltext):

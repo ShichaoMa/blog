@@ -48,6 +48,23 @@ class TestService(object):
         await ArticleService().update(article)
         assert article.to_dict() == {"id": "20180101010101"}
 
+    @article("save")
+    async def test_upload_without_title(self, join_root_dir):
+        f = open(join_root_dir("test_data/一键生成API文档.md"), "rb")
+        f.filename = os.path.basename(f.name)
+        article = Article(title="", article=f)
+        await ArticleService().upload(article)
+        assert article.title == "一键生成API文档"
+        f.seek(0)
+        assert article.article == f.read().decode()
+
+    @article("save")
+    async def test_upload_with_title(self, join_root_dir):
+        f = open(join_root_dir("test_data/一键生成API文档.md"), "rb")
+        article = Article(title="abc", article=f)
+        await ArticleService().upload(article)
+        assert article.title == "abc"
+
     @article("remove")
     async def test_remove(self):
         article = Article(id="20180101010101")

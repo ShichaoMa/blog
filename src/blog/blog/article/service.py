@@ -4,6 +4,7 @@ import hashlib
 import asyncio
 import zipfile
 import markdown
+import datetime
 import html2text
 
 from io import BytesIO
@@ -11,7 +12,6 @@ from toolkit import cache_method
 from concurrent.futures import ThreadPoolExecutor
 from apistellar import FileResponse, Service, settings
 
-from ..utils import get_id
 from .article import Article
 from .article_exporter import ArticleExporter
 
@@ -54,7 +54,19 @@ class ArticleService(Service):
         zip_file.seek(0)
         body = zip_file.read()
         zip_file.close()
-        return FileResponse(body, filename=f"{get_id()}.zip")
+        return FileResponse(
+            body, filename=f"{datetime.datetime.now().timestamp()}.zip")
+
+    async def upload(self, article):
+        article["title"] = article.title or \
+                           article.article.filename.replace(".md", "")
+        buffer = article.article.read()
+        try:
+            article["article"] = buffer.decode("utf-8")
+        except UnicodeDecodeError:
+            article["article"] = buffer.decode("gbk")
+
+        return await article.save()
 
     async def modify(self, article, img_url):
         """

@@ -1,20 +1,13 @@
-import os
 import pytest
 
-from apistellar import settings
 from pytest_apistellar import prop_alias
 from pytest_apistellar.parser import Attr
 
 from blog.blog.article.article import Article
 
+from factories import get_code
 
 article = prop_alias("blog.blog.article.article.Article")
-
-
-def get_code():
-    code, _ = open(os.path.join(
-        settings["PROJECT_PATH"], "code")).read().split("\n")
-    return code
 
 
 def assert_execute(sql, args, assert_sql, assert_args, **kwargs):
@@ -95,6 +88,31 @@ class TestArticle(object):
     async def test_load_without_article(self):
         assert "id" not in await Article.load()
 
+    @article("load_list",
+             ret_val=[Article(tags="python,abc"), Article(tags="abc")])
+    async def test_get_total_tags(self):
+        total, tags = await Article.get_total_tags()
+        assert total == 2
+        assert tags["python"] == 1
+        assert tags["abc"] == 2
+
+    @article("_build_select_sql", ret_val=(
+            ["a", "b"], "SELECT * FROM articles WHERE 1=1 AND a=? AND b=?"))
+    @article("store.execute", ret_factory=assert_execute,
+             assert_sql="SELECT * FROM articles WHERE 1=1 AND a=? AND b=?",
+             assert_args=["a", "b"])
+    @article("store.fetchall", ret_val=[("abc", "python")], callable=True)
+    @article("store.description", ret_val=[("title", ), ("tags", )])
+    async def test_load_list(self):
+        article_list = await Article.load_list()
+        assert article_list[0].title == "abc"
+        assert article_list[0].tags == "python"
+
+    @article("load_list", ret_factory=lambda sub=None, **kwargs: sub)
+    async def test_search(self):
+        assert await Article.search("abc", 0, 10, fulltext=True) == \
+               " AND (article LIKE ? OR tags LIKE ?)"
+
     async def test_fuzzy_search_sub_sql_without_field(self):
         assert Article._fuzzy_search_sub_sql("", False) == (None, None)
 
@@ -126,12 +144,14 @@ class TestArticle(object):
         assert "id IN (?, ?)" in sql
         assert "title=?" in sql
 
-    async def test_build_select_sql_with_order_fields(self):
+    async def test_build_select_sql_with_order_fields_and_projection(self):
         vals, sql = Article._build_select_sql(
+            projection=["tags", "id", "title"],
             order_fields=[("id", "desc"), ("title", "asc")])
         assert vals == []
         assert "id desc" in sql
         assert "title asc" in sql
+        assert "tags, id, title" in sql
 
     async def test_build_select_sql_with_size_and_from(self):
         vals, sql = Article._build_select_sql(size=10, _from=0)
