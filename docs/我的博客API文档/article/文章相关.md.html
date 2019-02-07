@@ -48,7 +48,7 @@
 <td align="left">String</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">20190126144151</td>
+<td align="left">20190207203439</td>
 <td align="left">每篇文章的唯一id，日期字符串的形式表示</td>
 <td align="left"></td>
 </tr>
@@ -93,7 +93,7 @@
 <td align="left">Timestamp</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">1548484911.842833</td>
+<td align="left">1549542879.816075</td>
 <td align="left">创建时间</td>
 <td align="left"></td>
 </tr>
@@ -102,7 +102,7 @@
 <td align="left">Timestamp</td>
 <td align="left">否</td>
 <td align="left">否</td>
-<td align="left">1548484911.842863</td>
+<td align="left">1549542879.816097</td>
 <td align="left">更新时间</td>
 <td align="left"></td>
 </tr>
@@ -184,8 +184,6 @@
 </tbody>
 </table>
 <h4>返回信息</h4>
-<h5>返回类型</h5>
-<p>str</p>
 <h5>返回描述</h5>
 <p>返回网页</p>
 <h3>3. 检查用户名密码是否正确，返回检查结果</h3>
@@ -254,11 +252,29 @@
 <h3>4. 用于上传文章</h3>
 <h4>URL: /upload</h4>
 <h4>方法: POST</h4>
-<h4>json请求体</h4>
-<h5>请求描述</h5>
-<p>文章相关信息</p>
-<h5>模型类型</h5>
-<p>blog.blog.article.article.Article</p>
+<h4>表单参数:</h4>
+<table>
+<thead>
+<tr>
+<th align="left">参数名</th>
+<th align="left">类型</th>
+<th align="left">是否必须</th>
+<th align="left">默认值</th>
+<th align="left">描述</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">article</td>
+<td align="left">blog.blog.article.article.Article</td>
+<td align="left">是</td>
+<td align="left"></td>
+<td align="left">文章相关信息</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
 <h4>返回信息</h4>
 <h5>返回描述</h5>
 <p>返回上传页面继续上传</p>
@@ -570,6 +586,8 @@
 </tbody>
 </table>
 <h4>返回信息</h4>
+<h5>返回类型</h5>
+<p>dict</p>
 <h5>返回示例</h5>
 <pre><code class="json">        {
             &quot;count&quot;: 10,
