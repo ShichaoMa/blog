@@ -51,8 +51,8 @@ class Article(PersistentType, SqliteDriverMixin):
     description = validators.String(default="")
     author = validators.String(default=get_author)
     feature = validators.Boolean(default=False)
-    created_at = Timestamp(default=datetime.datetime.now().timestamp)
-    updated_at = Timestamp(default=datetime.datetime.now().timestamp)
+    created_at = Timestamp(default=lambda: datetime.datetime.now().timestamp())
+    updated_at = Timestamp(default=lambda: datetime.datetime.now().timestamp())
     show = validators.Boolean(default=True)
     article = validators.String(default=str)
 
