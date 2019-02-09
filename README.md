@@ -13,6 +13,7 @@
 [![Github All Releases](https://img.shields.io/github/downloads/shichaoma/blog/total.svg)](https://github.com/shichaoma/blog/releases)
 [![GitHub Release Date](https://img.shields.io/github/release-date/shichaoma/blog.svg)](https://github.com/shichaoma/blog/releases)
 
+## Desc
 博文支持markdown格式的上传和编辑，支持全文搜索。业务代码单元测试代码覆盖率100%。
 
 通过环境变量来指定相关配置信息
@@ -22,7 +23,7 @@
 - PASSWORD: 登陆密码。eg: 12345(默认)。
 
 其它配置信息参见[settings.py](https://github.com/ShichaoMa/blog/edit/master/settings.py)
-# START
+## Start
 ```
 # 自行安装python3.6+
 git clone https://github.com/ShichaoMa/blog.git
