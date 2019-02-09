@@ -1,8 +1,22 @@
-# 开源个人博客, 一行指令，运行自己的专属博客
+# 基于apistellar的个人博客
+
+## Badge
+
+### GitHub
+
+[![GitHub followers](https://img.shields.io/github/followers/shichaoma.svg?label=github%20follow)](https://github.com/shichao.ma)
+[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/shichaoma/blog.svg)](https://github.com/shichaoma/blog)
+[![GitHub stars](https://img.shields.io/github/stars/shichaoma/blog.svg?label=github%20stars)](https://github.com/shichaoma/blog)
+[![GitHub release](https://img.shields.io/github/release/shichaoma/blog.svg)](https://github.com/shichaoma/blog/releases)
+[![Github commits (since latest release)](https://img.shields.io/github/commits-since/shichaoma/blog/latest.svg)](https://github.com/shichaoma/blog)
+
+[![Github All Releases](https://img.shields.io/github/downloads/shichaoma/blog/total.svg)](https://github.com/shichaoma/blog/releases)
+[![GitHub Release Date](https://img.shields.io/github/release-date/shichaoma/blog.svg)](https://github.com/shichaoma/blog/releases)
 
 博文支持markdown格式的上传和编辑，支持全文搜索。业务代码单元测试代码覆盖率100%。
 
-### 通过环境变量来指定相关配置信息
+通过环境变量来指定相关配置信息
+
 - AUTHOR： 这个博客的所有者， eg: 夏洛之枫(默认)。博客名就会变成 夏洛之枫的个人博客，默认导入的博文作者也会是 夏洛之枫
 - USERNAME: 登陆用户名。eg: test(默认)。个人博客只支持单用户登录以对博文进行上传，修改和删除。
 - PASSWORD: 登陆密码。eg: 12345(默认)。
