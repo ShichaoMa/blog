@@ -16,7 +16,7 @@ html2text = "*"
 aiofiles = "*"
 Markdown = "*"
 WeasyPrint = "*"
-apistellar = ">=1.2.1"
+apistellar = ">=1.2.2"
 
 [requires]
 python_version = "3.6"

@@ -49,10 +49,13 @@ class SqliteDriverMixin(DriverMixin):
         with super(SqliteDriverMixin, cls).get_store(
                 self_or_cls, **callargs) as self_or_cls:
             cur = conn.cursor()
-            store = SqliteProxy(
-                cur, before=[AOP.Hook(execute_before, ["execute"])])
+            if hasattr(self_or_cls, "_need_proxy") \
+                    and self_or_cls._need_proxy("store"):
+                store = SqliteProxy(
+                    cur, before=[AOP.Hook(execute_before, ["execute"])])
+                self_or_cls = proxy(self_or_cls, prop_name="store", prop=store)
             try:
-                yield proxy(self_or_cls, prop_name="store", prop=store)
+                yield self_or_cls
             finally:
                 conn.commit()
 
