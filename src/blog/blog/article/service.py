@@ -78,6 +78,7 @@ class ArticleService(Service):
         h2t = html2text.HTML2Text()
         h2t.ignore_links = False
         h2t.ignore_images = False
+        article.pop("img_url", None)
         article.article = "[comment]: <image> (![](%s))\n%s" % (
             img_url, h2t.handle(article.article)
         )
