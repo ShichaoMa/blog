@@ -19,10 +19,6 @@ from .format import Tags, Timestamp
 logger = logging.getLogger("article")
 
 
-def get_author():
-    return settings.get("AUTHOR")
-
-
 class Article(PersistentType, SqliteDriverMixin):
     """
     文章模型
@@ -49,7 +45,8 @@ class Article(PersistentType, SqliteDriverMixin):
             pytz.timezone(settings["TIME_ZONE"])).strftime("%Y%m%d%H%M%S"))
     tags = Tags()
     description = validators.String(default="")
-    author = validators.String(default=get_author)
+    import pdb;pdb.set_trace()
+    author = validators.String(default=settings.get("AUTHOR"))
     feature = validators.Boolean(default=False)
     created_at = Timestamp(default=lambda: datetime.datetime.now().timestamp())
     updated_at = Timestamp(default=lambda: datetime.datetime.now().timestamp())
