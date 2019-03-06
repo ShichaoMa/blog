@@ -45,7 +45,6 @@ class Article(PersistentType, SqliteDriverMixin):
             pytz.timezone(settings["TIME_ZONE"])).strftime("%Y%m%d%H%M%S"))
     tags = Tags()
     description = validators.String(default="")
-    import pdb;pdb.set_trace()
     author = validators.String(default=settings.get("AUTHOR"))
     feature = validators.Boolean(default=False)
     created_at = Timestamp(default=lambda: datetime.datetime.now().timestamp())
@@ -161,11 +160,11 @@ class Article(PersistentType, SqliteDriverMixin):
         sql = f"UPDATE {cls.TABLE} SET "
         args = list()
 
-        for name, val in article.items():
+        for name in article:
             # 在调用update之前使用了format,目前format会创建字符串时间
             # 无法使用，在这里进行一次排除
             if name not in ("id", "updated_at", "created_at", "show"):
-                article.reformat(name, val, allow_coerce=True)
+                article.reformat(name, allow_coerce=True)
                 sql += f"{name}=?, "
                 args.append(article[name])
 

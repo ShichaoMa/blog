@@ -17,6 +17,7 @@ aiofiles = "*"
 Markdown = "*"
 WeasyPrint = "*"
 apistellar = ">=1.2.2"
+toolkity = ">=1.7.33"
 
 [requires]
 python_version = "3.6"
