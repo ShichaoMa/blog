@@ -20,3 +20,5 @@ CODE_EXPIRE_INTERVAL = 30*24*3600
 PHANTOMJS_PATH = "phantomjs"
 
 NEED_CODE = False
+
+LOCAL_VARIABLE = {"session": "apistellar.bases.entities.Session"}
