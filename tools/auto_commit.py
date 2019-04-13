@@ -23,4 +23,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     while True:
         time.sleep(10)
-        main(args.paths)
+        main(args.path)
