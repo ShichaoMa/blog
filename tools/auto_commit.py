@@ -2,11 +2,12 @@ import os
 import re
 import time
 
+from argparse import ArgumentParser
 regex = re.compile("(modified:)|(Untracked files)")
 
 
-def main():
-    for path in ("/root/blog", "/home/learn/deep-learning"):
+def main(paths):
+    for path in paths:
         os.chdir(path)
         process = os.popen("/usr/bin/git status")
         buffer = process.read()
@@ -17,6 +18,9 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("path", nargs="+", help="Which path to run save check. ")
+    args = parser.parse_args()
     while True:
         time.sleep(10)
-        main()
+        main(args.paths)
