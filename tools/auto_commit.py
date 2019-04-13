@@ -23,4 +23,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     while True:
         time.sleep(10)
+        print("Save check")
         main(args.path)
