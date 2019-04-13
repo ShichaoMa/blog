@@ -20,9 +20,9 @@ def main(paths):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("path", nargs="+", help="Which path to run save check. ")
-    parser.add_argument("-i", "--interval", help="Check interval. ")
+    parser.add_argument("-i", "--interval", type=int, help="Check interval. ")
     args = parser.parse_args()
     while True:
-        time.sleep(args.inverval)
+        time.sleep(args.interval)
         print("Save check")
         main(args.path)
