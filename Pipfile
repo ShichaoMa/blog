@@ -8,7 +8,7 @@ pytest = "*"
 pytest-cov = "*"
 pytest-asyncio = "*"
 aiohttp = "*"
-pytest-apistellar = ">=0.1.8"
+pytest-apistellar = ">=0.1.10"
 
 [packages]
 pytz = "*"

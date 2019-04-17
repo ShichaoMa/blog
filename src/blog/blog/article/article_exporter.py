@@ -21,24 +21,40 @@ class ArticleExporter(object):
         self.code = code
         self.url = url
 
+    async def export_pdf(self, content):
+        from html.parser import unescape
+        html = unescape(markdown.markdown(
+            content, extensions=['markdown.extensions.extra']))
+        return await self._get_pdf_buffer(
+            f'<div class="markdown-body">{self._replace_url(html)}</div>')
+
     async def export_me(self):
         """
         导出我的简历
         :return:
         """
         assert self.article.right_code(self.code), f"Invalid code: {self.code}"
+        buffer = await self.export_pdf(self.article.article)
+        return ArticleFile(f"{self.article.title}.pdf", buffer)
 
-        from html.parser import unescape
+    @classmethod
+    async def save_as_pdf(cls, content, path):
+        """
+        将网页转换pdf
+        :param html:
+        :return:
+        """
+        with open(path, "wb") as f:
+            f.write(await cls._get_pdf_buffer(content))
+
+    @staticmethod
+    async def _get_pdf_buffer(html):
         from weasyprint import HTML
-        html = unescape(markdown.markdown(
-            self.article.article, extensions=['markdown.extensions.extra']))
-        html = f'<div class="markdown-body">{self._replace_url(html)}</div>'
 
         loop = asyncio.get_event_loop()
-        buffer = await loop.run_in_executor(
+        return await loop.run_in_executor(
             None, partial(HTML(string=html).write_pdf, stylesheets=[
                 os.path.join(settings["PROJECT_PATH"], "static/css/pdf.css")]))
-        return ArticleFile(f"{self.article.title}.pdf", buffer)
 
     async def export_other(self):
         """
