@@ -185,7 +185,9 @@ class ArticleController(Controller):
             return app.render_template("login.html", ref="edit", **article)
 
         await self.service.update(article)
-        return redirect(app.reverse_url("view:welcome:index"))
+        url = f'{app.reverse_url("view:welcome:index")}?path=' \
+            f'{app.reverse_url("view:article:article")}?id={article.id}'
+        return redirect(url)
 
     @get("/delete")
     async def delete(self, app: App, id: http.QueryParam, session: Session):

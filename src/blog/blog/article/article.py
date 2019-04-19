@@ -159,7 +159,7 @@ class Article(PersistentType, SqliteDriverMixin):
     def _build_update_sql(cls, article):
         sql = f"UPDATE {cls.TABLE} SET "
         args = list()
-
+        import pdb;pdb.set_trace()
         for name in article:
             # 在调用update之前使用了format,目前format会创建字符串时间
             # 无法使用，在这里进行一次排除
